@@ -3,7 +3,7 @@
 A pnpm/Turborepo monorepo with two apps:
 
 - **`apps/mobile`** — **Mise**, an Expo (React Native) recipe, meal-planning, and shared shopping list app. This is the actual product — see [`apps/mobile/README.md`](apps/mobile/README.md) for details.
-- **`apps/nextjs`** — the backend Mise talks to: auth (email/password with verification + reset), a REST API for recipes/meal-plans/shopping-items scoped per household, and a billing shell. It started life as a generic Next.js SaaS starter template, and its own marketing/dashboard frontend is still that unbranded template — Mise is the real consumer-facing surface, built on top of this app's API.
+- **`apps/nextjs`** — the backend Mise talks to: auth (email/password with verification + reset), a REST API for recipes/meal-plans/shopping-items scoped per household, and a billing shell.
 
 ## Tech Stack (`apps/nextjs`)
 
