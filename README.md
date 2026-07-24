@@ -1,8 +1,11 @@
-# Next.js Starter Kit
+# Mise
 
-A production-ready monorepo starter template built with **Next.js 16**, **Prisma 7**, **Better Auth**, **Stripe**, and **shadcn/ui**.
+A pnpm/Turborepo monorepo with two apps:
 
-## Tech Stack
+- **`apps/mobile`** — **Mise**, an Expo (React Native) recipe, meal-planning, and shared shopping list app. This is the actual product — see [`apps/mobile/README.md`](apps/mobile/README.md) for details.
+- **`apps/nextjs`** — the backend Mise talks to: auth (email/password with verification + reset), a REST API for recipes/meal-plans/shopping-items scoped per household, and a billing shell. It started life as a generic Next.js SaaS starter template, and its own marketing/dashboard frontend is still that unbranded template — Mise is the real consumer-facing surface, built on top of this app's API.
+
+## Tech Stack (`apps/nextjs`)
 
 | Category        | Technology                                                                  |
 | --------------- | --------------------------------------------------------------------------- |
@@ -24,18 +27,26 @@ A production-ready monorepo starter template built with **Next.js 16**, **Prisma
 
 ```
 ├── apps/
-│   └── nextjs/            # Next.js 16 application
-│       ├── .env.example   # Env template (copy to .env in this folder)
-│       ├── prisma/        # Database schema
+│   ├── mobile/             # Mise — Expo Router app (the actual product)
+│   │   ├── .env.example    # Env template (copy to .env in this folder)
+│   │   └── src/
+│   │       ├── app/        # Expo Router routes (screens + modal sheets)
+│   │       ├── components/mise/  # Shared UI, incl. @expo/ui native wrappers
+│   │       ├── hooks/       # React Query hooks (recipes, meal plan, shopping list)
+│   │       ├── lib/         # auth-client, API client, date utils
+│   │       └── store/       # Toast context
+│   └── nextjs/             # Next.js 16 application (backend for Mise)
+│       ├── .env.example    # Env template (copy to .env in this folder)
+│       ├── prisma/         # Database schema
 │       └── src/
 │           ├── app/       # App Router (pages, layouts, API routes)
-│           │   ├── (marketing)/   # Landing page, login, register, pricing
+│           │   ├── (marketing)/   # Landing page, login, register, forgot/reset password
 │           │   ├── (main)/        # Authenticated app (dashboard, settings)
 │           │   ├── (legal)/       # Privacy policy, terms of service
-│           │   └── api/           # Auth & webhook handlers
+│           │   └── api/           # Auth, recipes/meal-plans/shopping-items, webhook handlers
 │           ├── components/        # UI components (shadcn/ui)
 │           ├── hooks/             # Custom React hooks
-│           ├── lib/               # Auth, database, Stripe, utilities
+│           ├── lib/               # Auth, email, database, Stripe, utilities
 │           └── use-cases/         # Business logic layer
 ├── docker/                # Docker configuration files
 │   └── pgadmin/           # pgAdmin server pre-configuration
@@ -84,6 +95,7 @@ Edit `apps/nextjs/.env` with your values. Required for local development:
 | `BETTER_AUTH_SECRET`  | Secret for session signing (`openssl rand -base64 32`) |
 | `BETTER_AUTH_URL`     | Base URL of your app (e.g., `http://localhost:3000`)   |
 | `NEXT_PUBLIC_APP_URL` | Public-facing app URL (usually same host as above)    |
+| `RESEND_API_KEY`      | Sends verification/password-reset emails — get a key at [resend.com](https://resend.com); the sandbox sender works for local dev with no domain setup |
 
 Optional variables for additional features:
 
@@ -95,6 +107,7 @@ Optional variables for additional features:
 | `STRIPE_WEBHOOK_SECRET`  | Stripe webhook signing secret |
 | `STRIPE_PRICE_ID`        | Stripe price ID for checkout  |
 | `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key        |
+| `EMAIL_FROM`             | Sender for auth emails (defaults to `Mise <onboarding@resend.dev>` if unset) |
 
 ### Stripe webhook setup
 
@@ -165,8 +178,8 @@ pnpm --filter @repo/nextjs stripe:listen
 
 This starter uses [Better Auth](https://www.better-auth.com/) with:
 
-- **Email/password** authentication (enabled by default)
-- **Organization** plugin for team/workspace support
+- **Email/password** authentication, with **email verification required to sign in** and a password-reset flow. Both send real emails via Resend (`src/lib/email.ts`) — see `RESEND_API_KEY` above. Web pages live at `/forgot-password`, `/reset-password`, and `/verify-email`; the mobile app has its own `forgot-password` screen, but the actual "click the link" step always happens in a browser for both platforms.
+- **Organization** plugin for team/workspace support — every new user gets a default organization automatically (`databaseHooks.user.create.after` in `src/lib/auth.ts`), and new sessions default to it (`databaseHooks.session.create.before`). There's no client-side "create organization" step.
 - **Prisma adapter** for database-backed sessions
 
 Protected routes (`/dashboard/*`, `/settings/*`) are guarded by a proxy that checks for a valid session cookie and redirects unauthenticated users to `/login`.
@@ -181,6 +194,12 @@ Stripe is pre-configured with:
 - Prisma models for the `stripe` schema, so synced Stripe data can be queried from your app
 
 Stripe-related environment variables are optional so you can start building without a Stripe account.
+
+## Mobile app (Mise)
+
+`apps/mobile` is an Expo Router app that talks to this Next.js app's REST API (`/api/recipes`, `/api/meal-plans`, `/api/shopping-items`) and shares the same Better Auth backend (via `@better-auth/expo`). Recipes, meal plans, and the shopping list are all scoped to the signed-in user's organization/household. Data fetching goes through React Query, calling a thin `fetch` wrapper (`src/lib/api-client.ts`) that attaches the session cookie manually on native and relies on the browser's cookie jar on web.
+
+Run it from the root with `pnpm --filter @repo/mobile dev` (or `cd apps/mobile && pnpm dev`), then press `w` for web, or scan the QR code with Expo Go. It needs this Next.js app running and reachable — set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env` accordingly. See [`apps/mobile/README.md`](apps/mobile/README.md) for the full rundown.
 
 ## Adding Shared Packages
 
@@ -252,9 +271,11 @@ Host port overrides (optional env vars when you run Compose):
 
 ## Deployment
 
-This project is optimized for [Vercel](https://vercel.com/) deployment. The `turbo.json` configuration includes Vercel-aware environment variables.
+This project is optimized for [Vercel](https://vercel.com/) deployment. The `turbo.json` configuration includes Vercel-aware environment variables. When importing the repo, set the project's **Root Directory** to `apps/nextjs` — Vercel detects the pnpm workspace and Next.js from there.
 
-Configure the same keys as in **`apps/nextjs/.env.example`** on your host (Vercel project settings, Fly secrets, etc.). There is no repo-root `.env` for the app.
+Configure the same keys as in **`apps/nextjs/.env.example`** on your host (Vercel project settings, Fly secrets, etc.). There is no repo-root `.env` for the app. Use a fresh `BETTER_AUTH_SECRET` for production, not the local dev one, and run `prisma migrate deploy` (not `db:push`) against the production database.
+
+The generated Prisma client isn't committed to git (see `apps/nextjs/.gitignore`); `apps/nextjs/package.json` has a `postinstall: prisma generate` script so it's regenerated automatically on every install, including Vercel's.
 
 For other platforms, run:
 

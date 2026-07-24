@@ -1,56 +1,64 @@
-# Welcome to your Expo app 👋
+# Mise
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A recipe, meal-planning, and shared shopping list app for a household, built with [Expo Router](https://docs.expo.dev/router/introduction/).
 
-## Get started
+- **Recipes** — save your own, or "import" from a link (the import flow uses fixed mock data for now — there's no real scraping yet).
+- **Meal plan** — a real Monday–Sunday week (`date-utils.ts`), assign recipes to breakfast/lunch/dinner slots, or auto-generate the week.
+- **Shopping list** — add ingredients from a single recipe or the whole week's plan, with de-duplication by name; check items off, clear checked.
+- **Team** — recipes/plan/list are shared per household via [better-auth](https://www.better-auth.com)'s organization plugin; invite others by email.
 
-1. Install dependencies
+This app is the client for the backend in [`../nextjs`](../nextjs) — see that app's README for the API, auth, and database setup. It needs to be running (and reachable at `EXPO_PUBLIC_API_URL`) for anything beyond the login screen to work.
 
-   ```bash
-   npm install
-   ```
+## Stack
 
-2. Start the app
+- **Expo Router** (SDK 57) for file-based routing, including modal sheets (`transparentModal` presentation) for pick-recipe/invite/plan-options
+- **[`@expo/ui`](https://docs.expo.dev/versions/latest/sdk/ui/)** for native SwiftUI/Jetpack Compose components where it matters (`MiseSwitch`, `MiseSpinner`), hand-rolled RN views everywhere else
+- **better-auth** email/password auth via `@better-auth/expo`, with the organization plugin for household sharing — session cookies via `expo-secure-store` on native, browser cookies on web
+- **React Query** for all API data (recipes, meal plan, shopping list) through a thin fetch wrapper (`src/lib/api-client.ts`)
+- **React Compiler** enabled — see `.claude/skills/no-use-effect` for this repo's rule against writing raw `useEffect` in components; the few legitimate cases live in reusable hooks (`src/hooks/use-mount-effect.ts`, `use-auth-redirect.ts`, `use-hide-splash-when-ready.ts`)
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+## Getting started
 
 ```bash
-npm run reset-project
+cp .env.example .env   # then fill in EXPO_PUBLIC_API_URL / EXPO_PUBLIC_WEB_APP_URL
+
+pnpm dev            # starts Metro; press w for web, or scan the QR code
+pnpm dev -- --web   # go straight to web
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Requires the `apps/nextjs` backend running locally (see its README) — this app has no offline/mock mode.
 
-### Other setup steps
+## Environment variables
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+See `.env.example`. Both point at the Next.js app by default:
 
-## Learn more
+- `EXPO_PUBLIC_API_URL` — where the app makes its API calls
+- `EXPO_PUBLIC_WEB_APP_URL` — where password-reset links send the user. Reset always happens in a browser tab, even when requested from this app, to avoid native deep-link handling
 
-To learn more about developing your project with Expo, look at the following resources:
+## Scripts
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Script | Description |
+| --- | --- |
+| `pnpm dev` | Start the Expo dev server |
+| `pnpm web` / `pnpm ios` / `pnpm android` | Start directly on one platform |
+| `pnpm build` | `expo export` |
+| `pnpm lint` | `expo lint` |
+| `pnpm typecheck` | `tsc --noEmit` |
 
-## Join the community
+## Project structure
 
-Join our community of developers creating universal apps.
+```
+src/
+├── app/                  # Expo Router routes
+│   ├── (tabs)/            # Recipes, Plan, List, Team
+│   ├── recipe/[id].tsx
+│   ├── pick-recipe.tsx, plan-options.tsx, invite.tsx, ...  # modal sheets
+│   └── login.tsx, register.tsx, forgot-password.tsx
+├── components/mise/      # Shared UI (Button, TextField, Sheet, Toast, ...)
+├── hooks/                # React Query hooks: use-recipes, use-meal-plan, use-shopping-list
+├── lib/                  # auth-client, api-client, date-utils, secure-storage
+├── store/                # ToastProvider (the only app-wide context left; no more mock data store)
+└── constants/theme.ts    # Colors, fonts, radii
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Not built yet: EAS Build/Submit config (no `eas.json`), push notifications, native deep linking, and the recipe-import flow is mock data rather than a real scraper.
