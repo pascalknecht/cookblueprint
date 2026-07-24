@@ -45,6 +45,10 @@ export function LoginForm() {
           router.push("/dashboard");
         },
         onError: (error) => {
+          if (error.error.message === "Email not verified") {
+            toast.error("Check your email to verify your account — we just sent a new link.");
+            return;
+          }
           toast.error(error.error.message);
         },
       },
@@ -87,6 +91,11 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
+            <div className="text-right text-sm">
+              <Link href="/forgot-password" className="underline">
+                Forgot password?
+              </Link>
+            </div>
             <Button
               type="submit"
               className="w-full bg-black text-white hover:bg-black/90"

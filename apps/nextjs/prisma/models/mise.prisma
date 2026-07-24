@@ -1,0 +1,50 @@
+model Recipe {
+  id              String          @id @default(cuid())
+  organizationId  String
+  organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  title           String
+  color           String
+  time            Int
+  servings        Int
+  kcal            String
+  tags            String[]
+  ingredients     Json
+  steps           String[]
+  mealPlanEntries MealPlanEntry[]
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@index([organizationId])
+  @@map("recipe")
+  @@schema("public")
+}
+
+model MealPlanEntry {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  date           DateTime     @db.Date
+  mealType       String
+  recipeId       String
+  recipe         Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, date, mealType])
+  @@map("meal_plan_entry")
+  @@schema("public")
+}
+
+model ShoppingListItem {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  quantity       String
+  category       String
+  checked        Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@map("shopping_list_item")
+  @@schema("public")
+}

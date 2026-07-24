@@ -1,12 +1,15 @@
 model Organization {
-  id          String       @id
-  name        String       @db.Text
-  slug        String?
-  logo        String?      @db.Text
-  createdAt   DateTime
-  metadata    String?      @db.Text
-  members     Member[]
-  invitations Invitation[]
+  id                String             @id
+  name              String             @db.Text
+  slug              String?
+  logo              String?            @db.Text
+  createdAt         DateTime
+  metadata          String?            @db.Text
+  members           Member[]
+  invitations       Invitation[]
+  recipes           Recipe[]
+  mealPlanEntries   MealPlanEntry[]
+  shoppingListItems ShoppingListItem[]
 
   @@unique([slug])
   @@map("organization")
@@ -34,6 +37,7 @@ model Invitation {
   role           String?      @db.Text
   status         String       @db.Text
   expiresAt      DateTime
+  createdAt      DateTime
   inviterId      String
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 

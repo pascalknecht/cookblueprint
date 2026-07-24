@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import Link from "next/link";
 import { signUp } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -36,7 +35,7 @@ const formSchema = z.object({
 
 export function RegisterForm() {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [submitted, setSubmitted] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,7 +51,7 @@ export function RegisterForm() {
       email: values.email,
       password: values.password,
       name: values.fullName,
-      callbackURL: "/dashboard",
+      callbackURL: "/verify-email",
       fetchOptions: {
         onResponse: () => {
           setLoading(false);
@@ -64,11 +63,29 @@ export function RegisterForm() {
           toast.error(ctx.error.message);
         },
         onSuccess: async () => {
-          toast.success("User registered successfully");
-          router.push("/dashboard");
+          setSubmitted(true);
         },
       },
     });
+  }
+
+  if (submitted) {
+    return (
+      <div className="flex items-center justify-center">
+        <div className="w-full max-w-md space-y-4 rounded-xl bg-white p-8 text-center shadow-lg">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Check your email
+          </h1>
+          <p className="text-muted-foreground">
+            We sent a verification link to your email. Click it to confirm
+            your account, then log in.
+          </p>
+          <Link href="/login" className="inline-block underline">
+            Back to login
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
