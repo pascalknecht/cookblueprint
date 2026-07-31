@@ -1,5 +1,6 @@
 import { randomUUID } from "crypto";
 
+import { normalizeEnabledMealTypes } from "@/lib/meal-types";
 import { prisma } from "@/lib/prisma";
 
 function slugify(value: string) {
@@ -47,4 +48,20 @@ export async function resolveDefaultActiveOrganizationId(userId: string) {
     select: { organizationId: true },
   });
   return membership?.organizationId ?? null;
+}
+
+export async function getOrganizationSettings(organizationId: string) {
+  const organization = await prisma.organization.findUnique({
+    where: { id: organizationId },
+    select: { enabledMealTypes: true },
+  });
+  return organization;
+}
+
+export function updateEnabledMealTypes(organizationId: string, enabledMealTypes: string[]) {
+  return prisma.organization.update({
+    where: { id: organizationId },
+    data: { enabledMealTypes: normalizeEnabledMealTypes(enabledMealTypes) },
+    select: { enabledMealTypes: true },
+  });
 }

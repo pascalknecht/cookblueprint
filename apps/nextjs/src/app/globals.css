@@ -138,12 +138,51 @@
   --font-heading: var(--font-sans);
 
   --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+
+  --color-gold: var(--mise-gold);
+  --color-berry: var(--mise-berry);
+  --color-success: var(--mise-success);
+  --color-clay: var(--mise-clay);
 
   --radius-2xl: calc(var(--radius) * 1.8);
 
   --radius-3xl: calc(var(--radius) * 2.2);
 
   --radius-4xl: calc(var(--radius) * 2.6)
+}
+
+/*
+ * Warm palette from the Mise mobile app (apps/mobile/src/constants/theme.ts),
+ * scoped to the marketing site (which now also hosts auth and billing).
+ */
+.marketing-theme {
+  --background: #fbf6ef;
+  --foreground: #221e1b;
+  --card: #ffffff;
+  --card-foreground: #221e1b;
+  --popover: #ffffff;
+  --popover-foreground: #221e1b;
+  --primary: #c4553e;
+  --primary-foreground: #ffffff;
+  --secondary: #f0e8dd;
+  --secondary-foreground: #221e1b;
+  --muted: #f0e8dd;
+  --muted-foreground: #97887c;
+  --accent: #fbede7;
+  --accent-foreground: #9e3f2c;
+  --border: #eae1d4;
+  --input: #eae1d4;
+  --ring: #c4553e;
+  --radius: 1.125rem;
+
+  --mise-gold: #e8a33d;
+  --mise-berry: #b0447e;
+  --mise-success: #2fa46a;
+  --mise-clay: #c77c3a;
+
+  --font-sans: var(--font-mise-body);
+  --font-display: var(--font-mise-display);
 }
 
 @layer base {

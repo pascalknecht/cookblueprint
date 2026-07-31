@@ -6,33 +6,47 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Inter } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import { I18nProvider } from "@/lib/i18n/client";
+import { getLocale, getServerTranslator } from "@/lib/i18n/server";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
-export const metadata: Metadata = {
-  title: "Starter Kit",
-  description: "The Project Planner AI Next Starter Kit",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const [t, locale] = await Promise.all([getServerTranslator(), getLocale()]);
+  return {
+    title: t("meta.title"),
+    description: t("meta.description"),
+    openGraph: {
+      title: t("meta.title"),
+      description: t("meta.description"),
+      locale,
+    },
+  };
+}
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  const locale = await getLocale();
+
   return (
-    <html lang="en" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
+    <html lang={locale} suppressHydrationWarning className={cn("font-sans", inter.variable)}>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased",
           inter.variable,
         )}
       >
-        <TooltipProvider>
-          <Toaster />
-          <div className="flex flex-col w-full">
-            <div>{children}</div>
-          </div>
-        </TooltipProvider>
+        <I18nProvider initialLocale={locale}>
+          <TooltipProvider>
+            <Toaster />
+            <div className="flex flex-col w-full">
+              <div>{children}</div>
+            </div>
+          </TooltipProvider>
+        </I18nProvider>
       </body>
     </html>
   );

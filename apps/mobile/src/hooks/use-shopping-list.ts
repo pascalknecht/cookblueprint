@@ -11,12 +11,22 @@ export type ShoppingItem = {
   checked: boolean;
 };
 
+export type RecentShoppingItem = { id: string; name: string; category: string; lastUsedAt: string };
+
 type ShoppingItemsResponse = { items: ShoppingItem[]; total: number };
 
 export function useShoppingItems() {
   return useQuery({
     queryKey: ['shopping-items'],
     queryFn: () => api.get<ShoppingItemsResponse>('/api/shopping-items?perPage=100'),
+    select: (data) => data.items,
+  });
+}
+
+export function useRecentShoppingItems() {
+  return useQuery({
+    queryKey: ['shopping-items', 'recent'],
+    queryFn: () => api.get<{ items: RecentShoppingItem[] }>('/api/shopping-items/recent'),
     select: (data) => data.items,
   });
 }
@@ -30,10 +40,11 @@ export function useToggleShoppingItem() {
   });
 }
 
-export function useClearCheckedItems() {
+export function useCreateShoppingItem() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (ids: string[]) => api.delete<{ deletedCount: number }>(`/api/shopping-items?ids=${ids.join(',')}`),
+    mutationFn: (input: { name: string; quantity: string; category: string }) =>
+      api.post<ShoppingItem>('/api/shopping-items', input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['shopping-items'] }),
   });
 }

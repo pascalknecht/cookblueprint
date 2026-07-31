@@ -1,167 +1,202 @@
-import {
-  ArrowRight,
-  Blocks,
-  ChartNoAxesCombined,
-  Database,
-  Lock,
-  ShieldCheck,
-  Workflow,
-} from "lucide-react";
+import { ArrowRight, BookOpen, CalendarDays, Link2, ShoppingCart } from "lucide-react";
 import React from "react";
+import { getServerTranslator } from "@/lib/i18n/server";
 
-const capabilities = [
-  {
-    icon: Blocks,
-    title: "Composable architecture",
-    summary: "Build on a starter that respects clean boundaries and real-world growth.",
-    bullets: [
-      "Business logic isolated in use-cases",
-      "Auth and billing wired from day one",
-      "Monorepo-ready structure with Turborepo",
-    ],
-  },
-  {
-    icon: ShieldCheck,
-    title: "Production confidence",
-    summary: "Launch with security and reliability patterns already in place.",
-    bullets: [
-      "Role-aware auth with Better Auth",
-      "Type-safe env validation with Zod",
-      "Prisma + PostgreSQL integration out of the box",
-    ],
-  },
-  {
-    icon: ChartNoAxesCombined,
-    title: "Scale-ready operations",
-    summary: "Operate and iterate without rebuilding the foundation later.",
-    bullets: [
-      "Stripe checkout and webhook flow included",
-      "Testing + linting + typecheck scripts preconfigured",
-      "Smooth path from localhost to Vercel deployment",
-    ],
-  },
-];
+async function RecipesVisual() {
+  const t = await getServerTranslator();
+  const recipes = [
+    { name: t("features.recipesVisualLentilSoup"), tag: t("features.tagDinner") },
+    { name: t("features.recipesVisualTacos"), tag: t("features.tagLunch") },
+    { name: t("features.recipesVisualOats"), tag: t("features.tagBreakfast") },
+  ];
 
-const steps = [
-  {
-    step: "1",
-    title: "Clone and configure",
-    description:
-      "Install dependencies, set your environment variables, and run your local stack in minutes.",
-    icon: Database,
-  },
-  {
-    step: "2",
-    title: "Ship the core flow",
-    description:
-      "Enable auth, billing, and data models, then deliver your first customer-facing path fast.",
-    icon: Workflow,
-  },
-  {
-    step: "3",
-    title: "Harden and scale",
-    description:
-      "Expand with confidence using typed boundaries, tested modules, and deployment-ready defaults.",
-    icon: Lock,
-  },
-];
-
-export function FeaturesSection() {
   return (
-    <>
-      <section className="border-t border-border py-20 md:py-28" id="features">
-        <div className="container mx-auto px-4">
-          <div className="mx-auto mb-14 max-w-6xl">
-            <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Core capabilities
-            </p>
-            <h2 className="max-w-3xl text-3xl font-bold tracking-tight md:text-5xl">
-              The foundation feels mature from day one
-            </h2>
-            <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-              Instead of feature bloat, you get opinionated primitives you can
-              trust under real product pressure.
-            </p>
+    <div className="mx-auto w-full max-w-sm space-y-3">
+      <div className="border-border bg-card flex items-center gap-2 rounded-2xl border p-3 shadow-sm">
+        <div className="bg-gold/15 flex size-9 shrink-0 items-center justify-center rounded-xl">
+          <Link2 className="text-gold size-4" />
+        </div>
+        <div>
+          <p className="text-sm font-medium">{t("features.recipesVisualImportTitle")}</p>
+          <p className="text-muted-foreground text-xs">{t("features.recipesVisualImportSubtitle")}</p>
+        </div>
+      </div>
+      {recipes.map((recipe) => (
+        <div
+          key={recipe.name}
+          className="border-border bg-card flex items-center justify-between rounded-2xl border p-3 shadow-sm"
+        >
+          <div className="flex items-center gap-3">
+            <div className="bg-muted size-9 shrink-0 rounded-xl" />
+            <p className="text-sm font-medium">{recipe.name}</p>
           </div>
+          <span className="text-muted-foreground bg-muted rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-wide">
+            {recipe.tag}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-          <div className="mx-auto grid max-w-6xl gap-0 border-y border-border">
-            {capabilities.map((capability, index) => (
-              <article
-                key={capability.title}
-                className="grid gap-6 border-b border-border py-8 last:border-b-0 md:grid-cols-12 md:py-10"
+async function MealPlanVisual() {
+  const t = await getServerTranslator();
+  const week = [
+    { day: t("features.dayMonday"), meal: t("features.mealLentilSoup") },
+    { day: t("features.dayTuesday"), meal: t("features.mealStirFry") },
+    { day: t("features.dayWednesday"), meal: t("features.mealTacos") },
+    { day: t("features.dayThursday"), meal: t("features.mealSalmon") },
+    { day: t("features.dayFriday"), meal: t("features.mealPizza") },
+  ];
+
+  return (
+    <div className="border-border bg-card mx-auto w-full max-w-sm rounded-2xl border p-2 shadow-sm">
+      {week.map(({ day, meal }, i) => (
+        <div
+          key={day}
+          className={`flex items-center justify-between px-3 py-2.5 ${i !== week.length - 1 ? "border-b border-border/60" : ""}`}
+        >
+          <span className="text-muted-foreground text-sm">{day}</span>
+          <span className="text-sm font-medium">{meal}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+async function ShoppingListVisual() {
+  const t = await getServerTranslator();
+  const items = [
+    { item: t("features.itemSalmon"), done: true },
+    { item: t("features.itemTomatoes"), done: true },
+    { item: t("features.itemTortillas"), done: false },
+    { item: t("features.itemRice"), done: false },
+  ];
+
+  return (
+    <div className="border-border bg-card mx-auto w-full max-w-sm rounded-2xl border p-5 shadow-sm">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-semibold">{t("features.listVisualTitle")}</p>
+        <span className="text-muted-foreground text-xs">{t("features.listVisualCount", { count: items.length })}</span>
+      </div>
+      <div className="space-y-2.5">
+        {items.map(({ item, done }) => (
+          <div key={item} className="flex items-center gap-2.5">
+            <div
+              className={`flex size-4 shrink-0 items-center justify-center rounded-full border ${done ? "bg-success border-success" : "border-border"}`}
+            >
+              {done ? (
+                <svg viewBox="0 0 24 24" className="size-2.5 fill-none stroke-white stroke-[3]">
+                  <path d="M20 6 9 17l-5-5" />
+                </svg>
+              ) : null}
+            </div>
+            <span className={`text-sm ${done ? "text-muted-foreground line-through" : ""}`}>
+              {item}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const colorClasses = {
+  gold: { chip: "bg-gold/15 text-gold", bullet: "text-gold" },
+  primary: { chip: "bg-primary/10 text-primary", bullet: "text-primary" },
+  success: { chip: "bg-success/15 text-success", bullet: "text-success" },
+} as const;
+
+export async function FeaturesSection() {
+  const t = await getServerTranslator();
+
+  const capabilities = [
+    {
+      eyebrow: t("features.recipesEyebrow"),
+      icon: BookOpen,
+      color: "gold",
+      title: t("features.recipesTitle"),
+      description: t("features.recipesDescription"),
+      bullets: [t("features.recipesBullet1"), t("features.recipesBullet2"), t("features.recipesBullet3")],
+      visual: RecipesVisual,
+    },
+    {
+      eyebrow: t("features.planEyebrow"),
+      icon: CalendarDays,
+      color: "primary",
+      title: t("features.planTitle"),
+      description: t("features.planDescription"),
+      bullets: [t("features.planBullet1"), t("features.planBullet2"), t("features.planBullet3")],
+      visual: MealPlanVisual,
+    },
+    {
+      eyebrow: t("features.listEyebrow"),
+      icon: ShoppingCart,
+      color: "success",
+      title: t("features.listTitle"),
+      description: t("features.listDescription"),
+      bullets: [t("features.listBullet1"), t("features.listBullet2"), t("features.listBullet3")],
+      visual: ShoppingListVisual,
+    },
+  ] as const;
+
+  return (
+    <section className="border-t border-border py-20 md:py-28" id="features">
+      <div className="container mx-auto px-4">
+        <div className="mx-auto mb-16 max-w-2xl text-center">
+          <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+            {t("features.eyebrow")}
+          </p>
+          <h2 className="font-display text-3xl md:text-5xl">
+            {t("features.title")}
+          </h2>
+          <p className="mt-5 text-base text-muted-foreground md:text-lg">
+            {t("features.subtitle")}
+          </p>
+        </div>
+
+        <div className="mx-auto max-w-5xl space-y-20 md:space-y-28">
+          {capabilities.map((capability, index) => {
+            const colors = colorClasses[capability.color];
+            return (
+              <div
+                key={capability.eyebrow}
+                className="grid items-center gap-10 md:grid-cols-2 md:gap-16"
               >
-                <div className="md:col-span-4">
-                  <div className="mb-5 flex size-11 items-center justify-center rounded-2xl bg-primary/10">
-                    <capability.icon className="size-5 text-primary" />
+                <div className={index % 2 === 1 ? "md:order-2" : ""}>
+                  <div className="mb-3 flex items-center gap-2">
+                    <div
+                      className={`flex size-8 items-center justify-center rounded-lg ${colors.chip}`}
+                    >
+                      <capability.icon className="size-4" />
+                    </div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                      {capability.eyebrow}
+                    </p>
                   </div>
-                  <span className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                    Pillar 0{index + 1}
-                  </span>
-                  <h3 className="mt-2 text-2xl font-semibold tracking-tight">
+                  <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">
                     {capability.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-relaxed text-muted-foreground md:text-base">
-                    {capability.summary}
+                  <p className="text-muted-foreground mt-4 text-base leading-relaxed">
+                    {capability.description}
                   </p>
+                  <ul className="mt-6 space-y-2.5">
+                    {capability.bullets.map((bullet) => (
+                      <li key={bullet} className="flex items-start gap-2 text-sm">
+                        <ArrowRight className={`mt-0.5 size-4 shrink-0 ${colors.bullet}`} />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-3 md:col-span-8 md:pt-8">
-                  {capability.bullets.map((bullet) => (
-                    <li
-                      key={bullet}
-                      className="flex items-start gap-2 border-b border-border/70 pb-3 text-sm last:border-b-0 last:pb-0"
-                    >
-                      <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <span className="text-muted-foreground">{bullet}</span>
-                    </li>
-                  ))}
-                </ul>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section
-        className="border-t border-border bg-muted/30 py-20 md:py-28"
-        id="how-it-works"
-      >
-        <div className="container mx-auto px-4">
-          <div className="mx-auto mb-14 max-w-6xl">
-            <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              Implementation path
-            </p>
-            <h2 className="max-w-3xl text-3xl font-bold tracking-tight md:text-5xl">
-              From blank repo to production momentum
-            </h2>
-            <p className="mt-5 max-w-2xl text-base text-muted-foreground md:text-lg">
-              A clear sequence that keeps teams shipping instead of reworking
-              foundations.
-            </p>
-          </div>
-
-          <div className="mx-auto grid max-w-6xl gap-5 md:grid-cols-3">
-            {steps.map((step) => (
-              <article
-                key={step.step}
-                className="rounded-2xl border border-border/80 bg-background p-6"
-              >
-                <div className="mb-5 flex items-center justify-between">
-                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                    Step {step.step}
-                  </span>
-                  <step.icon className="size-4 text-primary" />
+                <div className={index % 2 === 1 ? "md:order-1" : ""}>
+                  <capability.visual />
                 </div>
-                <h3 className="mb-2 text-lg font-semibold tracking-tight">
-                  {step.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-muted-foreground md:text-[0.95rem]">
-                  {step.description}
-                </p>
-              </article>
-            ))}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

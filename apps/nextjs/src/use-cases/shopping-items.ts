@@ -31,8 +31,31 @@ export async function listShoppingItems(organizationId: string, pagination: Pagi
   return toPaginationEnvelope(items, total, pagination);
 }
 
-export function createShoppingItem(organizationId: string, data: ShoppingItemInput) {
-  return prisma.shoppingListItem.create({ data: { ...data, organizationId } });
+/** Upserts (name, category) into the org's "recently used" list, bumping lastUsedAt. */
+async function recordRecentItems(organizationId: string, items: ShoppingItemInput[]) {
+  await Promise.all(
+    items.map((item) =>
+      prisma.recentShoppingItem.upsert({
+        where: { organizationId_name: { organizationId, name: item.name } },
+        create: { organizationId, name: item.name, category: item.category },
+        update: { category: item.category, lastUsedAt: new Date() },
+      }),
+    ),
+  );
+}
+
+export function listRecentShoppingItems(organizationId: string, take = 12) {
+  return prisma.recentShoppingItem.findMany({
+    where: { organizationId },
+    orderBy: { lastUsedAt: "desc" },
+    take,
+  });
+}
+
+export async function createShoppingItem(organizationId: string, data: ShoppingItemInput) {
+  const item = await prisma.shoppingListItem.create({ data: { ...data, organizationId } });
+  await recordRecentItems(organizationId, [data]);
+  return item;
 }
 
 export async function updateShoppingItem(
@@ -81,6 +104,7 @@ async function createDedupedItems(organizationId: string, candidates: ShoppingIt
   await prisma.shoppingListItem.createMany({
     data: toCreate.map((item) => ({ ...item, organizationId })),
   });
+  await recordRecentItems(organizationId, toCreate);
 
   return prisma.shoppingListItem.findMany({
     where: { organizationId, name: { in: toCreate.map((item) => item.name) } },

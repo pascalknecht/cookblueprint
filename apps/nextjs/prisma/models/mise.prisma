@@ -4,6 +4,8 @@ model Recipe {
   organization    Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   title           String
   color           String
+  imageUrl        String?
+  frequency       String          @default("weekly")
   time            Int
   servings        Int
   kcal            String
@@ -46,5 +48,22 @@ model ShoppingListItem {
 
   @@index([organizationId])
   @@map("shopping_list_item")
+  @@schema("public")
+}
+
+/// Distinct item names ever added to an org's shopping list, kept around after
+/// the item itself is cleared/deleted so "recently used" quick-add suggestions
+/// survive clearing the list.
+model RecentShoppingItem {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+  category       String
+  lastUsedAt     DateTime     @default(now())
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+  @@map("recent_shopping_item")
   @@schema("public")
 }

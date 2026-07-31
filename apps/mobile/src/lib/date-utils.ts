@@ -19,12 +19,24 @@ export function toISODate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/** Parses a "YYYY-MM-DD" string as local midnight (avoids `new Date(str)`'s UTC-parsing gotcha). */
+export function fromISODate(isoDate: string): Date {
+  const [year, month, day] = isoDate.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export function isSameDate(a: Date, b: Date): boolean {
   return toISODate(a) === toISODate(b);
 }
 
-export function weekdayShort(date: Date): string {
-  return date.toLocaleDateString('en-US', { weekday: 'short' });
+const BCP47_TAG: Record<string, string> = { en: 'en-US', de: 'de-DE' };
+
+function bcp47(locale: string): string {
+  return BCP47_TAG[locale] ?? 'en-US';
+}
+
+export function weekdayShort(date: Date, locale = 'en'): string {
+  return date.toLocaleDateString(bcp47(locale), { weekday: 'short' });
 }
 
 export function dayOfMonth(date: Date): string {
@@ -32,11 +44,11 @@ export function dayOfMonth(date: Date): string {
 }
 
 /** e.g. "Jul 21–27" or "Jul 29 – Aug 4" if the range crosses a month boundary. */
-export function formatWeekRange(dates: Date[]): string {
+export function formatWeekRange(dates: Date[], locale = 'en'): string {
   const start = dates[0];
   const end = dates[dates.length - 1];
-  const startMonth = start.toLocaleDateString('en-US', { month: 'short' });
-  const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
+  const startMonth = start.toLocaleDateString(bcp47(locale), { month: 'short' });
+  const endMonth = end.toLocaleDateString(bcp47(locale), { month: 'short' });
 
   if (startMonth === endMonth) {
     return `${startMonth} ${dayOfMonth(start)}–${dayOfMonth(end)}`;

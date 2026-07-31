@@ -1,39 +1,41 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Sheet } from '@/components/mise/sheet';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 
 export default function AddRecipeSheetScreen() {
+  const { t } = useTranslation();
   return (
     <Sheet onDismiss={() => router.back()}>
-      <Text style={styles.title}>Add a recipe</Text>
-      <Text style={styles.subtitle}>How would you like to add it?</Text>
+      <Text style={styles.title}>{t('addRecipe.title')}</Text>
+      <Text style={styles.subtitle}>{t('addRecipe.subtitle')}</Text>
 
       <View style={styles.rows}>
         <SheetRow
           icon="link"
           iconColor={MiseColors.brand}
           iconBg={MiseColors.tint}
-          title="Paste a link"
-          subtitle="Import from any recipe site"
+          title={t('addRecipe.linkTitle')}
+          subtitle={t('addRecipe.linkSubtitle')}
           onPress={() => router.replace('/import')}
         />
         <SheetRow
           icon="share-social"
           iconColor={MiseColors.amber}
           iconBg={MiseColors.tintStrong}
-          title="Share from another app"
-          subtitle="Safari, Instagram, TikTok…"
+          title={t('addRecipe.shareTitle')}
+          subtitle={t('addRecipe.shareSubtitle')}
           onPress={() => router.replace('/share-sheet')}
         />
         <SheetRow
           icon="create"
           iconColor={MiseColors.success}
           iconBg={MiseColors.successBg}
-          title="Write it manually"
-          subtitle="Type in your own recipe"
+          title={t('addRecipe.manualTitle')}
+          subtitle={t('addRecipe.manualSubtitle')}
           onPress={() => router.replace('/manual')}
         />
       </View>

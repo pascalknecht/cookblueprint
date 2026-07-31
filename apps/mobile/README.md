@@ -5,7 +5,7 @@ A recipe, meal-planning, and shared shopping list app for a household, built wit
 - **Recipes** — save your own, or "import" from a link (the import flow uses fixed mock data for now — there's no real scraping yet).
 - **Meal plan** — a real Monday–Sunday week (`date-utils.ts`), assign recipes to breakfast/lunch/dinner slots, or auto-generate the week.
 - **Shopping list** — add ingredients from a single recipe or the whole week's plan, with de-duplication by name; check items off, clear checked.
-- **Team** — recipes/plan/list are shared per household via [better-auth](https://www.better-auth.com)'s organization plugin; invite others by email.
+- **Household** — recipes/plan/list are shared per household via [better-auth](https://www.better-auth.com)'s organization plugin; invite others by email.
 
 This app is the client for the backend in [`../nextjs`](../nextjs) — see that app's README for the API, auth, and database setup. It needs to be running (and reachable at `EXPO_PUBLIC_API_URL`) for anything beyond the login screen to work.
 
@@ -27,6 +27,24 @@ pnpm dev -- --web   # go straight to web
 ```
 
 Requires the `apps/nextjs` backend running locally (see its README) — this app has no offline/mock mode.
+
+### Running on an Android emulator
+
+`EXPO_PUBLIC_API_URL=http://localhost:3000` (the `.env.example` default) resolves to the *emulator's own* loopback, not your host machine, so API calls fail silently unless you forward the port:
+
+```bash
+adb reverse tcp:3000 tcp:3000   # after the emulator is running, before testing login/API calls
+pnpm android                    # or: expo start --android
+```
+
+Also needs Postgres up and the Next.js backend running (`docker compose -f docker-compose.dev.yml up -d postgres` and `pnpm dev` from the repo root, or in `apps/nextjs`).
+
+Without a real `RESEND_API_KEY` (see `apps/nextjs/README.md`), sign-up emails don't actually send, so the "check your email" verification gate blocks login. For local testing, verify the user manually instead of setting up email:
+
+```bash
+docker exec food-postgres-1 psql -U postgres -d nextjs-boilerplate \
+  -c "UPDATE \"user\" SET \"emailVerified\" = true WHERE email = 'you@example.com';"
+```
 
 ## Environment variables
 
@@ -50,7 +68,7 @@ See `.env.example`. Both point at the Next.js app by default:
 ```
 src/
 ├── app/                  # Expo Router routes
-│   ├── (tabs)/            # Recipes, Plan, List, Team
+│   ├── (tabs)/            # Recipes, Plan, List, Household
 │   ├── recipe/[id].tsx
 │   ├── pick-recipe.tsx, plan-options.tsx, invite.tsx, ...  # modal sheets
 │   └── login.tsx, register.tsx, forgot-password.tsx

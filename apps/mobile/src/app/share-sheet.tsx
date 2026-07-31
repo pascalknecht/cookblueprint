@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -8,24 +9,16 @@ import { MiseColors, MiseFonts } from '@/constants/theme';
 
 const DEMO_URL = 'https://cooking.example.com/best-lemon-herb-chicken';
 
-const STEPS = [
-  {
-    title: '1 · Find a recipe',
-    body: 'You spotted a recipe on any website or app — here, "The Best Lemon Herb Chicken".',
-  },
-  {
-    title: '2 · Tap Share',
-    body: 'In that app, tap the system Share button to open this menu of destinations.',
-  },
-  {
-    title: '3 · Choose Mise',
-    body: "Pick Mise and we'll pull in the ingredients, steps and photo automatically.",
-  },
-];
-
 export default function ShareSheetScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
+
+  const STEPS = [
+    { title: t('shareSheet.step1Title'), body: t('shareSheet.step1Body') },
+    { title: t('shareSheet.step2Title'), body: t('shareSheet.step2Body') },
+    { title: t('shareSheet.step3Title'), body: t('shareSheet.step3Body') },
+  ];
 
   function dismiss() {
     router.back();
@@ -49,9 +42,9 @@ export default function ShareSheetScreen() {
 
       <View style={styles.coachmark}>
         <View style={styles.coachmarkHeader}>
-          <Text style={styles.coachmarkEyebrow}>TUTORIAL · HOW IMPORTING WORKS</Text>
+          <Text style={styles.coachmarkEyebrow}>{t('shareSheet.tutorialEyebrow')}</Text>
           <Text style={styles.skip} onPress={dismiss}>
-            Skip
+            {t('shareSheet.skip')}
           </Text>
         </View>
         <Text style={styles.coachmarkTitle}>{STEPS[step].title}</Text>
@@ -65,11 +58,11 @@ export default function ShareSheetScreen() {
           <View style={styles.coachmarkButtons}>
             {step > 0 ? (
               <Pressable onPress={back} style={styles.backButton}>
-                <Text style={styles.backButtonLabel}>Back</Text>
+                <Text style={styles.backButtonLabel}>{t('shareSheet.back')}</Text>
               </Pressable>
             ) : null}
             <Pressable onPress={next} style={styles.nextButton}>
-              <Text style={styles.nextButtonLabel}>{step === 2 ? 'Import it →' : 'Next'}</Text>
+              <Text style={styles.nextButtonLabel}>{step === 2 ? t('shareSheet.importIt') : t('shareSheet.next')}</Text>
             </Pressable>
           </View>
         </View>
@@ -81,30 +74,30 @@ export default function ShareSheetScreen() {
           <View style={styles.sourceThumb} />
           <View style={styles.sourceBody}>
             <Text style={styles.sourceTitle} numberOfLines={1}>
-              The Best Lemon Herb Chicken
+              {t('shareSheet.demoTitle')}
             </Text>
-            <Text style={styles.sourceUrl}>cooking.example.com</Text>
+            <Text style={styles.sourceUrl}>{t('shareSheet.demoUrl')}</Text>
           </View>
         </View>
         <View style={styles.divider} />
         <View style={[styles.shareToWrap, step === 1 && styles.highlight]}>
-          <Text style={styles.shareToLabel}>SHARE TO</Text>
+          <Text style={styles.shareToLabel}>{t('shareSheet.shareTo')}</Text>
           <View style={styles.appsRow}>
             <Pressable onPress={next} style={styles.appSlot}>
               <MiseTile pulsing={step === 2} />
-              <Text style={styles.appLabel}>Mise</Text>
+              <Text style={styles.appLabel}>{t('shareSheet.appMise')}</Text>
             </Pressable>
             <View style={styles.appSlot}>
               <View style={[styles.appIcon, { backgroundColor: '#25D366' }]} />
-              <Text style={styles.appLabelDim}>Messages</Text>
+              <Text style={styles.appLabelDim}>{t('shareSheet.appMessages')}</Text>
             </View>
             <View style={styles.appSlot}>
               <View style={[styles.appIcon, { backgroundColor: '#1877F2' }]} />
-              <Text style={styles.appLabelDim}>Mail</Text>
+              <Text style={styles.appLabelDim}>{t('shareSheet.appMail')}</Text>
             </View>
             <View style={styles.appSlot}>
               <View style={[styles.appIcon, { backgroundColor: '#8A817A' }]} />
-              <Text style={styles.appLabelDim}>Notes</Text>
+              <Text style={styles.appLabelDim}>{t('shareSheet.appNotes')}</Text>
             </View>
           </View>
         </View>

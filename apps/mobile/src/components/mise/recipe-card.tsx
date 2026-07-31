@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import type { Recipe } from '@/hooks/use-recipes';
@@ -12,20 +13,35 @@ type RecipeCardProps = {
 };
 
 export function RecipeCard({ recipe, meta, onPress }: RecipeCardProps) {
+  const pressed = useSharedValue(false);
+
+  const cardStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(pressed.value ? 0.96 : 1, { damping: 14, stiffness: 320 }) }],
+  }));
+
   return (
-    <Pressable onPress={onPress} style={styles.card}>
-      <PhotoPlaceholder color={recipe.color} style={styles.photo}>
-        <View style={styles.timeBadge}>
-          <Text style={styles.timeBadgeLabel}>{recipe.time}m</Text>
+    <Animated.View style={[styles.card, cardStyle]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => (pressed.value = true)}
+        onPressOut={() => (pressed.value = false)}
+        style={styles.pressable}>
+        <PhotoPlaceholder
+          color={recipe.color}
+          style={styles.photo}
+          source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}>
+          <View style={styles.timeBadge}>
+            <Text style={styles.timeBadgeLabel}>{recipe.time}m</Text>
+          </View>
+        </PhotoPlaceholder>
+        <View style={styles.body}>
+          <Text style={styles.title} numberOfLines={2}>
+            {recipe.title}
+          </Text>
+          <Text style={styles.meta}>{meta}</Text>
         </View>
-      </PhotoPlaceholder>
-      <View style={styles.body}>
-        <Text style={styles.title} numberOfLines={2}>
-          {recipe.title}
-        </Text>
-        <Text style={styles.meta}>{meta}</Text>
-      </View>
-    </Pressable>
+      </Pressable>
+    </Animated.View>
   );
 }
 
@@ -43,6 +59,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 2,
   },
+  pressable: { flex: 1 },
   photo: {
     height: 112,
     position: 'relative',

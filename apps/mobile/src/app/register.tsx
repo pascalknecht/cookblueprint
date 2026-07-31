@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +13,7 @@ import { signUp } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const [name, setName] = useState('');
@@ -22,7 +24,7 @@ export default function RegisterScreen() {
   const registerMutation = useMutation({
     mutationFn: async (input: { name: string; email: string; password: string }) => {
       const { data, error } = await signUp.email(input);
-      if (error) throw new Error(error.message ?? 'Could not create account');
+      if (error) throw new Error(error.message ?? t('common.errorRegister'));
       return data;
     },
     onSuccess: () => setSubmitted(true),
@@ -44,11 +46,9 @@ export default function RegisterScreen() {
           styles.confirmContent,
           { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 },
         ]}>
-        <Text style={[styles.title, styles.centerText]}>Check your email</Text>
-        <Text style={[styles.subtitle, styles.centerText]}>
-          We sent a verification link to your email. Click it to confirm your account, then log in.
-        </Text>
-        <Button label="Back to login" onPress={() => router.replace('/login')} />
+        <Text style={[styles.title, styles.centerText]}>{t('auth.checkEmailTitle')}</Text>
+        <Text style={[styles.subtitle, styles.centerText]}>{t('auth.checkEmailBody')}</Text>
+        <Button label={t('auth.backToLogin')} onPress={() => router.replace('/login')} />
       </ScrollView>
     );
   }
@@ -59,41 +59,41 @@ export default function RegisterScreen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 }]}>
       <IconButton name={BackIconName} onPress={() => router.back()} style={styles.back} />
 
-      <Text style={styles.title}>Create your account</Text>
-      <Text style={styles.subtitle}>Start saving recipes in seconds.</Text>
+      <Text style={styles.title}>{t('auth.registerTitle')}</Text>
+      <Text style={styles.subtitle}>{t('auth.registerSubtitle')}</Text>
 
       <TextField
-        label="Name"
+        label={t('auth.nameLabel')}
         value={name}
         onChangeText={setName}
-        placeholder="Alex Morgan"
+        placeholder={t('auth.namePlaceholder')}
         containerStyle={styles.field}
       />
       <TextField
-        label="Email"
+        label={t('auth.emailLabel')}
         value={email}
         onChangeText={setEmail}
-        placeholder="you@email.com"
+        placeholder={t('auth.emailPlaceholder')}
         keyboardType="email-address"
         autoCapitalize="none"
         containerStyle={styles.field}
       />
       <TextField
-        label="Password"
+        label={t('auth.passwordLabel')}
         value={password}
         onChangeText={setPassword}
-        placeholder="Create a password"
+        placeholder={t('auth.passwordCreatePlaceholder')}
         secureTextEntry
         containerStyle={styles.fieldLast}
       />
 
-      <Button label="Create account" onPress={handleRegister} loading={registerMutation.isPending} />
-      <Text style={styles.legal}>By continuing you agree to our Terms &amp; Privacy Policy.</Text>
+      <Button label={t('auth.createAccountButton')} onPress={handleRegister} loading={registerMutation.isPending} />
+      <Text style={styles.legal}>{t('auth.legal')}</Text>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>Have an account? </Text>
+        <Text style={styles.footerText}>{t('auth.haveAccountText')}</Text>
         <Text style={styles.footerLink} onPress={() => router.replace('/login')}>
-          Log In
+          {t('auth.logIn')}
         </Text>
       </View>
     </ScrollView>

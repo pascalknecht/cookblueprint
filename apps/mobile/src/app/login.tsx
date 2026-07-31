@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +13,7 @@ import { signIn } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
@@ -20,13 +22,13 @@ export default function LoginScreen() {
   const loginMutation = useMutation({
     mutationFn: async (input: { email: string; password: string }) => {
       const { data, error } = await signIn.email(input);
-      if (error) throw new Error(error.message ?? 'Could not log in');
+      if (error) throw new Error(error.message ?? t('common.errorLogin'));
       return data;
     },
     onSuccess: () => router.replace('/(tabs)/recipes'),
     onError: (error) => {
       if (error.message === 'Email not verified') {
-        showToast('Check your email to verify your account — we just sent a new link.');
+        showToast(t('auth.verifyEmailToast'));
         return;
       }
       showToast(error.message);
@@ -44,36 +46,36 @@ export default function LoginScreen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 }]}>
       <IconButton name={BackIconName} onPress={() => router.back()} style={styles.back} />
 
-      <Text style={styles.title}>Welcome back</Text>
-      <Text style={styles.subtitle}>Log in to your kitchen.</Text>
+      <Text style={styles.title}>{t('auth.loginTitle')}</Text>
+      <Text style={styles.subtitle}>{t('auth.loginSubtitle')}</Text>
 
       <TextField
-        label="Email"
+        label={t('auth.emailLabel')}
         value={email}
         onChangeText={setEmail}
-        placeholder="you@email.com"
+        placeholder={t('auth.emailPlaceholder')}
         keyboardType="email-address"
         autoCapitalize="none"
         containerStyle={styles.field}
       />
       <TextField
-        label="Password"
+        label={t('auth.passwordLabel')}
         value={password}
         onChangeText={setPassword}
-        placeholder="••••••••"
+        placeholder={t('auth.passwordPlaceholder')}
         secureTextEntry
         containerStyle={styles.fieldTight}
       />
       <Text style={styles.forgot} onPress={() => router.push('/forgot-password')}>
-        Forgot password?
+        {t('auth.forgotPassword')}
       </Text>
 
-      <Button label="Log In" onPress={handleLogin} loading={loginMutation.isPending} />
+      <Button label={t('auth.logIn')} onPress={handleLogin} loading={loginMutation.isPending} />
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>New here? </Text>
+        <Text style={styles.footerText}>{t('auth.newHere')}</Text>
         <Text style={styles.footerLink} onPress={() => router.replace('/register')}>
-          Create account
+          {t('auth.createAccount')}
         </Text>
       </View>
     </ScrollView>

@@ -5,11 +5,13 @@ model Organization {
   logo              String?            @db.Text
   createdAt         DateTime
   metadata          String?            @db.Text
+  enabledMealTypes  String[]           @default(["breakfast", "lunch", "dinner"])
   members           Member[]
   invitations       Invitation[]
   recipes           Recipe[]
   mealPlanEntries   MealPlanEntry[]
   shoppingListItems ShoppingListItem[]
+  recentShoppingItems RecentShoppingItem[]
 
   @@unique([slug])
   @@map("organization")

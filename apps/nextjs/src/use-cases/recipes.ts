@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { toPaginationEnvelope, toSkipTake, type PaginationQuery } from "@/lib/pagination";
+import type { RecipeFrequency } from "@/lib/recipe-frequency";
 import { Prisma } from "@/lib/generated/prisma/client/client";
 
 export type RecipeIngredientInput = {
@@ -11,6 +12,8 @@ export type RecipeIngredientInput = {
 export type RecipeInput = {
   title: string;
   color: string;
+  imageUrl?: string | null;
+  frequency: RecipeFrequency;
   time: number;
   servings: number;
   kcal: string;

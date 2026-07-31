@@ -1,4 +1,5 @@
-import { Platform, StyleSheet, Text } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
+import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MiseFonts } from '@/constants/theme';
@@ -10,14 +11,16 @@ export function Toast() {
   if (!toast) return null;
 
   return (
-    <Text
+    <Animated.Text
+      entering={FadeInDown.springify().damping(16).stiffness(220)}
+      exiting={FadeOutDown.duration(160)}
       pointerEvents="none"
       style={[
         Platform.OS === 'ios' ? styles.pill : styles.snackbar,
         Platform.OS === 'ios' ? { bottom: insets.bottom + 96 } : { bottom: insets.bottom + 20 },
       ]}>
       {toast}
-    </Text>
+    </Animated.Text>
   );
 }
 

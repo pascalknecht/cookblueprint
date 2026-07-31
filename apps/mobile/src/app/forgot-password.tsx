@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +13,7 @@ import { requestPasswordReset } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
 
 export default function ForgotPasswordScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
@@ -22,10 +24,10 @@ export default function ForgotPasswordScreen() {
         email: input.email,
         redirectTo: `${process.env.EXPO_PUBLIC_WEB_APP_URL}/reset-password`,
       });
-      if (error) throw new Error(error.message ?? 'Could not send reset link');
+      if (error) throw new Error(error.message ?? t('common.errorResetPassword'));
     },
     onSuccess: () => {
-      showToast('If that email is registered, a reset link is on its way');
+      showToast(t('auth.resetLinkToast'));
       router.back();
     },
     onError: (error) => showToast(error.message),
@@ -42,20 +44,20 @@ export default function ForgotPasswordScreen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 }]}>
       <IconButton name={BackIconName} onPress={() => router.back()} style={styles.back} />
 
-      <Text style={styles.title}>Reset your password</Text>
-      <Text style={styles.subtitle}>Enter your email and we&apos;ll send you a reset link.</Text>
+      <Text style={styles.title}>{t('auth.forgotTitle')}</Text>
+      <Text style={styles.subtitle}>{t('auth.forgotSubtitle')}</Text>
 
       <TextField
-        label="Email"
+        label={t('auth.emailLabel')}
         value={email}
         onChangeText={setEmail}
-        placeholder="you@email.com"
+        placeholder={t('auth.emailPlaceholder')}
         keyboardType="email-address"
         autoCapitalize="none"
         containerStyle={styles.field}
       />
 
-      <Button label="Send reset link" onPress={handleSend} loading={requestResetMutation.isPending} />
+      <Button label={t('auth.sendResetLink')} onPress={handleSend} loading={requestResetMutation.isPending} />
     </ScrollView>
   );
 }

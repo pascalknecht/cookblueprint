@@ -19,6 +19,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { client } from "@/lib/auth-client";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z
   .object({
@@ -33,6 +34,7 @@ const formSchema = z
   });
 
 export function ResetPasswordForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -53,10 +55,10 @@ export function ResetPasswordForm() {
     });
     setLoading(false);
     if (resetError) {
-      toast.error(resetError.message ?? "Could not reset password");
+      toast.error(resetError.message ?? t("resetPassword.errorFallback"));
       return;
     }
-    toast.success("Password updated — log in with your new password");
+    toast.success(t("resetPassword.successToast"));
     router.push("/login");
   }
 
@@ -65,14 +67,13 @@ export function ResetPasswordForm() {
       <div className="flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-4 rounded-xl bg-white p-8 text-center shadow-lg">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Link expired
+            {t("resetPassword.linkExpiredTitle")}
           </h1>
           <p className="text-muted-foreground">
-            This password reset link is invalid or has expired. Request a new
-            one below.
+            {t("resetPassword.linkExpiredBody")}
           </p>
           <Link href="/forgot-password" className="inline-block underline">
-            Request a new link
+            {t("resetPassword.requestNewLink")}
           </Link>
         </div>
       </div>
@@ -84,7 +85,7 @@ export function ResetPasswordForm() {
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Set a new password
+            {t("resetPassword.title")}
           </h1>
         </div>
 
@@ -95,7 +96,7 @@ export function ResetPasswordForm() {
               name="newPassword"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>New password</FormLabel>
+                  <FormLabel>{t("resetPassword.newPasswordLabel")}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
@@ -108,7 +109,7 @@ export function ResetPasswordForm() {
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Confirm password</FormLabel>
+                  <FormLabel>{t("resetPassword.confirmPasswordLabel")}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
@@ -121,7 +122,7 @@ export function ResetPasswordForm() {
               disabled={loading}
               className="w-full bg-black text-white hover:bg-black/90"
             >
-              Reset password
+              {t("resetPassword.submit")}
             </Button>
           </form>
         </Form>

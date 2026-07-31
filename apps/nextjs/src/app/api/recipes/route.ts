@@ -1,6 +1,7 @@
 import { parseJsonBody, unauthorizedResponse } from "@/lib/api";
 import { getActiveOrganizationContext } from "@/lib/get-active-organization";
 import { paginationQuerySchema } from "@/lib/pagination";
+import { ALL_RECIPE_FREQUENCIES, DEFAULT_RECIPE_FREQUENCY } from "@/lib/recipe-frequency";
 import { createRecipe, listRecipes } from "@/use-cases/recipes";
 import { z } from "zod";
 
@@ -13,6 +14,8 @@ const recipeIngredientSchema = z.object({
 const recipeBodySchema = z.object({
   title: z.string().min(1),
   color: z.string().min(1),
+  imageUrl: z.url().nullable().optional(),
+  frequency: z.enum(ALL_RECIPE_FREQUENCIES).default(DEFAULT_RECIPE_FREQUENCY),
   time: z.coerce.number().int().min(0),
   servings: z.coerce.number().int().min(1),
   kcal: z.string().min(1),

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/mise/button';
@@ -13,6 +14,7 @@ import { organization } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
 
 export default function InviteScreen() {
+  const { t } = useTranslation();
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [canEdit, setCanEdit] = useState(true);
@@ -20,11 +22,11 @@ export default function InviteScreen() {
   const inviteMutation = useMutation({
     mutationFn: async (input: { email: string; role: 'admin' | 'member' }) => {
       const { data, error } = await organization.inviteMember(input);
-      if (error) throw new Error(error.message ?? 'Could not send invite');
+      if (error) throw new Error(error.message ?? t('common.errorInvite'));
       return data;
     },
     onSuccess: () => {
-      showToast('Invitation sent');
+      showToast(t('invite.sentToast'));
       router.back();
     },
     onError: (error) => showToast(error.message),
@@ -38,15 +40,13 @@ export default function InviteScreen() {
 
   return (
     <Sheet onDismiss={() => router.back()}>
-      <Text style={styles.title}>Invite to workspace</Text>
-      <Text style={styles.subtitle}>
-        They&apos;ll get access to shared recipes, the meal plan and the shopping list.
-      </Text>
+      <Text style={styles.title}>{t('invite.title')}</Text>
+      <Text style={styles.subtitle}>{t('invite.subtitle')}</Text>
 
       <TextField
         value={email}
         onChangeText={setEmail}
-        placeholder="name@email.com"
+        placeholder={t('invite.emailPlaceholder')}
         keyboardType="email-address"
         autoCapitalize="none"
         icon={<Ionicons name="mail" size={16} color={MiseColors.mutedLight} />}
@@ -54,14 +54,11 @@ export default function InviteScreen() {
       />
 
       <View style={styles.toggleRow}>
-        <Text style={styles.toggleLabel}>Can edit everything</Text>
+        <Text style={styles.toggleLabel}>{t('invite.canEdit')}</Text>
         <MiseSwitch value={canEdit} onValueChange={setCanEdit} />
       </View>
 
-      <Button label="Send invite" onPress={handleSend} loading={inviteMutation.isPending} />
-      <Text style={styles.footer}>
-        or share an <Text style={styles.footerLink}>invite link</Text>
-      </Text>
+      <Button label={t('invite.sendInvite')} onPress={handleSend} loading={inviteMutation.isPending} />
     </Sheet>
   );
 }
@@ -83,6 +80,4 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   toggleLabel: { fontFamily: MiseFonts.bodySemiBold, fontSize: 14, color: MiseColors.ink },
-  footer: { textAlign: 'center', marginTop: 14, color: MiseColors.muted, fontFamily: MiseFonts.body, fontSize: 13 },
-  footerLink: { color: MiseColors.brand, fontFamily: MiseFonts.bodyBold },
 });

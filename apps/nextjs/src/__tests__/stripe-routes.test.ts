@@ -143,7 +143,7 @@ describe("stripe route handlers", () => {
     expect(createPortalSessionMock).toHaveBeenCalledTimes(1);
     expect(createPortalSessionMock).toHaveBeenCalledWith({
       customer: "cus_123",
-      return_url: "http://localhost:3000/settings?billing=portal-return",
+      return_url: "http://localhost:3000/billing?billing=portal-return",
     });
   });
 });

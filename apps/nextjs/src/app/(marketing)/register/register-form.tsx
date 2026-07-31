@@ -20,6 +20,7 @@ import { signUp } from "@/lib/auth-client";
 
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   fullName: z.string().min(2, {
@@ -34,6 +35,7 @@ const formSchema = z.object({
 });
 
 export function RegisterForm() {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -74,14 +76,13 @@ export function RegisterForm() {
       <div className="flex items-center justify-center">
         <div className="w-full max-w-md space-y-4 rounded-xl bg-white p-8 text-center shadow-lg">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Check your email
+            {t("register.checkEmailTitle")}
           </h1>
           <p className="text-muted-foreground">
-            We sent a verification link to your email. Click it to confirm
-            your account, then log in.
+            {t("register.checkEmailBody")}
           </p>
           <Link href="/login" className="inline-block underline">
-            Back to login
+            {t("register.backToLogin")}
           </Link>
         </div>
       </div>
@@ -93,10 +94,10 @@ export function RegisterForm() {
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Create an account
+            {t("register.title")}
           </h1>
           <p className="text-muted-foreground">
-            Enter your information below to get started
+            {t("register.subtitle")}
           </p>
         </div>
 
@@ -107,9 +108,9 @@ export function RegisterForm() {
               name="fullName"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Full name</FormLabel>
+                  <FormLabel>{t("register.fullNameLabel")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder={t("register.fullNamePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -120,11 +121,11 @@ export function RegisterForm() {
               name="email"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("register.emailLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      placeholder="me@example.com"
+                      placeholder={t("register.emailPlaceholder")}
                       {...field}
                     />
                   </FormControl>
@@ -137,7 +138,7 @@ export function RegisterForm() {
               name="password"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t("register.passwordLabel")}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
@@ -152,16 +153,16 @@ export function RegisterForm() {
               {loading ? (
                 <Loader2 size={16} className="animate-spin" />
               ) : (
-                "Create an account"
+                t("register.submit")
               )}
             </Button>
           </form>
         </Form>
 
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("register.haveAccount")}
           <Link href="/login" className="underline">
-            Log in
+            {t("register.logIn")}
           </Link>
         </p>
       </div>

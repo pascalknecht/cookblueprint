@@ -1,9 +1,10 @@
 import { parseJsonBody, unauthorizedResponse } from "@/lib/api";
 import { getActiveOrganizationContext } from "@/lib/get-active-organization";
+import { ALL_MEAL_TYPES } from "@/lib/meal-types";
 import { listMealPlanEntries, upsertMealPlanEntry } from "@/use-cases/meal-plans";
 import { z } from "zod";
 
-const mealTypeSchema = z.enum(["breakfast", "lunch", "dinner"]);
+const mealTypeSchema = z.enum(ALL_MEAL_TYPES);
 
 const upsertBodySchema = z.object({
   date: z.coerce.date(),

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { RecipeFrequency } from '@/constants/recipe-frequency';
 import { api } from '@/lib/api-client';
 
 export type Ingredient = { n: string; q: string; cat: string };
@@ -8,6 +9,8 @@ export type Recipe = {
   id: string;
   title: string;
   color: string;
+  imageUrl?: string | null;
+  frequency: RecipeFrequency;
   time: number;
   servings: number;
   kcal: string;
@@ -19,6 +22,7 @@ export type Recipe = {
 export type RecipeInput = {
   title: string;
   color: string;
+  frequency: RecipeFrequency;
   time: number;
   servings: number;
   kcal: string;

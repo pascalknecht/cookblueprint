@@ -1,13 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import type { MealType } from '@/constants/meal-types';
 import { api } from '@/lib/api-client';
 import { toISODate } from '@/lib/date-utils';
 
 import type { Recipe } from './use-recipes';
 
-export type MealType = 'breakfast' | 'lunch' | 'dinner';
-
-export const MEAL_DEFS: MealType[] = ['breakfast', 'lunch', 'dinner'];
+export type { MealType };
 
 export type MealPlanEntry = {
   id: string;
@@ -39,6 +38,14 @@ export function useAssignMeal() {
         mealType: input.mealType,
         recipeId: input.recipeId,
       }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['meal-plan'] }),
+  });
+}
+
+export function useDeleteMealAssignment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (entryId: string) => api.delete<{ id: string }>(`/api/meal-plans/${entryId}`),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['meal-plan'] }),
   });
 }

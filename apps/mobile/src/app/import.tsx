@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -20,6 +21,7 @@ function importedRecipePreview(): RecipeInput {
   return {
     title: 'One-Pan Lemon Herb Chicken',
     color: '#D98324',
+    frequency: 'weekly',
     time: 35,
     servings: 4,
     kcal: '530',
@@ -42,6 +44,7 @@ function importedRecipePreview(): RecipeInput {
 }
 
 export default function ImportScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const createRecipeMutation = useCreateRecipe();
   const { showToast } = useToast();
@@ -70,7 +73,7 @@ export default function ImportScreen() {
   function handleSave() {
     createRecipeMutation.mutate(preview, {
       onSuccess: () => {
-        showToast('Recipe saved to your library');
+        showToast(t('importRecipe.savedToast'));
         router.replace('/(tabs)/recipes');
       },
       onError: (error) => showToast(error.message),
@@ -85,28 +88,27 @@ export default function ImportScreen() {
 
       {stage === 'input' ? (
         <View>
-          <Text style={styles.title}>Import from the web</Text>
-          <Text style={styles.subtitle}>
-            Paste a recipe link and we&apos;ll pull out the ingredients, steps and photo automatically.
-          </Text>
+          <Text style={styles.title}>{t('importRecipe.title')}</Text>
+          <Text style={styles.subtitle}>{t('importRecipe.subtitle')}</Text>
           <TextField
             value={url}
             onChangeText={setUrl}
-            placeholder="https://…/best-lemon-chicken"
+            placeholder={t('importRecipe.urlPlaceholder')}
             autoCapitalize="none"
             icon={<Ionicons name="link" size={16} color={MiseColors.mutedLight} />}
             containerStyle={styles.field}
           />
-          <Button label="Import recipe" onPress={handleImport} />
+          <Button label={t('importRecipe.importButton')} onPress={handleImport} />
 
           <View style={styles.tip}>
-            <Text style={styles.tipTitle}>↗ Even faster</Text>
+            <Text style={styles.tipTitle}>{t('importRecipe.tipTitle')}</Text>
             <Text style={styles.tipBody}>
-              From any recipe site or app, tap <Text style={{ fontFamily: MiseFonts.bodyBold }}>Share → Mise</Text>{' '}
-              and the recipe lands straight in your library.
+              {t('importRecipe.tipBodyPrefix')}
+              <Text style={{ fontFamily: MiseFonts.bodyBold }}>{t('importRecipe.tipBodyBold')}</Text>
+              {t('importRecipe.tipBodySuffix')}
             </Text>
             <Button
-              label="Try the share sheet"
+              label={t('importRecipe.tryShareSheet')}
               variant="secondary"
               compact
               onPress={() => router.push('/share-sheet')}
@@ -119,12 +121,12 @@ export default function ImportScreen() {
       {stage === 'parsing' ? (
         <View style={styles.parsing}>
           <MiseSpinner size={64} />
-          <Text style={styles.parsingTitle}>Reading the recipe…</Text>
-          <Text style={styles.parsingSubtitle}>Fetching ingredients, steps and cook time from the page.</Text>
+          <Text style={styles.parsingTitle}>{t('importRecipe.parsingTitle')}</Text>
+          <Text style={styles.parsingSubtitle}>{t('importRecipe.parsingSubtitle')}</Text>
           <View style={styles.checklist}>
-            <ChecklistItem label="Found recipe title" done />
-            <ChecklistItem label="Extracted 6 ingredients" done />
-            <ChecklistItem label="Parsing method steps…" done={false} />
+            <ChecklistItem label={t('importRecipe.checklistTitle')} done />
+            <ChecklistItem label={t('importRecipe.checklistIngredients')} done />
+            <ChecklistItem label={t('importRecipe.checklistSteps')} done={false} />
           </View>
         </View>
       ) : null}
@@ -133,16 +135,16 @@ export default function ImportScreen() {
         <View>
           <View style={styles.successBanner}>
             <Ionicons name="checkmark-circle" size={18} color={MiseColors.success} />
-            <Text style={styles.successLabel}>Recipe found — review &amp; save</Text>
+            <Text style={styles.successLabel}>{t('importRecipe.successLabel')}</Text>
           </View>
           <View style={styles.previewCard}>
             <PhotoPlaceholder color={MiseColors.amber} style={styles.previewPhoto}>
-              <Text style={styles.previewSource}>from cooking.example.com</Text>
+              <Text style={styles.previewSource}>{t('importRecipe.previewSource')}</Text>
             </PhotoPlaceholder>
             <View style={styles.previewBody}>
               <Text style={styles.previewTitle}>{preview.title}</Text>
               <Text style={styles.previewMeta}>
-                {preview.time} min · serves {preview.servings} · {preview.kcal} kcal
+                {t('importRecipe.previewMeta', { time: preview.time, servings: preview.servings, kcal: preview.kcal })}
               </Text>
             </View>
             <View style={styles.previewIngredients}>
@@ -158,9 +160,9 @@ export default function ImportScreen() {
             </View>
           </View>
           <View style={styles.doneActions}>
-            <Button label="Redo" variant="secondary" compact onPress={() => setStage('input')} />
+            <Button label={t('importRecipe.redo')} variant="secondary" compact onPress={() => setStage('input')} />
             <Button
-              label="Save to library"
+              label={t('importRecipe.saveToLibrary')}
               onPress={handleSave}
               loading={createRecipeMutation.isPending}
               style={{ flex: 1 }}

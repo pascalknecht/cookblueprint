@@ -1,14 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EmptyState } from '@/components/mise/empty-state';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useAssignMeal, type MealType } from '@/hooks/use-meal-plan';
 import { useRecipes, type Recipe } from '@/hooks/use-recipes';
 import { useToast } from '@/store/toast';
 
 export default function PickRecipeScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { date, meal } = useLocalSearchParams<{ date: string; meal: MealType }>();
   const { data: recipes = [] } = useRecipes();
@@ -28,20 +31,21 @@ export default function PickRecipeScreen() {
       <Pressable style={StyleSheet.absoluteFill} onPress={() => router.back()} />
       <View style={[styles.sheet, { marginTop: insets.top + 100 }]}>
         <View style={styles.handle} />
-        <Text style={styles.title}>Choose a recipe</Text>
+        <Text style={styles.title}>{t('pickRecipe.title')}</Text>
         <FlatList
           data={recipes}
           keyExtractor={(item) => item.id}
           contentContainerStyle={styles.list}
           ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+          ListEmptyComponent={
+            <EmptyState icon="restaurant-outline" title={t('pickRecipe.emptyTitle')} subtitle={t('pickRecipe.emptySubtitle')} />
+          }
           renderItem={({ item }) => (
             <Pressable onPress={() => pick(item)} style={styles.row}>
               <View style={[styles.swatch, { backgroundColor: item.color }]} />
               <View style={styles.rowBody}>
                 <Text style={styles.rowTitle}>{item.title}</Text>
-                <Text style={styles.rowMeta}>
-                  {item.time} min · serves {item.servings}
-                </Text>
+                <Text style={styles.rowMeta}>{t('pickRecipe.rowMeta', { time: item.time, servings: item.servings })}</Text>
               </View>
               <Ionicons name="add-circle" size={22} color={MiseColors.brand} />
             </Pressable>

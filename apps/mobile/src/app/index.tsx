@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,6 +12,7 @@ import { useAuthRedirect } from '@/hooks/use-auth-redirect';
 import { useSession } from '@/lib/auth-client';
 
 export default function WelcomeScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { data: session, isPending } = useSession();
 
@@ -39,21 +41,34 @@ export default function WelcomeScreen() {
       </View>
 
       <View style={styles.collage}>
-        <PhotoPlaceholder color={MiseColors.gold} style={styles.collageTall} iconSize={40} />
+        <PhotoPlaceholder
+          color={MiseColors.gold}
+          style={styles.collageTall}
+          iconSize={40}
+          source={require('@/assets/images/welcome/pasta.jpg')}
+        />
         <View style={styles.collageColumn}>
-          <PhotoPlaceholder color={MiseColors.brand} style={styles.collageSmall} iconSize={28} />
-          <PhotoPlaceholder color={MiseColors.success} style={styles.collageSmall} iconSize={28} />
+          <PhotoPlaceholder
+            color={MiseColors.brand}
+            style={styles.collageSmall}
+            iconSize={28}
+            source={require('@/assets/images/welcome/tomatoes.jpg')}
+          />
+          <PhotoPlaceholder
+            color={MiseColors.success}
+            style={styles.collageSmall}
+            iconSize={28}
+            source={require('@/assets/images/welcome/herbs.jpg')}
+          />
         </View>
       </View>
 
-      <Text style={styles.title}>Cook, plan &{'\n'}shop — together.</Text>
-      <Text style={styles.subtitle}>
-        Save recipes from anywhere, build your week, and never forget an ingredient.
-      </Text>
+      <Text style={styles.title}>{t('auth.welcomeTitle')}</Text>
+      <Text style={styles.subtitle}>{t('auth.welcomeSubtitle')}</Text>
 
       <View style={styles.ctas}>
-        <Button label="Get started — it's free" onPress={() => router.push('/register')} />
-        <Button label="I already have an account" variant="secondary" onPress={() => router.push('/login')} />
+        <Button label={t('auth.getStarted')} onPress={() => router.push('/register')} />
+        <Button label={t('auth.haveAccount')} variant="secondary" onPress={() => router.push('/login')} />
       </View>
     </ScrollView>
   );

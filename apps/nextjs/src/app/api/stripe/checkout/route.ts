@@ -72,8 +72,8 @@ export async function POST(request: Request) {
     billing_address_collection: "auto",
     customer: billingState.customerId ?? undefined,
     customer_email: billingState.customerId ? undefined : user.email,
-    success_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billing=checkout-success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/settings?billing=checkout-cancelled`,
+    success_url: `${env.NEXT_PUBLIC_APP_URL}/billing?billing=checkout-success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${env.NEXT_PUBLIC_APP_URL}/billing?billing=checkout-cancelled`,
     metadata: {
       user_id: user.id,
       intent: parsed.data.intent,

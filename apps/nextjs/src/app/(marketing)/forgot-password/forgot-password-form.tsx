@@ -18,12 +18,14 @@ import {
 } from "@/components/ui/form";
 import { client } from "@/lib/auth-client";
 import { env } from "@/env";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   email: z.email(),
 });
 
 export function ForgotPasswordForm() {
+  const { t } = useTranslation();
   const [submitted, setSubmitted] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,14 +47,13 @@ export function ForgotPasswordForm() {
       <div className="flex items-center justify-center p-4">
         <div className="w-full max-w-md space-y-4 rounded-xl bg-white p-8 text-center shadow-lg">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Check your email
+            {t("forgotPassword.checkEmailTitle")}
           </h1>
           <p className="text-muted-foreground">
-            If that email is registered, we&apos;ve sent a link to reset your
-            password.
+            {t("forgotPassword.checkEmailBody")}
           </p>
           <Link href="/login" className="inline-block underline">
-            Back to login
+            {t("forgotPassword.backToLogin")}
           </Link>
         </div>
       </div>
@@ -64,10 +65,10 @@ export function ForgotPasswordForm() {
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">
-            Reset your password
+            {t("forgotPassword.title")}
           </h1>
           <p className="text-muted-foreground">
-            Enter your email and we&apos;ll send you a reset link
+            {t("forgotPassword.subtitle")}
           </p>
         </div>
 
@@ -78,9 +79,9 @@ export function ForgotPasswordForm() {
               name="email"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("forgotPassword.emailLabel")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="test@example.com" {...field} />
+                    <Input placeholder={t("forgotPassword.emailPlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,14 +91,14 @@ export function ForgotPasswordForm() {
               type="submit"
               className="w-full bg-black text-white hover:bg-black/90"
             >
-              Send reset link
+              {t("forgotPassword.submit")}
             </Button>
           </form>
         </Form>
 
         <p className="text-center text-sm text-muted-foreground">
           <Link href="/login" className="underline">
-            Back to login
+            {t("forgotPassword.backToLogin")}
           </Link>
         </p>
       </div>

@@ -19,6 +19,7 @@ import {
 import { signIn } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 const formSchema = z.object({
   email: z.email(),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+  const { t } = useTranslation();
   const router = useRouter();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -39,14 +41,14 @@ export function LoginForm() {
     await signIn.email({
       email: values.email,
       password: values.password,
-      callbackURL: "/dashboard",
+      callbackURL: "/billing",
       fetchOptions: {
         onSuccess: () => {
-          router.push("/dashboard");
+          router.push("/billing");
         },
         onError: (error) => {
           if (error.error.message === "Email not verified") {
-            toast.error("Check your email to verify your account — we just sent a new link.");
+            toast.error(t("login.verifyEmailToast"));
             return;
           }
           toast.error(error.error.message);
@@ -59,8 +61,8 @@ export function LoginForm() {
     <div className="flex items-center justify-center p-4">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-8 shadow-lg">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome</h1>
-          <p className="text-muted-foreground">Log in to your account</p>
+          <h1 className="text-2xl font-semibold tracking-tight">{t("login.title")}</h1>
+          <p className="text-muted-foreground">{t("login.subtitle")}</p>
         </div>
 
         <Form {...form}>
@@ -70,9 +72,9 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("login.emailLabel")}</FormLabel>
                   <FormControl>
-                    <Input placeholder="test@example.com" {...field} />
+                    <Input placeholder={t("login.emailPlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -83,7 +85,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem className="space-y-2">
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t("login.passwordLabel")}</FormLabel>
                   <FormControl>
                     <Input type="password" {...field} />
                   </FormControl>
@@ -93,22 +95,22 @@ export function LoginForm() {
             />
             <div className="text-right text-sm">
               <Link href="/forgot-password" className="underline">
-                Forgot password?
+                {t("login.forgotPassword")}
               </Link>
             </div>
             <Button
               type="submit"
               className="w-full bg-black text-white hover:bg-black/90"
             >
-              Login
+              {t("login.submit")}
             </Button>
           </form>
         </Form>
 
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("login.noAccount")}
           <Link href="/register" className="underline">
-            Sign up
+            {t("login.signUp")}
           </Link>
         </p>
       </div>

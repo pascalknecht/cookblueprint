@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { mobileWebDevOrigins } from "@/lib/mobile-dev-origins";
 
-const PROTECTED_PREFIXES = ["/dashboard", "/settings"];
+const PROTECTED_PREFIXES = ["/billing"];
 const LOGIN_PATH = "/login";
 
 function corsHeaders(origin: string | null): Record<string, string> | null {
@@ -50,5 +50,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/settings/:path*", "/api/:path*"],
+  matcher: ["/billing/:path*", "/api/:path*"],
 };

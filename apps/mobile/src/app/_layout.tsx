@@ -15,6 +15,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
+import { I18nextProvider } from 'react-i18next';
 import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -22,6 +23,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Toast } from '@/components/mise/toast';
 import { MiseColors } from '@/constants/theme';
 import { useHideSplashWhenReady } from '@/hooks/use-hide-splash-when-ready';
+import i18n from '@/lib/i18n';
 import { ToastProvider } from '@/store/toast';
 
 SplashScreen.preventAutoHideAsync();
@@ -51,31 +53,36 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <QueryClientProvider client={queryClient}>
-        <SafeAreaProvider>
-          <ToastProvider>
-            <View style={{ flex: 1, backgroundColor: MiseColors.background }}>
-              <StatusBar style="dark" />
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="index" />
-                <Stack.Screen name="login" />
-                <Stack.Screen name="register" />
-                <Stack.Screen name="forgot-password" />
-                <Stack.Screen name="(tabs)" />
-                <Stack.Screen name="recipe/[id]" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="import" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="manual" options={{ animation: 'slide_from_right' }} />
-                <Stack.Screen name="add-recipe-sheet" options={modalScreenOptions} />
-                <Stack.Screen name="share-sheet" options={modalScreenOptions} />
-                <Stack.Screen name="pick-recipe" options={modalScreenOptions} />
-                <Stack.Screen name="plan-options" options={modalScreenOptions} />
-                <Stack.Screen name="invite" options={modalScreenOptions} />
-              </Stack>
-              <Toast />
-            </View>
-          </ToastProvider>
-        </SafeAreaProvider>
-      </QueryClientProvider>
+      <I18nextProvider i18n={i18n}>
+        <QueryClientProvider client={queryClient}>
+          <SafeAreaProvider>
+            <ToastProvider>
+              <View style={{ flex: 1, backgroundColor: MiseColors.background }}>
+                <StatusBar style="dark" />
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="login" />
+                  <Stack.Screen name="register" />
+                  <Stack.Screen name="forgot-password" />
+                  <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="recipe/[id]" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="import" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="manual" options={{ animation: 'slide_from_right' }} />
+                  <Stack.Screen name="add-recipe-sheet" options={modalScreenOptions} />
+                  <Stack.Screen name="quick-add-sheet" options={modalScreenOptions} />
+                  <Stack.Screen name="share-sheet" options={modalScreenOptions} />
+                  <Stack.Screen name="pick-recipe" options={modalScreenOptions} />
+                  <Stack.Screen name="edit-meal" options={modalScreenOptions} />
+                  <Stack.Screen name="plan-options" options={modalScreenOptions} />
+                  <Stack.Screen name="invite" options={modalScreenOptions} />
+                  <Stack.Screen name="add-shopping-item" options={modalScreenOptions} />
+                </Stack>
+                <Toast />
+              </View>
+            </ToastProvider>
+          </SafeAreaProvider>
+        </QueryClientProvider>
+      </I18nextProvider>
     </GestureHandlerRootView>
   );
 }

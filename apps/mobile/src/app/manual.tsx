@@ -1,17 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/mise/button';
 import { IconButton } from '@/components/mise/icon-button';
 import { TextField } from '@/components/mise/text-field';
+import { ALL_RECIPE_FREQUENCIES, DEFAULT_RECIPE_FREQUENCY, type RecipeFrequency } from '@/constants/recipe-frequency';
 import { BackIconName, MiseColors, MiseFonts, MiseRadius, RecipeAccentColors } from '@/constants/theme';
 import { useCreateRecipe } from '@/hooks/use-recipes';
 import { useToast } from '@/store/toast';
 
 export default function ManualScreen() {
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const createRecipeMutation = useCreateRecipe();
   const { showToast } = useToast();
@@ -19,6 +22,7 @@ export default function ManualScreen() {
   const [time, setTime] = useState('');
   const [servings, setServings] = useState('');
   const [ing, setIng] = useState('');
+  const [frequency, setFrequency] = useState<RecipeFrequency>(DEFAULT_RECIPE_FREQUENCY);
 
   function handleSave() {
     const ingredients = ing
@@ -29,18 +33,19 @@ export default function ManualScreen() {
 
     createRecipeMutation.mutate(
       {
-        title: title || 'My Recipe',
+        title: title || t('manualRecipe.defaultTitle'),
         color: RecipeAccentColors[5],
+        frequency,
         time: Number(time) || 20,
         servings: Number(servings) || 2,
         kcal: '—',
-        tags: ['My recipe'],
-        ingredients: ingredients.length ? ingredients : [{ n: 'Add ingredients', q: '', cat: 'Pantry' }],
-        steps: ['Add your method steps.'],
+        tags: [t('manualRecipe.defaultTag')],
+        ingredients: ingredients.length ? ingredients : [{ n: t('manualRecipe.defaultIngredient'), q: '', cat: 'Pantry' }],
+        steps: [t('manualRecipe.defaultStep')],
       },
       {
         onSuccess: () => {
-          showToast('Recipe added');
+          showToast(t('manualRecipe.addedToast'));
           router.replace('/(tabs)/recipes');
         },
         onError: (error) => showToast(error.message),
@@ -53,44 +58,67 @@ export default function ManualScreen() {
       style={styles.screen}
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 40 }]}>
       <IconButton name={BackIconName} onPress={() => router.back()} style={styles.back} />
-      <Text style={styles.title}>New recipe</Text>
+      <Text style={styles.title}>{t('manualRecipe.title')}</Text>
 
       <View style={styles.photoBox}>
         <Ionicons name="camera-outline" size={26} color={MiseColors.mutedLight} />
-        <Text style={styles.photoLabel}>Add a photo</Text>
+        <Text style={styles.photoLabel}>{t('manualRecipe.addPhoto')}</Text>
       </View>
 
-      <TextField label="Title" value={title} onChangeText={setTitle} placeholder="Grandma's lasagna" containerStyle={styles.field} />
+      <TextField
+        label={t('manualRecipe.titleLabel')}
+        value={title}
+        onChangeText={setTitle}
+        placeholder={t('manualRecipe.titlePlaceholder')}
+        containerStyle={styles.field}
+      />
 
       <View style={styles.row}>
         <TextField
-          label="Time (min)"
+          label={t('manualRecipe.timeLabel')}
           value={time}
           onChangeText={setTime}
-          placeholder="45"
+          placeholder={t('manualRecipe.timePlaceholder')}
           keyboardType="number-pad"
           containerStyle={styles.rowField}
         />
         <TextField
-          label="Serves"
+          label={t('manualRecipe.servesLabel')}
           value={servings}
           onChangeText={setServings}
-          placeholder="4"
+          placeholder={t('manualRecipe.servesPlaceholder')}
           keyboardType="number-pad"
           containerStyle={styles.rowField}
         />
       </View>
 
       <TextField
-        label="Ingredients (one per line)"
+        label={t('manualRecipe.ingredientsLabel')}
         value={ing}
         onChangeText={setIng}
-        placeholder={'2 slices sourdough\n1 avocado\n2 eggs'}
+        placeholder={t('manualRecipe.ingredientsPlaceholder')}
         multiline
         containerStyle={styles.field}
       />
 
-      <Button label="Save recipe" onPress={handleSave} loading={createRecipeMutation.isPending} />
+      <Text style={styles.frequencyLabel}>{t('manualRecipe.frequencyQuestion')}</Text>
+      <View style={styles.frequencyChips}>
+        {ALL_RECIPE_FREQUENCIES.map((option) => {
+          const active = option === frequency;
+          return (
+            <Pressable
+              key={option}
+              onPress={() => setFrequency(option)}
+              style={[styles.frequencyChip, active && styles.frequencyChipActive]}>
+              <Text style={[styles.frequencyChipLabel, active && styles.frequencyChipLabelActive]}>
+                {t(`recipeFrequency.${option}`)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <Button label={t('manualRecipe.saveRecipe')} onPress={handleSave} loading={createRecipeMutation.isPending} />
     </ScrollView>
   );
 }
@@ -116,4 +144,22 @@ const styles = StyleSheet.create({
   field: { marginBottom: 14 },
   row: { flexDirection: 'row', gap: 12, marginBottom: 14 },
   rowField: { flex: 1 },
+  frequencyLabel: {
+    fontFamily: MiseFonts.bodySemiBold,
+    fontSize: 13,
+    color: MiseColors.inkSoft,
+    marginBottom: 8,
+  },
+  frequencyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 22 },
+  frequencyChip: {
+    backgroundColor: MiseColors.card,
+    borderWidth: 1,
+    borderColor: MiseColors.borderFaint,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  frequencyChipActive: { backgroundColor: MiseColors.near, borderColor: MiseColors.near },
+  frequencyChipLabel: { fontFamily: MiseFonts.bodySemiBold, fontSize: 13, color: MiseColors.inkSoft },
+  frequencyChipLabelActive: { color: '#fff' },
 });

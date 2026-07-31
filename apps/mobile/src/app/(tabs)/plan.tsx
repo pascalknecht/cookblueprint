@@ -1,19 +1,29 @@
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/mise/button';
+import { IconButton } from '@/components/mise/icon-button';
+import { type MealType } from '@/constants/meal-types';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
-import { MEAL_DEFS, MealType, useMealPlan } from '@/hooks/use-meal-plan';
-import type { Recipe } from '@/hooks/use-recipes';
+import { useMealPlan, type MealPlanEntry } from '@/hooks/use-meal-plan';
+import { useEnabledMealTypes } from '@/hooks/use-organization-settings';
 import { useAddMealPlanToShoppingList } from '@/hooks/use-shopping-list';
 import { dayOfMonth, formatWeekRange, getCurrentWeekDates, isSameDate, toISODate, weekdayShort } from '@/lib/date-utils';
 import { useToast } from '@/store/toast';
 
 export default function PlanScreen() {
+  const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
-  const weekDates = useMemo(() => getCurrentWeekDates(), []);
+  const [weekOffset, setWeekOffset] = useState(0);
+  const weekDates = useMemo(() => {
+    const reference = new Date();
+    reference.setDate(reference.getDate() + weekOffset * 7);
+    return getCurrentWeekDates(reference);
+  }, [weekOffset]);
   const startDate = weekDates[0];
   const endDate = weekDates[weekDates.length - 1];
   const { data: entries = [] } = useMealPlan({ startDate, endDate });
@@ -21,12 +31,25 @@ export default function PlanScreen() {
   const { showToast } = useToast();
   const today = new Date();
 
+  const weekLabel =
+    weekOffset === 0
+      ? t('planScreen.eyebrow')
+      : weekOffset === 1
+        ? t('planScreen.nextWeek')
+        : weekOffset === -1
+          ? t('planScreen.lastWeek')
+          : weekOffset > 1
+            ? t('planScreen.weeksAhead', { count: weekOffset })
+            : t('planScreen.weeksAgo', { count: -weekOffset });
+
+  const mealTypes = useEnabledMealTypes();
+
   const entriesByDate = useMemo(() => {
-    const map = new Map<string, Map<MealType, Recipe>>();
+    const map = new Map<string, Map<MealType, MealPlanEntry>>();
     for (const entry of entries) {
       const dateKey = toISODate(new Date(entry.date));
       if (!map.has(dateKey)) map.set(dateKey, new Map());
-      map.get(dateKey)!.set(entry.mealType, entry.recipe);
+      map.get(dateKey)!.set(entry.mealType, entry);
     }
     return map;
   }, [entries]);
@@ -35,7 +58,7 @@ export default function PlanScreen() {
     addWeekToListMutation.mutate(
       { startDate, endDate },
       {
-        onSuccess: () => showToast('Added week to shopping list'),
+        onSuccess: () => showToast(t('planScreen.addedWeekToList')),
         onError: (error) => showToast(error.message),
       },
     );
@@ -45,21 +68,38 @@ export default function PlanScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 108 }}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.eyebrow}>This week</Text>
-          <Text style={styles.title}>Meal plan</Text>
+          <Text style={styles.eyebrow}>{weekLabel}</Text>
+          <Text style={styles.title}>{t('planScreen.title')}</Text>
         </View>
-        <Text style={styles.range}>{formatWeekRange(weekDates)}</Text>
+      </View>
+
+      <View style={styles.weekSwitcher}>
+        <IconButton name="chevron-back" size={44} onPress={() => setWeekOffset((offset) => offset - 1)} />
+        <View style={styles.weekSwitcherCenter}>
+          <Text style={styles.range}>{formatWeekRange(weekDates, i18n.language)}</Text>
+          {weekOffset !== 0 ? (
+            <Pressable hitSlop={8} onPress={() => setWeekOffset(0)}>
+              <Text style={styles.todayLinkLabel}>{t('planScreen.backToThisWeek')}</Text>
+            </Pressable>
+          ) : null}
+        </View>
+        <IconButton name="chevron-forward" size={44} onPress={() => setWeekOffset((offset) => offset + 1)} />
       </View>
 
       <View style={styles.ctaRow}>
         <Button
-          label="✨ Auto-plan week"
+          label={t('planScreen.autoPlan')}
           variant="gradient"
-          onPress={() => router.push('/plan-options')}
+          onPress={() =>
+            router.push({
+              pathname: '/plan-options',
+              params: { startDate: toISODate(startDate), endDate: toISODate(endDate) },
+            })
+          }
           style={styles.ctaGradient}
         />
         <Button
-          label="＋ List"
+          label={t('planScreen.addToList')}
           variant="secondary"
           compact
           onPress={handleAddWeekToList}
@@ -78,27 +118,39 @@ export default function PlanScreen() {
               <View style={styles.dayHeader}>
                 <View style={[styles.dayBadge, isToday && styles.dayBadgeToday]}>
                   <Text style={[styles.dayBadgeLabel, isToday && styles.dayBadgeLabelToday]}>
-                    {weekdayShort(date)}
+                    {weekdayShort(date, i18n.language)}
                   </Text>
                   <Text style={[styles.dayBadgeDate, isToday && styles.dayBadgeLabelToday]}>{dayOfMonth(date)}</Text>
                 </View>
                 {isToday ? (
                   <View style={styles.todayPill}>
-                    <Text style={styles.todayPillLabel}>TODAY</Text>
+                    <Text style={styles.todayPillLabel}>{t('planScreen.today')}</Text>
                   </View>
                 ) : null}
               </View>
 
               <View style={styles.cells}>
-                {MEAL_DEFS.map((meal) => {
-                  const recipe = dayMeals?.get(meal);
-                  if (recipe) {
+                {mealTypes.map((meal) => {
+                  const entry = dayMeals?.get(meal);
+                  if (entry) {
                     return (
                       <MealCell
                         key={meal}
                         meal={meal}
-                        recipe={recipe}
-                        onPress={() => router.push(`/recipe/${recipe.id}`)}
+                        recipe={entry.recipe}
+                        onPress={() => router.push(`/recipe/${entry.recipe.id}`)}
+                        onOptionsPress={() =>
+                          router.push({
+                            pathname: '/edit-meal',
+                            params: {
+                              date: dateISO,
+                              meal,
+                              entryId: entry.id,
+                              title: entry.recipe.title,
+                              color: entry.recipe.color,
+                            },
+                          })
+                        }
                       />
                     );
                   }
@@ -123,33 +175,45 @@ function MealCell({
   meal,
   recipe,
   onPress,
+  onOptionsPress,
 }: {
   meal: MealType;
   recipe: { title: string; color: string; time: number };
   onPress: () => void;
+  onOptionsPress: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <Pressable style={styles.cellTouchable} onPress={onPress}>
       <View style={[styles.cellSwatch, { backgroundColor: recipe.color }]} />
       <View style={styles.cellBody}>
-        <Text style={styles.cellMeal}>{meal}</Text>
+        <Text style={styles.cellMeal}>{t(`mealTypes.${meal}`)}</Text>
         <Text style={styles.cellTitle} numberOfLines={1}>
           {recipe.title}
         </Text>
       </View>
-      <Text style={styles.cellTime}>{recipe.time}m</Text>
+      <Text style={styles.cellTime}>{t('planScreen.minutesShort', { count: recipe.time })}</Text>
+      <Pressable
+        hitSlop={8}
+        onPress={(e) => {
+          e.stopPropagation();
+          onOptionsPress();
+        }}
+        style={styles.cellOptions}>
+        <Ionicons name="ellipsis-horizontal" size={16} color={MiseColors.mutedLight} />
+      </Pressable>
     </Pressable>
   );
 }
 
 function EmptyMealCell({ meal, onPress }: { meal: MealType; onPress: () => void }) {
-  const label = meal.charAt(0).toUpperCase() + meal.slice(1);
+  const { t } = useTranslation();
   return (
     <Pressable style={styles.emptyCell} onPress={onPress}>
       <View style={styles.emptyIcon}>
         <Text style={styles.emptyIconLabel}>＋</Text>
       </View>
-      <Text style={styles.emptyLabel}>Add {label}</Text>
+      <Text style={styles.emptyLabel}>{t('planScreen.addMeal', { meal: t(`mealTypes.${meal}`) })}</Text>
     </Pressable>
   );
 }
@@ -157,17 +221,23 @@ function EmptyMealCell({ meal, onPress }: { meal: MealType; onPress: () => void 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
   header: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
     paddingHorizontal: 22,
     paddingBottom: 8,
   },
   eyebrow: { fontFamily: MiseFonts.bodySemiBold, fontSize: 13, color: MiseColors.muted },
   title: { fontFamily: MiseFonts.display, fontSize: 32, color: MiseColors.ink, marginTop: 2 },
-  range: { fontFamily: MiseFonts.bodySemiBold, fontSize: 12.5, color: MiseColors.muted },
-  ctaRow: { flexDirection: 'row', gap: 10, paddingHorizontal: 22, paddingVertical: 14 },
-  ctaGradient: { flex: 1 },
+  range: { fontFamily: MiseFonts.bodySemiBold, fontSize: 15, color: MiseColors.ink },
+  weekSwitcher: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 22,
+    paddingVertical: 10,
+  },
+  weekSwitcherCenter: { alignItems: 'center', gap: 4 },
+  todayLinkLabel: { fontFamily: MiseFonts.bodyBold, fontSize: 12.5, color: MiseColors.brand },
+  ctaRow: { flexDirection: 'column', gap: 10, paddingHorizontal: 22, paddingVertical: 14 },
+  ctaGradient: {},
   week: { paddingHorizontal: 22, gap: 14 },
   dayHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   dayBadge: {
@@ -210,6 +280,7 @@ const styles = StyleSheet.create({
   },
   cellTitle: { fontFamily: MiseFonts.bodyBold, fontSize: 14, color: MiseColors.ink },
   cellTime: { fontSize: 12, color: '#C9BEB0', fontFamily: MiseFonts.body },
+  cellOptions: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center' },
   emptyCell: {
     flexDirection: 'row',
     alignItems: 'center',

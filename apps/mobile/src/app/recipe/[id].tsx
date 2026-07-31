@@ -1,32 +1,35 @@
+import { FadingView, Header, ScrollViewWithHeaders } from '@codeherence/react-native-header';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated, { Extrapolation, interpolate, type SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/mise/button';
 import { IconButton } from '@/components/mise/icon-button';
 import { PhotoPlaceholder } from '@/components/mise/photo-placeholder';
 import { MiseSpinner } from '@/components/mise/spinner';
+import { RECIPE_TAG_KEY } from '@/constants/recipe-tags';
 import { BackIconName, MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useAddRecipeToShoppingList } from '@/hooks/use-shopping-list';
-import { useRecipe } from '@/hooks/use-recipes';
+import { useRecipe, type Recipe } from '@/hooks/use-recipes';
 import { toISODate } from '@/lib/date-utils';
 import { useToast } from '@/store/toast';
 
 export default function RecipeDetailScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { data: recipe, isPending, isError } = useRecipe(id);
   const addToListMutation = useAddRecipeToShoppingList();
   const { showToast } = useToast();
-  const [saved, setSaved] = useState(false);
 
   if (isError) {
     return (
       <View style={[styles.screen, styles.loading]}>
-        <Text style={styles.errorText}>This recipe couldn&apos;t be found.</Text>
-        <Button label="Go back" onPress={() => router.back()} />
+        <Text style={styles.errorText}>{t('recipeDetail.notFound')}</Text>
+        <Button label={t('recipeDetail.goBack')} onPress={() => router.back()} />
       </View>
     );
   }
@@ -41,56 +44,52 @@ export default function RecipeDetailScreen() {
 
   function handleAddToList() {
     addToListMutation.mutate(id, {
-      onSuccess: () => showToast('Added to shopping list'),
+      onSuccess: () => showToast(t('recipeDetail.addedToast')),
       onError: (error) => showToast(error.message),
     });
   }
 
   return (
     <View style={styles.screen}>
-      <ScrollView contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}>
-        <View style={[styles.hero, { backgroundColor: recipe.color }]}>
-          <PhotoPlaceholder color={recipe.color} style={StyleSheet.absoluteFill} iconSize={48} />
-          <LinearGradient
-            colors={['rgba(20,10,30,0.35)', 'rgba(20,10,30,0)', 'rgba(20,10,30,0.55)']}
-            locations={[0, 0.3, 1]}
-            style={StyleSheet.absoluteFill}
+      <ScrollViewWithHeaders
+        absoluteHeader
+        initialAbsoluteHeaderHeight={0}
+        contentContainerStyle={{ paddingTop: 0, paddingBottom: insets.bottom + 100 }}
+        HeaderComponent={({ showNavBar }) => (
+          <Header
+            showNavBar={showNavBar}
+            noBottomBorder
+            headerLeft={
+              <IconButton
+                name={BackIconName}
+                variant="translucent"
+                size={38}
+                onPress={() => router.back()}
+              />
+            }
+            headerCenter={
+              <Text style={styles.headerBarTitle} numberOfLines={1}>
+                {recipe.title}
+              </Text>
+            }
+            SurfaceComponent={({ showNavBar: navBar }) => (
+              <FadingView opacity={navBar} style={[StyleSheet.absoluteFill, styles.headerBarSurface]} />
+            )}
           />
-          <IconButton
-            name={BackIconName}
-            variant="translucent"
-            onPress={() => router.back()}
-            style={[styles.heroButton, { top: insets.top + 14, left: 18 }]}
-          />
-          <IconButton
-            name={saved ? 'heart' : 'heart-outline'}
-            variant="translucent"
-            color={saved ? MiseColors.brand : MiseColors.ink}
-            onPress={() => setSaved((v) => !v)}
-            style={[styles.heroButton, { top: insets.top + 14, right: 18 }]}
-          />
-          <View style={styles.heroFooter}>
-            <View style={styles.tagRow}>
-              {recipe.tags.map((tag) => (
-                <Text key={tag} style={styles.tag}>
-                  {tag}
-                </Text>
-              ))}
-            </View>
-            <Text style={styles.heroTitle}>{recipe.title}</Text>
-          </View>
-        </View>
-
+        )}
+        LargeHeaderComponent={({ scrollY }) => <RecipeHero recipe={recipe} scrollY={scrollY} />}>
         <View style={styles.content}>
           <View style={styles.statsRow}>
-            <StatBox label="TIME" value={`${recipe.time} min`} />
-            <StatBox label="SERVES" value={String(recipe.servings)} />
-            <StatBox label="KCAL" value={String(recipe.kcal)} />
+            <StatBox label={t('recipeDetail.time')} value={t('recipeDetail.timeValue', { count: recipe.time })} />
+            <StatBox label={t('recipeDetail.serves')} value={String(recipe.servings)} />
+            <StatBox label={t('recipeDetail.kcal')} value={String(recipe.kcal)} />
           </View>
 
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Ingredients</Text>
-            <Text style={styles.sectionMeta}>{recipe.ingredients.length} items</Text>
+            <Text style={styles.sectionTitle}>{t('recipeDetail.ingredients')}</Text>
+            <Text style={styles.sectionMeta}>
+              {t('recipeDetail.itemsCount', { count: recipe.ingredients.length })}
+            </Text>
           </View>
           <View style={styles.ingredientsCard}>
             {recipe.ingredients.map((ing, index) => (
@@ -104,7 +103,7 @@ export default function RecipeDetailScreen() {
             ))}
           </View>
 
-          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>Method</Text>
+          <Text style={[styles.sectionTitle, { marginBottom: 10 }]}>{t('recipeDetail.method')}</Text>
           <View style={styles.steps}>
             {recipe.steps.map((step, index) => (
               <View key={step} style={styles.stepRow}>
@@ -116,14 +115,14 @@ export default function RecipeDetailScreen() {
             ))}
           </View>
         </View>
-      </ScrollView>
+      </ScrollViewWithHeaders>
 
       <LinearGradient
         colors={['rgba(251,246,239,0)', MiseColors.background]}
         locations={[0, 0.34]}
         style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
         <Button
-          label="＋ Add to shopping list"
+          label={t('recipeDetail.addToList')}
           onPress={handleAddToList}
           loading={addToListMutation.isPending}
           style={{ flex: 1 }}
@@ -141,6 +140,54 @@ export default function RecipeDetailScreen() {
   );
 }
 
+const HERO_HEIGHT = 300;
+
+function RecipeHero({ recipe, scrollY }: { recipe: Recipe; scrollY: SharedValue<number> }) {
+  const { t } = useTranslation();
+  const parallaxStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(
+      scrollY.value,
+      [-HERO_HEIGHT, 0, HERO_HEIGHT],
+      [0, 0, HERO_HEIGHT * 0.5],
+      Extrapolation.CLAMP,
+    );
+    const scale = interpolate(scrollY.value, [-HERO_HEIGHT, 0, HERO_HEIGHT], [2, 1, 1], Extrapolation.CLAMP);
+    return { transform: [{ translateY }, { scale }] };
+  });
+
+  return (
+    <View style={[styles.hero, { backgroundColor: recipe.color }]}>
+      <Animated.View style={[StyleSheet.absoluteFill, parallaxStyle]}>
+        <PhotoPlaceholder
+          color={recipe.color}
+          style={StyleSheet.absoluteFill}
+          iconSize={48}
+          source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}
+        />
+        <LinearGradient
+          colors={['rgba(20,10,30,0.35)', 'rgba(20,10,30,0)', 'rgba(20,10,30,0.55)']}
+          locations={[0, 0.3, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+      <View style={styles.heroFooter}>
+        <View style={styles.tagRow}>
+          {recipe.tags.map((tag) => {
+            const key = RECIPE_TAG_KEY[tag];
+            return (
+              <Text key={tag} style={styles.tag}>
+                {key ? t(`recipeTags.${key}`) : tag}
+              </Text>
+            );
+          })}
+          <Text style={styles.tag}>{t(`recipeFrequency.${recipe.frequency}`)}</Text>
+        </View>
+        <Text style={styles.heroTitle}>{recipe.title}</Text>
+      </View>
+    </View>
+  );
+}
+
 function StatBox({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.statBox}>
@@ -154,9 +201,10 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
   loading: { alignItems: 'center', justifyContent: 'center', gap: 16 },
   errorText: { fontFamily: MiseFonts.body, fontSize: 15, color: MiseColors.muted },
-  hero: { height: 300, position: 'relative' },
-  heroButton: { position: 'absolute' },
-  heroFooter: { position: 'absolute', left: 22, right: 22, bottom: 16 },
+  headerBarTitle: { fontFamily: MiseFonts.bodyBold, fontSize: 15, color: '#fff' },
+  headerBarSurface: { backgroundColor: MiseColors.near },
+  hero: { height: HERO_HEIGHT, position: 'relative', overflow: 'hidden' },
+  heroFooter: { position: 'absolute', left: 22, right: 22, bottom: 34 },
   tagRow: { flexDirection: 'row', gap: 6, marginBottom: 8 },
   tag: {
     backgroundColor: 'rgba(255,255,255,0.9)',
@@ -175,7 +223,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: MiseRadius.xxl,
     marginTop: -16,
     paddingHorizontal: 22,
-    paddingTop: 20,
+    paddingTop: 32,
   },
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 18 },
   statBox: {
