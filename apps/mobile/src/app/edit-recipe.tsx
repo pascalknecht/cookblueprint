@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
@@ -122,24 +122,7 @@ function EditRecipeForm({
     );
   }
 
-  async function handlePickImage() {
-    // launchImageLibraryAsync handles permissions itself — on Android 13+ it
-    // uses the system Photo Picker, which needs no runtime permission at all,
-    // so pre-checking requestMediaLibraryPermissionsAsync would wrongly deny
-    // access on OSes that never needed it in the first place.
-    let result: ImagePicker.ImagePickerResult;
-    try {
-      result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-        base64: true,
-      });
-    } catch {
-      showToast(t('editRecipe.photoPermissionDenied'));
-      return;
-    }
+  function applyImageResult(result: ImagePicker.ImagePickerResult) {
     if (result.canceled) return;
 
     const asset = result.assets[0];
@@ -150,6 +133,49 @@ function EditRecipeForm({
         onError: (error) => showToast(error.message),
       },
     );
+  }
+
+  async function handleChooseFromLibrary() {
+    // launchImageLibraryAsync handles permissions itself — on Android 13+ it
+    // uses the system Photo Picker, which needs no runtime permission at all,
+    // so pre-checking requestMediaLibraryPermissionsAsync would wrongly deny
+    // access on OSes that never needed it in the first place.
+    try {
+      applyImageResult(
+        await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+          base64: true,
+        }),
+      );
+    } catch {
+      showToast(t('editRecipe.photoPermissionDenied'));
+    }
+  }
+
+  async function handleTakePhoto() {
+    try {
+      applyImageResult(
+        await ImagePicker.launchCameraAsync({
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 0.8,
+          base64: true,
+        }),
+      );
+    } catch {
+      showToast(t('editRecipe.cameraPermissionDenied'));
+    }
+  }
+
+  function handlePickImage() {
+    Alert.alert(t('editRecipe.photoSourceTitle'), undefined, [
+      { text: t('editRecipe.photoSourceCancel'), style: 'cancel' },
+      { text: t('editRecipe.photoSourceChooseLibrary'), onPress: handleChooseFromLibrary },
+      { text: t('editRecipe.photoSourceTakePhoto'), onPress: handleTakePhoto },
+    ]);
   }
 
   function handleSave() {

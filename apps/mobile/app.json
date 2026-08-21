@@ -22,10 +22,7 @@
         "backgroundColor": "#221E1B",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
-      "predictiveBackGestureEnabled": false,
-      "permissions": [
-        "android.permission.RECORD_AUDIO"
-      ]
+      "predictiveBackGestureEnabled": false
     },
     "plugins": [
       "expo-router",
@@ -46,6 +43,12 @@
             "resizeMode": "cover",
             "backgroundColor": "#9E3F2C"
           }
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "style": "dark"
         }
       ],
       "expo-web-browser",
@@ -102,7 +105,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "CookBlueprint uses your photo library to let you set a recipe's photo."
+          "photosPermission": "CookBlueprint uses your photo library to let you set a recipe's photo.",
+          "cameraPermission": "CookBlueprint uses your camera to let you take a recipe photo.",
+          "microphonePermission": false
         }
       ]
     ],

@@ -1,8 +1,6 @@
-import { useFocusEffect, Tabs } from 'expo-router';
-import * as NavigationBar from 'expo-navigation-bar';
-import { useCallback } from 'react';
+import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Platform, View } from 'react-native';
+import { View } from 'react-native';
 
 import { MiseTabBar } from '@/components/mise/tab-bar';
 import { useAuthRedirect } from '@/hooks/use-auth-redirect';
@@ -26,16 +24,6 @@ export default function TabsLayout() {
   // Mirrors local trial data into the iOS widget's shared storage — Android's
   // widget reads local-db directly and needs no such syncing.
   useSyncWidgetTrialData(!!isTrial);
-
-  useFocusEffect(
-    useCallback(() => {
-      if (Platform.OS !== 'android') return;
-      NavigationBar.setVisibilityAsync('hidden');
-      return () => {
-        NavigationBar.setVisibilityAsync('visible');
-      };
-    }, [])
-  );
 
   return (
     <View style={{ flex: 1 }}>
