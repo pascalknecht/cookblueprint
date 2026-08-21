@@ -4,10 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { EmptyState } from '@/components/mise/empty-state';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useAssignMeal, type MealType } from '@/hooks/use-meal-plan';
 import { useRecipes, type Recipe } from '@/hooks/use-recipes';
+import { usePressFeedback } from '@/hooks/usePressFeedback';
 import { useToast } from '@/store/toast';
 
 export default function PickRecipeScreen() {
@@ -40,19 +42,25 @@ export default function PickRecipeScreen() {
           ListEmptyComponent={
             <EmptyState icon="restaurant-outline" title={t('pickRecipe.emptyTitle')} subtitle={t('pickRecipe.emptySubtitle')} />
           }
-          renderItem={({ item }) => (
-            <Pressable onPress={() => pick(item)} style={styles.row}>
-              <View style={[styles.swatch, { backgroundColor: item.color }]} />
-              <View style={styles.rowBody}>
-                <Text style={styles.rowTitle}>{item.title}</Text>
-                <Text style={styles.rowMeta}>{t('pickRecipe.rowMeta', { time: item.time, servings: item.servings })}</Text>
-              </View>
-              <Ionicons name="add-circle" size={22} color={MiseColors.brand} />
-            </Pressable>
-          )}
+          renderItem={({ item }) => <PickRecipeRow recipe={item} onPress={() => pick(item)} />}
         />
       </View>
     </View>
+  );
+}
+
+function PickRecipeRow({ recipe, onPress }: { recipe: Recipe; onPress: () => void }) {
+  const { t } = useTranslation();
+  const { onPressIn, onPressOut, style: pressStyle } = usePressFeedback();
+  return (
+    <AnimatedPressable style={[styles.row, pressStyle]} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+      <View style={[styles.swatch, { backgroundColor: recipe.color }]} />
+      <View style={styles.rowBody}>
+        <Text style={styles.rowTitle}>{recipe.title}</Text>
+        <Text style={styles.rowMeta}>{t('pickRecipe.rowMeta', { time: recipe.time, servings: recipe.servings })}</Text>
+      </View>
+      <Ionicons name="add-circle" size={22} color={MiseColors.brand} />
+    </AnimatedPressable>
   );
 }
 
@@ -73,7 +81,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: 12,
   },
-  title: { fontFamily: MiseFonts.display, fontSize: 24, color: MiseColors.ink, paddingHorizontal: 22, marginBottom: 12 },
+  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 24, color: MiseColors.ink, paddingHorizontal: 22, marginBottom: 12 },
   list: { paddingHorizontal: 22, paddingBottom: 24 },
   row: {
     flexDirection: 'row',

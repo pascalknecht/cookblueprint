@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { FadeIn, LinearTransition, ZoomIn, ZoomOut } from 'react-native-reanimated';
+import Animated, { FadeIn, ZoomIn, ZoomOut } from 'react-native-reanimated';
 
 import { SHOPPING_CATEGORY_COLOR, SHOPPING_CATEGORY_ICON, type ShoppingCategory } from '@/constants/shopping-categories';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
+import { useReducedMotionFlag } from '@/lib/motion';
 
 const COMPLETE_HOLD_MS = 480;
 
@@ -18,6 +19,7 @@ type ShoppingTileProps = {
 
 export function ShoppingTile({ name, category, quantity, checked, onPress }: ShoppingTileProps) {
   const [completing, setCompleting] = useState(false);
+  const reduced = useReducedMotionFlag();
   const done = checked || completing;
   const tint = done ? MiseColors.mutedLight : SHOPPING_CATEGORY_COLOR[category];
 
@@ -30,9 +32,8 @@ export function ShoppingTile({ name, category, quantity, checked, onPress }: Sho
   return (
     <Animated.View
       style={styles.tile}
-      entering={FadeIn.duration(220)}
-      exiting={ZoomOut.duration(220)}
-      layout={LinearTransition.springify().damping(16).stiffness(200)}>
+      entering={reduced ? undefined : FadeIn.duration(220)}
+      exiting={reduced ? undefined : ZoomOut.duration(220)}>
       <Pressable onPress={handlePress} disabled={completing} style={[styles.pressable, { backgroundColor: tint }]}>
         <Ionicons name={SHOPPING_CATEGORY_ICON[category]} size={26} color="rgba(255,255,255,0.92)" />
         <Text style={styles.name} numberOfLines={2}>
@@ -41,8 +42,10 @@ export function ShoppingTile({ name, category, quantity, checked, onPress }: Sho
         {quantity ? <Text style={styles.quantity}>{quantity}</Text> : null}
 
         {completing ? (
-          <Animated.View entering={FadeIn.duration(120)} style={styles.completeOverlay}>
-            <Animated.View entering={ZoomIn.springify().damping(11).stiffness(260)} style={styles.completeCircle}>
+          <Animated.View entering={reduced ? undefined : FadeIn.duration(120)} style={styles.completeOverlay}>
+            <Animated.View
+              entering={reduced ? undefined : ZoomIn.springify().damping(11).stiffness(260)}
+              style={styles.completeCircle}>
               <Ionicons name="checkmark" size={26} color={MiseColors.mutedLight} />
             </Animated.View>
           </Animated.View>

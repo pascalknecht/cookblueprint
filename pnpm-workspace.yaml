@@ -1,7 +1,6 @@
 packages:
   - apps/*
-  # Uncomment when you add shared packages:
-  # - packages/*
+  - packages/*
 onlyBuiltDependencies:
   - "@prisma/client"
   - "@prisma/engines"

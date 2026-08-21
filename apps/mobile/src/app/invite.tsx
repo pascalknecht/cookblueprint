@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/mise/button';
-import { Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet } from '@/components/mise/sheet';
 import { MiseSwitch } from '@/components/mise/switch';
 import { TextField } from '@/components/mise/text-field';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
@@ -40,10 +40,12 @@ export default function InviteScreen() {
 
   return (
     <Sheet onDismiss={() => router.back()}>
+      <BottomSheetView>
       <Text style={styles.title}>{t('invite.title')}</Text>
       <Text style={styles.subtitle}>{t('invite.subtitle')}</Text>
 
       <TextField
+        testID="invite-email-input"
         value={email}
         onChangeText={setEmail}
         placeholder={t('invite.emailPlaceholder')}
@@ -58,13 +60,19 @@ export default function InviteScreen() {
         <MiseSwitch value={canEdit} onValueChange={setCanEdit} />
       </View>
 
-      <Button label={t('invite.sendInvite')} onPress={handleSend} loading={inviteMutation.isPending} />
+      <Button
+        testID="invite-send-button"
+        label={t('invite.sendInvite')}
+        onPress={handleSend}
+        loading={inviteMutation.isPending}
+      />
+      </BottomSheetView>
     </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  title: { fontFamily: MiseFonts.display, fontSize: 25, color: MiseColors.ink, marginBottom: 4 },
+  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 25, color: MiseColors.ink, marginBottom: 4 },
   subtitle: { fontFamily: MiseFonts.body, fontSize: 14, lineHeight: 20, color: MiseColors.muted, marginBottom: 18 },
   field: { marginBottom: 12 },
   toggleRow: {

@@ -1,0 +1,10 @@
+appId: com.mise.app
+tags:
+  - offline
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "welcome-try-it-out"
+- assertVisible:
+    id: "recipes-screen"

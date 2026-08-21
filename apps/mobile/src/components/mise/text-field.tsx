@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ComponentType, ReactNode, forwardRef } from 'react';
 import { StyleProp, StyleSheet, Text, TextInput, TextInputProps, View, ViewStyle } from 'react-native';
 
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
@@ -8,15 +8,24 @@ type TextFieldProps = TextInputProps & {
   icon?: ReactNode;
   containerStyle?: StyleProp<ViewStyle>;
   multiline?: boolean;
+  // Pass @/components/mise/sheet's BottomSheetTextInput when this field lives
+  // inside a Sheet, so the sheet can track keyboard focus for auto-sizing.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  InputComponent?: ComponentType<any>;
 };
 
-export function TextField({ label, icon, containerStyle, style, multiline, ...inputProps }: TextFieldProps) {
+export const TextField = forwardRef<TextInput, TextFieldProps>(function TextField(
+  { label, icon, containerStyle, style, multiline, InputComponent, ...inputProps },
+  ref,
+) {
+  const Input: ComponentType<any> = InputComponent ?? TextInput; // eslint-disable-line @typescript-eslint/no-explicit-any
   return (
     <View style={containerStyle}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
       <View style={[styles.field, multiline && styles.fieldMultiline]}>
         {icon}
-        <TextInput
+        <Input
+          ref={ref}
           placeholderTextColor={MiseColors.mutedLight}
           style={[styles.input, multiline && styles.inputMultiline, style]}
           multiline={multiline}
@@ -25,7 +34,7 @@ export function TextField({ label, icon, containerStyle, style, multiline, ...in
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   label: {

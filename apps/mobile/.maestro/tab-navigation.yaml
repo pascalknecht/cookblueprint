@@ -1,0 +1,26 @@
+appId: com.mise.app
+tags:
+  - offline
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "welcome-try-it-out"
+- assertVisible:
+    id: "recipes-screen"
+- tapOn:
+    id: "tab-plan"
+- assertVisible:
+    id: "plan-screen"
+- tapOn:
+    id: "tab-list"
+- assertVisible:
+    id: "list-screen"
+- tapOn:
+    id: "tab-settings"
+- assertVisible:
+    id: "settings-screen"
+- tapOn:
+    id: "tab-recipes"
+- assertVisible:
+    id: "recipes-screen"

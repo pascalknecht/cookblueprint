@@ -34,24 +34,17 @@ export function isSpacesConfigured() {
 }
 
 /**
- * Downloads an image from `sourceUrl` and uploads it to the configured DigitalOcean
- * Space under `key`, returning its public CDN URL. Throws if Spaces isn't configured —
- * check `isSpacesConfigured()` first if you want a fallback instead.
+ * Uploads raw image bytes to the configured DigitalOcean Space under `key`, returning
+ * its public CDN URL. Throws if Spaces isn't configured — check `isSpacesConfigured()`
+ * first if you want a fallback instead.
  */
-export async function uploadImageFromUrl(sourceUrl: string, key: string): Promise<string> {
+export async function uploadImageBuffer(body: Buffer, contentType: string, key: string): Promise<string> {
   const s3 = getClient();
   if (!s3) {
     throw new Error(
       "DigitalOcean Spaces is not configured. Set DO_SPACES_KEY, DO_SPACES_SECRET, DO_SPACES_ENDPOINT, and DO_SPACES_BUCKET.",
     );
   }
-
-  const response = await fetch(sourceUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch source image (${response.status}): ${sourceUrl}`);
-  }
-  const contentType = response.headers.get("content-type") ?? "image/jpeg";
-  const body = Buffer.from(await response.arrayBuffer());
 
   await s3.send(
     new PutObjectCommand({
@@ -65,4 +58,15 @@ export async function uploadImageFromUrl(sourceUrl: string, key: string): Promis
 
   const cdnBase = process.env.DO_SPACES_CDN_URL ?? `${process.env.DO_SPACES_ENDPOINT}/${process.env.DO_SPACES_BUCKET}`;
   return `${cdnBase.replace(/\/$/, "")}/${key}`;
+}
+
+/** Downloads an image from `sourceUrl` and uploads it via {@link uploadImageBuffer}. */
+export async function uploadImageFromUrl(sourceUrl: string, key: string): Promise<string> {
+  const response = await fetch(sourceUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch source image (${response.status}): ${sourceUrl}`);
+  }
+  const contentType = response.headers.get("content-type") ?? "image/jpeg";
+  const body = Buffer.from(await response.arrayBuffer());
+  return uploadImageBuffer(body, contentType, key);
 }

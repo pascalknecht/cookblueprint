@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   },
 
   serverExternalPackages: ["@prisma/adapter-pg"],
+  transpilePackages: ["@repo/shared"],
 
   typedRoutes: true,
   experimental: {

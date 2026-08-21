@@ -1,14 +1,15 @@
 import { useMutation } from '@tanstack/react-query';
+import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { BackHeader } from '@/components/mise/back-header';
 import { Button } from '@/components/mise/button';
-import { IconButton } from '@/components/mise/icon-button';
 import { TextField } from '@/components/mise/text-field';
-import { BackIconName, MiseColors, MiseFonts } from '@/constants/theme';
+import { MiseColors, MiseFonts } from '@/constants/theme';
 import { signUp } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
 
@@ -40,6 +41,7 @@ export default function RegisterScreen() {
   if (submitted) {
     return (
       <ScrollView
+        testID="register-check-email-screen"
         style={styles.screen}
         contentContainerStyle={[
           styles.content,
@@ -54,60 +56,64 @@ export default function RegisterScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 }]}>
-      <IconButton name={BackIconName} onPress={() => router.back()} style={styles.back} />
+    <View style={styles.screen}>
+      <StatusBar style="light" />
+      <BackHeader title={t('auth.registerTitle')} />
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
+        <TextField
+          testID="register-name-input"
+          label={t('auth.nameLabel')}
+          value={name}
+          onChangeText={setName}
+          placeholder={t('auth.namePlaceholder')}
+          containerStyle={styles.field}
+        />
+        <TextField
+          testID="register-email-input"
+          label={t('auth.emailLabel')}
+          value={email}
+          onChangeText={setEmail}
+          placeholder={t('auth.emailPlaceholder')}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          containerStyle={styles.field}
+        />
+        <TextField
+          testID="register-password-input"
+          label={t('auth.passwordLabel')}
+          value={password}
+          onChangeText={setPassword}
+          placeholder={t('auth.passwordCreatePlaceholder')}
+          secureTextEntry
+          containerStyle={styles.fieldLast}
+        />
 
-      <Text style={styles.title}>{t('auth.registerTitle')}</Text>
-      <Text style={styles.subtitle}>{t('auth.registerSubtitle')}</Text>
+        <Button
+          testID="register-submit-button"
+          label={t('auth.createAccountButton')}
+          onPress={handleRegister}
+          loading={registerMutation.isPending}
+        />
+        <Text style={styles.legal}>{t('auth.legal')}</Text>
 
-      <TextField
-        label={t('auth.nameLabel')}
-        value={name}
-        onChangeText={setName}
-        placeholder={t('auth.namePlaceholder')}
-        containerStyle={styles.field}
-      />
-      <TextField
-        label={t('auth.emailLabel')}
-        value={email}
-        onChangeText={setEmail}
-        placeholder={t('auth.emailPlaceholder')}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        containerStyle={styles.field}
-      />
-      <TextField
-        label={t('auth.passwordLabel')}
-        value={password}
-        onChangeText={setPassword}
-        placeholder={t('auth.passwordCreatePlaceholder')}
-        secureTextEntry
-        containerStyle={styles.fieldLast}
-      />
-
-      <Button label={t('auth.createAccountButton')} onPress={handleRegister} loading={registerMutation.isPending} />
-      <Text style={styles.legal}>{t('auth.legal')}</Text>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>{t('auth.haveAccountText')}</Text>
-        <Text style={styles.footerLink} onPress={() => router.replace('/login')}>
-          {t('auth.logIn')}
-        </Text>
-      </View>
-    </ScrollView>
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>{t('auth.haveAccountText')}</Text>
+          <Text style={styles.footerLink} onPress={() => router.replace('/login')}>
+            {t('auth.logIn')}
+          </Text>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
-  content: { flexGrow: 1, paddingHorizontal: 22 },
+  content: { flexGrow: 1, paddingHorizontal: 22, paddingTop: 26 },
   confirmContent: { justifyContent: 'center', alignItems: 'center', gap: 16 },
   centerText: { textAlign: 'center' },
-  back: { marginBottom: 22 },
-  title: { fontFamily: MiseFonts.display, fontSize: 34, lineHeight: 36, color: MiseColors.ink, marginBottom: 6 },
-  subtitle: { fontFamily: MiseFonts.body, fontSize: 15, color: MiseColors.muted, marginBottom: 26 },
+  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 34, lineHeight: 36, color: MiseColors.ink },
+  subtitle: { fontFamily: MiseFonts.body, fontSize: 15, color: MiseColors.muted },
   field: { marginBottom: 16 },
   fieldLast: { marginBottom: 22 },
   legal: {

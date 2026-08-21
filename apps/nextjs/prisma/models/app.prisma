@@ -6,6 +6,7 @@ model Organization {
   createdAt         DateTime
   metadata          String?            @db.Text
   enabledMealTypes  String[]           @default(["breakfast", "lunch", "dinner"])
+  shoppingCategoryOrder String[]       @default(["Produce", "Dairy & Eggs", "Meat & Fish", "Bakery", "Pantry"])
   members           Member[]
   invitations       Invitation[]
   recipes           Recipe[]

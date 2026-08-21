@@ -1,23 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 
+import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
-import { IconButton } from '@/components/mise/icon-button';
+import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
 import { type MealType } from '@/constants/meal-types';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useMealPlan, type MealPlanEntry } from '@/hooks/use-meal-plan';
 import { useEnabledMealTypes } from '@/hooks/use-organization-settings';
 import { useAddMealPlanToShoppingList } from '@/hooks/use-shopping-list';
+import { usePressFeedback } from '@/hooks/usePressFeedback';
 import { dayOfMonth, formatWeekRange, getCurrentWeekDates, isSameDate, toISODate, weekdayShort } from '@/lib/date-utils';
+import { useReducedMotionFlag } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
 export default function PlanScreen() {
   const { t, i18n } = useTranslation();
-  const insets = useSafeAreaInsets();
   const [weekOffset, setWeekOffset] = useState(0);
   const weekDates = useMemo(() => {
     const reference = new Date();
@@ -30,19 +33,36 @@ export default function PlanScreen() {
   const addWeekToListMutation = useAddMealPlanToShoppingList();
   const { showToast } = useToast();
   const today = new Date();
-
-  const weekLabel =
-    weekOffset === 0
-      ? t('planScreen.eyebrow')
-      : weekOffset === 1
-        ? t('planScreen.nextWeek')
-        : weekOffset === -1
-          ? t('planScreen.lastWeek')
-          : weekOffset > 1
-            ? t('planScreen.weeksAhead', { count: weekOffset })
-            : t('planScreen.weeksAgo', { count: -weekOffset });
+  const reduced = useReducedMotionFlag();
+  const { onScroll, onHeaderLayout, compactStyle, compactShown } = useScrollHeader();
+  const lastWeekPress = usePressFeedback();
+  const nextWeekPress = usePressFeedback();
+  const weekActions = (
+    <View style={styles.weekActions}>
+      <AnimatedPressable
+        accessibilityLabel={t('planScreen.lastWeek')}
+        hitSlop={6}
+        onPress={() => setWeekOffset((offset) => offset - 1)}
+        onPressIn={lastWeekPress.onPressIn}
+        onPressOut={lastWeekPress.onPressOut}
+        style={[styles.weekAction, lastWeekPress.style]}>
+        <Ionicons name="chevron-back" size={16} color="#FFF9F3" />
+      </AnimatedPressable>
+      <AnimatedPressable
+        accessibilityLabel={t('planScreen.nextWeek')}
+        hitSlop={6}
+        onPress={() => setWeekOffset((offset) => offset + 1)}
+        onPressIn={nextWeekPress.onPressIn}
+        onPressOut={nextWeekPress.onPressOut}
+        style={[styles.weekAction, nextWeekPress.style]}>
+        <Ionicons name="chevron-forward" size={16} color="#FFF9F3" />
+      </AnimatedPressable>
+    </View>
+  );
 
   const mealTypes = useEnabledMealTypes();
+  const plannedMealCount = entries.length;
+  const totalMealCount = weekDates.length * mealTypes.length;
 
   const entriesByDate = useMemo(() => {
     const map = new Map<string, Map<MealType, MealPlanEntry>>();
@@ -55,6 +75,10 @@ export default function PlanScreen() {
   }, [entries]);
 
   function handleAddWeekToList() {
+    if (plannedMealCount === 0) {
+      showToast(t('planScreen.noMealsToAdd'));
+      return;
+    }
     addWeekToListMutation.mutate(
       { startDate, endDate },
       {
@@ -65,109 +89,126 @@ export default function PlanScreen() {
   }
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: 108 }}>
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.eyebrow}>{weekLabel}</Text>
-          <Text style={styles.title}>{t('planScreen.title')}</Text>
-        </View>
-      </View>
-
-      <View style={styles.weekSwitcher}>
-        <IconButton name="chevron-back" size={44} onPress={() => setWeekOffset((offset) => offset - 1)} />
-        <View style={styles.weekSwitcherCenter}>
-          <Text style={styles.range}>{formatWeekRange(weekDates, i18n.language)}</Text>
+    <View style={styles.screen}>
+      <StatusBar style="light" />
+      <Animated.ScrollView
+        testID="plan-screen"
+        contentContainerStyle={{ paddingBottom: 108 }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}>
+        <PageHeader
+          onLayout={onHeaderLayout}
+          title={t('planScreen.title')}
+          subtitle={formatWeekRange(weekDates, i18n.language)}
+          action={weekActions}>
           {weekOffset !== 0 ? (
             <Pressable hitSlop={8} onPress={() => setWeekOffset(0)}>
               <Text style={styles.todayLinkLabel}>{t('planScreen.backToThisWeek')}</Text>
             </Pressable>
           ) : null}
-        </View>
-        <IconButton name="chevron-forward" size={44} onPress={() => setWeekOffset((offset) => offset + 1)} />
-      </View>
+          <View style={styles.progressRow}>
+            <View style={styles.progressTrack}>
+              <Animated.View
+                style={[
+                  styles.progressFill,
+                  { width: `${totalMealCount ? (plannedMealCount / totalMealCount) * 100 : 0}%` },
+                  {
+                    transitionProperty: 'width',
+                    transitionDuration: reduced ? 0 : 260,
+                    transitionTimingFunction: 'ease-out',
+                  },
+                ]}
+              />
+            </View>
+            <Text style={styles.progressLabel}>{t('planScreen.plannedProgress', { planned: plannedMealCount, total: totalMealCount })}</Text>
+          </View>
+          <View style={styles.mastheadActions}>
+            <Button
+              label={t('planScreen.autoPlan')}
+              variant="gradient"
+              onPress={() =>
+                router.push({
+                  pathname: '/plan-options',
+                  params: { startDate: toISODate(startDate), endDate: toISODate(endDate) },
+                })
+              }
+              style={styles.autoPlanButton}
+            />
+            <Pressable
+              accessibilityLabel={t('planScreen.addToList')}
+              disabled={addWeekToListMutation.isPending}
+              onPress={handleAddWeekToList}
+              style={[styles.listAction, addWeekToListMutation.isPending && styles.listActionDisabled]}>
+              <Ionicons name="cart-outline" size={21} color="#FFF9F3" />
+            </Pressable>
+          </View>
+        </PageHeader>
 
-      <View style={styles.ctaRow}>
-        <Button
-          label={t('planScreen.autoPlan')}
-          variant="gradient"
-          onPress={() =>
-            router.push({
-              pathname: '/plan-options',
-              params: { startDate: toISODate(startDate), endDate: toISODate(endDate) },
-            })
-          }
-          style={styles.ctaGradient}
-        />
-        <Button
-          label={t('planScreen.addToList')}
-          variant="secondary"
-          compact
-          onPress={handleAddWeekToList}
-          loading={addWeekToListMutation.isPending}
-        />
-      </View>
+        <Animated.View key={weekOffset} entering={reduced ? undefined : FadeIn.duration(180)} style={styles.week}>
+          {weekDates.map((date, dayIndex) => {
+            const isToday = isSameDate(date, today);
+            const dateISO = toISODate(date);
+            const dayMeals = entriesByDate.get(dateISO);
 
-      <View style={styles.week}>
-        {weekDates.map((date) => {
-          const isToday = isSameDate(date, today);
-          const dateISO = toISODate(date);
-          const dayMeals = entriesByDate.get(dateISO);
-
-          return (
-            <View key={dateISO}>
-              <View style={styles.dayHeader}>
-                <View style={[styles.dayBadge, isToday && styles.dayBadgeToday]}>
-                  <Text style={[styles.dayBadgeLabel, isToday && styles.dayBadgeLabelToday]}>
-                    {weekdayShort(date, i18n.language)}
-                  </Text>
-                  <Text style={[styles.dayBadgeDate, isToday && styles.dayBadgeLabelToday]}>{dayOfMonth(date)}</Text>
-                </View>
-                {isToday ? (
-                  <View style={styles.todayPill}>
-                    <Text style={styles.todayPillLabel}>{t('planScreen.today')}</Text>
+            return (
+              <View key={dateISO}>
+                <View style={styles.dayHeader}>
+                  <View style={[styles.dayBadge, isToday && styles.dayBadgeToday]}>
+                    <Text style={[styles.dayBadgeLabel, isToday && styles.dayBadgeLabelToday]}>
+                      {weekdayShort(date, i18n.language)}
+                    </Text>
+                    <Text style={[styles.dayBadgeDate, isToday && styles.dayBadgeLabelToday]}>{dayOfMonth(date)}</Text>
                   </View>
-                ) : null}
-              </View>
+                  {isToday ? (
+                    <View style={styles.todayPill}>
+                      <Text style={styles.todayPillLabel}>{t('planScreen.today')}</Text>
+                    </View>
+                  ) : null}
+                </View>
 
-              <View style={styles.cells}>
-                {mealTypes.map((meal) => {
-                  const entry = dayMeals?.get(meal);
-                  if (entry) {
+                <View style={styles.cells}>
+                  {mealTypes.map((meal) => {
+                    const entry = dayMeals?.get(meal);
+                    if (entry) {
+                      return (
+                        <MealCell
+                          key={meal}
+                          meal={meal}
+                          recipe={entry.recipe}
+                          onPress={() => router.push(`/recipe/${entry.recipe.id}`)}
+                          onOptionsPress={() =>
+                            router.push({
+                              pathname: '/edit-meal',
+                              params: {
+                                date: dateISO,
+                                meal,
+                                entryId: entry.id,
+                                title: entry.recipe.title,
+                                color: entry.recipe.color,
+                              },
+                            })
+                          }
+                        />
+                      );
+                    }
                     return (
-                      <MealCell
+                      <EmptyMealCell
                         key={meal}
+                        testID={`meal-cell-empty-${dayIndex}-${meal}`}
                         meal={meal}
-                        recipe={entry.recipe}
-                        onPress={() => router.push(`/recipe/${entry.recipe.id}`)}
-                        onOptionsPress={() =>
-                          router.push({
-                            pathname: '/edit-meal',
-                            params: {
-                              date: dateISO,
-                              meal,
-                              entryId: entry.id,
-                              title: entry.recipe.title,
-                              color: entry.recipe.color,
-                            },
-                          })
-                        }
+                        onPress={() => router.push({ pathname: '/pick-recipe', params: { date: dateISO, meal } })}
                       />
                     );
-                  }
-                  return (
-                    <EmptyMealCell
-                      key={meal}
-                      meal={meal}
-                      onPress={() => router.push({ pathname: '/pick-recipe', params: { date: dateISO, meal } })}
-                    />
-                  );
-                })}
+                  })}
+                </View>
               </View>
-            </View>
-          );
-        })}
-      </View>
-    </ScrollView>
+            );
+          })}
+        </Animated.View>
+      </Animated.ScrollView>
+
+      <CompactHeader title={t('planScreen.title')} compactStyle={compactStyle} compactShown={compactShown} action={weekActions} />
+    </View>
   );
 }
 
@@ -183,8 +224,9 @@ function MealCell({
   onOptionsPress: () => void;
 }) {
   const { t } = useTranslation();
+  const { onPressIn, onPressOut, style: pressStyle } = usePressFeedback();
   return (
-    <Pressable style={styles.cellTouchable} onPress={onPress}>
+    <AnimatedPressable style={[styles.cellTouchable, pressStyle]} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
       <View style={[styles.cellSwatch, { backgroundColor: recipe.color }]} />
       <View style={styles.cellBody}>
         <Text style={styles.cellMeal}>{t(`mealTypes.${meal}`)}</Text>
@@ -202,43 +244,67 @@ function MealCell({
         style={styles.cellOptions}>
         <Ionicons name="ellipsis-horizontal" size={16} color={MiseColors.mutedLight} />
       </Pressable>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
-function EmptyMealCell({ meal, onPress }: { meal: MealType; onPress: () => void }) {
+function EmptyMealCell({
+  meal,
+  onPress,
+  testID,
+}: {
+  meal: MealType;
+  onPress: () => void;
+  testID?: string;
+}) {
   const { t } = useTranslation();
+  const { onPressIn, onPressOut, style: pressStyle } = usePressFeedback();
   return (
-    <Pressable style={styles.emptyCell} onPress={onPress}>
+    <AnimatedPressable
+      testID={testID}
+      style={[styles.emptyCell, pressStyle]}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}>
       <View style={styles.emptyIcon}>
         <Text style={styles.emptyIconLabel}>＋</Text>
       </View>
       <Text style={styles.emptyLabel}>{t('planScreen.addMeal', { meal: t(`mealTypes.${meal}`) })}</Text>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
-  header: {
-    paddingHorizontal: 22,
-    paddingBottom: 8,
-  },
-  eyebrow: { fontFamily: MiseFonts.bodySemiBold, fontSize: 13, color: MiseColors.muted },
-  title: { fontFamily: MiseFonts.display, fontSize: 32, color: MiseColors.ink, marginTop: 2 },
-  range: { fontFamily: MiseFonts.bodySemiBold, fontSize: 15, color: MiseColors.ink },
-  weekSwitcher: {
-    flexDirection: 'row',
+  weekActions: { flexDirection: 'row', gap: 8 },
+  weekAction: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 22,
-    paddingVertical: 10,
+    backgroundColor: '#30251E',
+    borderColor: '#5B493D',
+    borderRadius: 18,
+    borderWidth: 1,
+    height: 36,
+    justifyContent: 'center',
+    width: 36,
   },
-  weekSwitcherCenter: { alignItems: 'center', gap: 4 },
-  todayLinkLabel: { fontFamily: MiseFonts.bodyBold, fontSize: 12.5, color: MiseColors.brand },
-  ctaRow: { flexDirection: 'column', gap: 10, paddingHorizontal: 22, paddingVertical: 14 },
-  ctaGradient: {},
-  week: { paddingHorizontal: 22, gap: 14 },
+  todayLinkLabel: { color: '#E88861', fontFamily: MiseFonts.bodyBold, fontSize: 12.5, marginTop: 8 },
+  progressRow: { alignItems: 'center', flexDirection: 'row', gap: 10, marginTop: 16 },
+  progressTrack: { backgroundColor: '#4A3A30', flex: 1, height: 4 },
+  progressFill: { backgroundColor: '#E88861', height: 4 },
+  progressLabel: { color: '#D7B49D', fontFamily: MiseFonts.bodyMedium, fontSize: 11.5 },
+  mastheadActions: { alignItems: 'center', flexDirection: 'row', gap: 10, marginTop: 16 },
+  autoPlanButton: { flex: 1 },
+  listAction: {
+    alignItems: 'center',
+    borderColor: '#5B493D',
+    borderRadius: 14,
+    borderWidth: 1,
+    height: 56,
+    justifyContent: 'center',
+    width: 56,
+  },
+  listActionDisabled: { opacity: 0.5 },
+  week: { paddingTop: 16, paddingHorizontal: 22, gap: 14 },
   dayHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
   dayBadge: {
     width: 44,

@@ -1,9 +1,9 @@
-# Mise
+# CookBlueprint
 
 A pnpm/Turborepo monorepo with two apps:
 
-- **`apps/mobile`** — **Mise**, an Expo (React Native) recipe, meal-planning, and shared shopping list app. This is the actual product — see [`apps/mobile/README.md`](apps/mobile/README.md) for details.
-- **`apps/nextjs`** — the backend Mise talks to: auth (email/password with verification + reset), a REST API for recipes/meal-plans/shopping-items scoped per household, and a billing shell.
+- **`apps/mobile`** — **CookBlueprint**, an Expo (React Native) recipe, meal-planning, and shared shopping list app. This is the actual product — see [`apps/mobile/README.md`](apps/mobile/README.md) for details.
+- **`apps/nextjs`** — the backend CookBlueprint talks to: auth (email/password with verification + reset), a REST API for recipes/meal-plans/shopping-items scoped per household, and a billing shell.
 
 ## Tech Stack (`apps/nextjs`)
 
@@ -27,7 +27,7 @@ A pnpm/Turborepo monorepo with two apps:
 
 ```
 ├── apps/
-│   ├── mobile/             # Mise — Expo Router app (the actual product)
+│   ├── mobile/             # CookBlueprint — Expo Router app (the actual product)
 │   │   ├── .env.example    # Env template (copy to .env in this folder)
 │   │   └── src/
 │   │       ├── app/        # Expo Router routes (screens + modal sheets)
@@ -35,7 +35,7 @@ A pnpm/Turborepo monorepo with two apps:
 │   │       ├── hooks/       # React Query hooks (recipes, meal plan, shopping list)
 │   │       ├── lib/         # auth-client, API client, date utils
 │   │       └── store/       # Toast context
-│   └── nextjs/             # Next.js 16 application (backend for Mise)
+│   └── nextjs/             # Next.js 16 application (backend for CookBlueprint)
 │       ├── .env.example    # Env template (copy to .env in this folder)
 │       ├── prisma/         # Database schema
 │       └── src/
@@ -50,8 +50,8 @@ A pnpm/Turborepo monorepo with two apps:
 │           └── use-cases/         # Business logic layer
 ├── docker/                # Docker configuration files
 │   └── pgadmin/           # pgAdmin server pre-configuration
-├── Dockerfile             # Multi-stage production build
-├── docker-compose.dev.yml # Postgres + pgAdmin (run Next.js on the host)
+├── Dockerfile             # Multi-stage production build (+ dev stage for compose)
+├── docker-compose.dev.yml # Postgres + pgAdmin + Next.js (dev, hot reload)
 ├── turbo.json             # Turborepo pipeline config
 ├── pnpm-workspace.yaml    # Workspace definition
 └── .env.example           # Pointer to apps/nextjs/.env.example
@@ -107,7 +107,7 @@ Optional variables for additional features:
 | `STRIPE_WEBHOOK_SECRET`  | Stripe webhook signing secret |
 | `STRIPE_PRICE_ID`        | Stripe price ID for checkout  |
 | `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key        |
-| `EMAIL_FROM`             | Sender for auth emails (defaults to `Mise <onboarding@resend.dev>` if unset) |
+| `EMAIL_FROM`             | Sender for auth emails (defaults to `CookBlueprint <onboarding@resend.dev>` if unset) |
 
 ### Stripe webhook setup
 
@@ -195,7 +195,7 @@ Stripe is pre-configured with:
 
 Stripe-related environment variables are optional so you can start building without a Stripe account.
 
-## Mobile app (Mise)
+## Mobile app (CookBlueprint)
 
 `apps/mobile` is an Expo Router app that talks to this Next.js app's REST API (`/api/recipes`, `/api/meal-plans`, `/api/shopping-items`) and shares the same Better Auth backend (via `@better-auth/expo`). Recipes, meal plans, and the shopping list are all scoped to the signed-in user's organization/household. Data fetching goes through React Query, calling a thin `fetch` wrapper (`src/lib/api-client.ts`) that attaches the session cookie manually on native and relies on the browser's cookie jar on web.
 
@@ -221,7 +221,7 @@ To skip validation (e.g., during production Docker builds), set `SKIP_ENV_VALIDA
 
 ## Docker
 
-Docker Compose runs **PostgreSQL** and **pgAdmin** only. Run the Next.js app on the host (`pnpm dev` from the repo root or `apps/nextjs`) so Turbopack hot reload works reliably.
+Docker Compose runs **PostgreSQL**, **pgAdmin**, and **Next.js** (dev server, hot reload). Copy `apps/nextjs/.env.example` to `apps/nextjs/.env` first — the `nextjs` service loads it via `env_file` (only `DATABASE_URL` is overridden, to point at the `postgres` service instead of `localhost`).
 
 ```bash
 docker compose -f docker-compose.dev.yml up
@@ -233,19 +233,22 @@ Or:
 pnpm docker:dev
 ```
 
-Recreate containers after compose changes:
+The `nextjs` service installs dependencies on container start (source and `node_modules` are bind-mounted, so edits on the host hot-reload). First start is slower while it installs; later starts are fast. If you'd rather run Next.js on the host instead, run `docker compose -f docker-compose.dev.yml up postgres pgadmin` and `pnpm dev` separately.
+
+Recreate containers after compose or dependency changes:
 
 ```bash
 docker compose -f docker-compose.dev.yml down --remove-orphans
 docker compose -f docker-compose.dev.yml up --force-recreate
 ```
 
-| Service    | Default host port       | Description            |
-| ---------- | ----------------------- | ---------------------- |
-| `postgres` | `localhost:5432`        | PostgreSQL 17 database |
-| `pgadmin`  | http://localhost:5050   | pgAdmin database UI    |
+| Service    | Default host port       | Description             |
+| ---------- | ------------------------ | ----------------------- |
+| `postgres` | `localhost:5432`         | PostgreSQL 17 database  |
+| `pgadmin`  | http://localhost:5050    | pgAdmin database UI     |
+| `nextjs`   | http://localhost:3000    | Next.js app (dev)       |
 
-Default host ports are stable. Override them with env vars if needed.
+Default host ports are stable. Override them with env vars if needed (`POSTGRES_PORT`, `PGADMIN_PORT`, `NEXTJS_PORT`).
 
 **Postgres credentials:** `postgres` / `postgres` (database: `nextjs-boilerplate`)
 

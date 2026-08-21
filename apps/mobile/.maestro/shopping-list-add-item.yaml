@@ -1,0 +1,27 @@
+appId: com.mise.app
+tags:
+  - offline
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "welcome-try-it-out"
+- assertVisible:
+    id: "recipes-screen"
+- tapOn:
+    id: "tab-list"
+- assertVisible:
+    id: "list-screen"
+- tapOn:
+    id: "shopping-add-item-bar"
+- tapOn:
+    id: "shopping-item-name-input"
+- inputText: "Bananas"
+- tapOn:
+    id: "shopping-item-add-button"
+- assertVisible:
+    id: "list-screen"
+- assertVisible: "Bananas"
+# Checking an item off removes it from the (unchecked-only) list view.
+- tapOn: "Bananas"
+- assertNotVisible: "Bananas"

@@ -1,16 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
+import { StatusBar } from 'expo-status-bar';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/mise/animated-pressable';
+import { BackHeader } from '@/components/mise/back-header';
 import { Button } from '@/components/mise/button';
-import { IconButton } from '@/components/mise/icon-button';
 import { TextField } from '@/components/mise/text-field';
 import { ALL_RECIPE_FREQUENCIES, DEFAULT_RECIPE_FREQUENCY, type RecipeFrequency } from '@/constants/recipe-frequency';
-import { BackIconName, MiseColors, MiseFonts, MiseRadius, RecipeAccentColors } from '@/constants/theme';
+import { RECIPE_MEAL_TYPES, type RecipeMealType } from '@/constants/recipe-meal-types';
+import { MiseColors, MiseFonts, MiseRadius, RecipeAccentColors } from '@/constants/theme';
 import { useCreateRecipe } from '@/hooks/use-recipes';
+import { useReducedMotionFlag, colorTransition } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
 export default function ManualScreen() {
@@ -23,6 +27,14 @@ export default function ManualScreen() {
   const [servings, setServings] = useState('');
   const [ing, setIng] = useState('');
   const [frequency, setFrequency] = useState<RecipeFrequency>(DEFAULT_RECIPE_FREQUENCY);
+  const [mealTypes, setMealTypes] = useState<RecipeMealType[]>([]);
+  const reduced = useReducedMotionFlag();
+
+  function toggleMealType(mealType: RecipeMealType) {
+    setMealTypes((current) =>
+      current.includes(mealType) ? current.filter((m) => m !== mealType) : [...current, mealType],
+    );
+  }
 
   function handleSave() {
     const ingredients = ing
@@ -39,7 +51,7 @@ export default function ManualScreen() {
         time: Number(time) || 20,
         servings: Number(servings) || 2,
         kcal: '—',
-        tags: [t('manualRecipe.defaultTag')],
+        mealTypes,
         ingredients: ingredients.length ? ingredients : [{ n: t('manualRecipe.defaultIngredient'), q: '', cat: 'Pantry' }],
         steps: [t('manualRecipe.defaultStep')],
       },
@@ -54,18 +66,17 @@ export default function ManualScreen() {
   }
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 40 }]}>
-      <IconButton name={BackIconName} onPress={() => router.back()} style={styles.back} />
-      <Text style={styles.title}>{t('manualRecipe.title')}</Text>
-
+    <View style={styles.screen}>
+      <StatusBar style="light" />
+      <BackHeader title={t('manualRecipe.title')} />
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 40 }]}>
       <View style={styles.photoBox}>
         <Ionicons name="camera-outline" size={26} color={MiseColors.mutedLight} />
         <Text style={styles.photoLabel}>{t('manualRecipe.addPhoto')}</Text>
       </View>
 
       <TextField
+        testID="manual-title-input"
         label={t('manualRecipe.titleLabel')}
         value={title}
         onChangeText={setTitle}
@@ -93,6 +104,7 @@ export default function ManualScreen() {
       </View>
 
       <TextField
+        testID="manual-ingredients-input"
         label={t('manualRecipe.ingredientsLabel')}
         value={ing}
         onChangeText={setIng}
@@ -101,33 +113,54 @@ export default function ManualScreen() {
         containerStyle={styles.field}
       />
 
+      <Text style={styles.frequencyLabel}>{t('manualRecipe.mealTypesQuestion')}</Text>
+      <View style={styles.frequencyChips}>
+        {RECIPE_MEAL_TYPES.map((option) => {
+          const active = mealTypes.includes(option);
+          return (
+            <AnimatedPressable
+              key={option}
+              onPress={() => toggleMealType(option)}
+              style={[styles.frequencyChip, active && styles.frequencyChipActive, colorTransition(reduced)]}>
+              <Text style={[styles.frequencyChipLabel, active && styles.frequencyChipLabelActive]}>
+                {t(`recipeMealTypes.${option}`)}
+              </Text>
+            </AnimatedPressable>
+          );
+        })}
+      </View>
+
       <Text style={styles.frequencyLabel}>{t('manualRecipe.frequencyQuestion')}</Text>
       <View style={styles.frequencyChips}>
         {ALL_RECIPE_FREQUENCIES.map((option) => {
           const active = option === frequency;
           return (
-            <Pressable
+            <AnimatedPressable
               key={option}
               onPress={() => setFrequency(option)}
-              style={[styles.frequencyChip, active && styles.frequencyChipActive]}>
+              style={[styles.frequencyChip, active && styles.frequencyChipActive, colorTransition(reduced)]}>
               <Text style={[styles.frequencyChipLabel, active && styles.frequencyChipLabelActive]}>
                 {t(`recipeFrequency.${option}`)}
               </Text>
-            </Pressable>
+            </AnimatedPressable>
           );
         })}
       </View>
 
-      <Button label={t('manualRecipe.saveRecipe')} onPress={handleSave} loading={createRecipeMutation.isPending} />
-    </ScrollView>
+      <Button
+        testID="manual-save-button"
+        label={t('manualRecipe.saveRecipe')}
+        onPress={handleSave}
+        loading={createRecipeMutation.isPending}
+      />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
-  content: { flexGrow: 1, paddingHorizontal: 22 },
-  back: { marginBottom: 20 },
-  title: { fontFamily: MiseFonts.display, fontSize: 30, color: MiseColors.ink, marginBottom: 22 },
+  content: { flexGrow: 1, paddingHorizontal: 22, paddingTop: 26 },
   photoBox: {
     height: 130,
     borderWidth: 1.5,

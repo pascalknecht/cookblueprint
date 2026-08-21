@@ -3,17 +3,19 @@ import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MiseFonts } from '@/constants/theme';
+import { useReducedMotionFlag } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
 export function Toast() {
   const { toast } = useToast();
   const insets = useSafeAreaInsets();
+  const reduced = useReducedMotionFlag();
   if (!toast) return null;
 
   return (
     <Animated.Text
-      entering={FadeInDown.springify().damping(16).stiffness(220)}
-      exiting={FadeOutDown.duration(160)}
+      entering={reduced ? undefined : FadeInDown.springify().damping(16).stiffness(220)}
+      exiting={reduced ? undefined : FadeOutDown.duration(160)}
       pointerEvents="none"
       style={[
         Platform.OS === 'ios' ? styles.pill : styles.snackbar,

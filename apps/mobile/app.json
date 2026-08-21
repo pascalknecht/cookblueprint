@@ -1,22 +1,31 @@
 {
   "expo": {
-    "name": "Mise",
-    "slug": "mise",
+    "name": "CookBlueprint",
+    "slug": "cookblueprint",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mise",
+    "scheme": "cookblueprint",
     "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.cookblueprint.app",
+      "appleTeamId": "",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.cookblueprint.app"
+        ]
+      }
+    },
     "android": {
+      "package": "com.cookblueprint.app",
       "adaptiveIcon": {
-        "backgroundColor": "#C4553E",
+        "backgroundColor": "#221E1B",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
-      "predictiveBackGestureEnabled": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "plugins": [
       "expo-router",
@@ -27,9 +36,10 @@
           "image": "./assets/images/splash-ios.png",
           "resizeMode": "cover",
           "android": {
-            "image": "./assets/images/splash-android.png",
-            "resizeMode": "cover",
-            "backgroundColor": "#9E3F2C"
+            "image": "./assets/images/splash-icon-android.png",
+            "imageWidth": 160,
+            "resizeMode": "contain",
+            "backgroundColor": "#221E1B"
           },
           "ios": {
             "image": "./assets/images/splash-ios.png",
@@ -39,11 +49,94 @@
         }
       ],
       "expo-web-browser",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsWebURLWithMaxCount": 1,
+            "NSExtensionActivationSupportsWebPageWithMaxCount": 1,
+            "NSExtensionActivationSupportsText": true
+          },
+          "androidIntentFilters": [
+            "text/*"
+          ],
+          "iosAppGroupIdentifier": "group.com.cookblueprint.app"
+        }
+      ],
+      "@bacons/apple-targets",
+      [
+        "react-native-android-widget",
+        {
+          "fonts": [
+            "./assets/fonts/PlusJakartaSans_700Bold.ttf",
+            "./assets/fonts/PlusJakartaSans_500Medium.ttf"
+          ],
+          "widgets": [
+            {
+              "name": "MealPlan",
+              "label": "Meal Plan",
+              "description": "This week's meal plan at a glance.",
+              "minWidth": "250dp",
+              "minHeight": "180dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 3,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            },
+            {
+              "name": "ShoppingList",
+              "label": "Shopping List",
+              "description": "Your household's shopping list.",
+              "minWidth": "250dp",
+              "minHeight": "180dp",
+              "targetCellWidth": 3,
+              "targetCellHeight": 3,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000
+            }
+          ]
+        }
+      ],
+      "expo-sqlite",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "CookBlueprint uses your photo library to let you set a recipe's photo."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ShareExtension",
+                  "bundleIdentifier": "com.cookblueprint.app.share-extension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.cookblueprint.app"
+                    ]
+                  }
+                },
+                {
+                  "bundleIdentifier": "com.cookblueprint.app.widget",
+                  "targetName": "CookBlueprintWidgets"
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "12f638f2-4eb6-41a1-966e-ce7267bdbd90"
+      }
+    },
+    "owner": "revenwo"
   }
 }

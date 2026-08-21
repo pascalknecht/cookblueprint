@@ -1,54 +1,88 @@
-import { ReactNode } from 'react';
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView as GorhomBottomSheetScrollView,
+  BottomSheetTextInput,
+  BottomSheetView as GorhomBottomSheetView,
+  type BottomSheetBackdropProps,
+  type BottomSheetModalProps,
+} from '@gorhom/bottom-sheet';
+import { forwardRef, useCallback, useImperativeHandle, useRef, type ComponentProps, type ComponentRef } from 'react';
+import { StyleSheet } from 'react-native';
 
 import { MiseColors } from '@/constants/theme';
+import { useMountEffect } from '@/hooks/use-mount-effect';
 
-type SheetProps = {
-  children: ReactNode;
-  onDismiss: () => void;
-  topInset?: number;
-  contentStyle?: StyleProp<ViewStyle>;
-};
+const contentStyle = StyleSheet.create({
+  base: {
+    paddingHorizontal: 22,
+    paddingBottom: 20,
+  },
+});
 
-export function Sheet({ children, onDismiss, topInset, contentStyle }: SheetProps) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={styles.host}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={onDismiss} />
-      <View
-        style={[
-          styles.card,
-          { paddingBottom: insets.bottom + 20 },
-          topInset ? { marginTop: topInset } : null,
-          contentStyle,
-        ]}>
-        <View style={styles.handle} />
-        {children}
-      </View>
-    </View>
-  );
+export function BottomSheetView({
+  style,
+  ...rest
+}: ComponentProps<typeof GorhomBottomSheetView>) {
+  return <GorhomBottomSheetView style={[contentStyle.base, style]} {...rest} />;
 }
 
+export { BottomSheetTextInput };
+
+export const BottomSheetScrollView = forwardRef<
+  ComponentRef<typeof GorhomBottomSheetScrollView>,
+  ComponentProps<typeof GorhomBottomSheetScrollView>
+>(function BottomSheetScrollView({ style, ...rest }, ref) {
+  return <GorhomBottomSheetScrollView ref={ref} style={[contentStyle.base, style]} {...rest} />;
+});
+
+export const Sheet = forwardRef<BottomSheetModal, BottomSheetModalProps>(function Sheet(
+  { backdropComponent, backgroundStyle, handleIndicatorStyle, enablePanDownToClose = true, ...rest },
+  forwardedRef,
+) {
+  const innerRef = useRef<BottomSheetModal>(null);
+  useImperativeHandle(forwardedRef, () => innerRef.current as BottomSheetModal, []);
+
+  useMountEffect(() => {
+    innerRef.current?.present();
+  });
+
+  const defaultBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        opacity={0.42}
+        pressBehavior={enablePanDownToClose ? 'close' : 'none'}
+      />
+    ),
+    [enablePanDownToClose],
+  );
+
+  return (
+    <BottomSheetModal
+      ref={innerRef}
+      enablePanDownToClose={enablePanDownToClose}
+      keyboardBehavior="interactive"
+      keyboardBlurBehavior="restore"
+      android_keyboardInputMode="adjustResize"
+      backdropComponent={backdropComponent ?? defaultBackdrop}
+      backgroundStyle={backgroundStyle ?? styles.card}
+      handleIndicatorStyle={handleIndicatorStyle ?? styles.handle}
+      {...rest}
+    />
+  );
+});
+
 const styles = StyleSheet.create({
-  host: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(20,12,30,0.42)',
-  },
   card: {
     backgroundColor: MiseColors.background,
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
-    paddingHorizontal: 22,
-    paddingTop: 12,
   },
   handle: {
-    width: 38,
-    height: 5,
-    borderRadius: 999,
     backgroundColor: '#DDD3C6',
-    alignSelf: 'center',
-    marginBottom: 16,
+    width: 38,
   },
 });

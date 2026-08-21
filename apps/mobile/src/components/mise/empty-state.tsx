@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   title: {
-    fontFamily: MiseFonts.display,
+    fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking,
     fontSize: 21,
     color: MiseColors.ink,
     textAlign: 'center',

@@ -1,34 +1,98 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { router } from 'expo-router';
 import type { BottomTabBarProps } from 'expo-router/tabs';
-import { Pressable, StyleSheet, View } from 'react-native';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import { Pressable, StyleSheet, View, type LayoutChangeEvent } from 'react-native';
+import Animated, {
+  Easing,
+  interpolateColor,
+  useAnimatedReaction,
+  useAnimatedStyle,
+  useDerivedValue,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { MiseColors } from '@/constants/theme';
+import { MiseColors, MiseFonts } from '@/constants/theme';
 
-const TAB_ICONS: Record<string, { active: keyof typeof Ionicons.glyphMap; inactive: keyof typeof Ionicons.glyphMap }> = {
-  recipes: { active: 'restaurant', inactive: 'restaurant-outline' },
-  plan: { active: 'calendar', inactive: 'calendar-outline' },
-  list: { active: 'cart', inactive: 'cart-outline' },
-  household: { active: 'people', inactive: 'people-outline' },
+import { TabIcon, type TabIconName } from './tab-icon';
+
+const TAB_ICONS: Record<string, TabIconName> = {
+  recipes: 'restaurant',
+  plan: 'calendar',
+  list: 'cart',
+  settings: 'people',
 };
 
-const BUTTON_SIZE = 60;
-export const TAB_BAR_HEIGHT = 64;
+// The indicator slides and resizes to match the focused tab's bounds. x and
+// width used to animate as two independent springs, which drift out of sync
+// on multi-tab jumps — the rect balloons wider than any single tab mid-
+// transition before catching up. Driving both from one 0->1 progress value
+// (interpolating start bounds -> target bounds every frame) keeps it a
+// rigid body: it can only ever be exactly one tab's width, sliding.
+const INDICATOR_DURATION_MS = 280;
+const INDICATOR_EASING = Easing.out(Easing.cubic);
+// Much snappier than the indicator's slide on purpose — the icon/label should
+// react to the tap immediately, not wait on the indicator's motion.
+const FOCUS_SPRING = { damping: 20, stiffness: 500, mass: 0.3 };
+const ICON_INACTIVE_COLOR = '#9A8F82';
+
+// The bar's inner edge (where the indicator sits) is inset from the outer edge by BAR_INSET
+// on every side, so the indicator's corner radius must shrink by that same amount to stay
+// concentric with the bar's own corners — the nested-rounded-corners rule: inner radius =
+// outer radius - the padding/gap between the two shapes.
+const BAR_RADIUS = 26;
+const BAR_INSET = 10;
+const INDICATOR_RADIUS = BAR_RADIUS - BAR_INSET;
+
+export const TAB_BAR_HEIGHT = 72;
 
 export function MiseTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   const bottomGap = Math.max(insets.bottom, 16);
-  const leftRoutes = state.routes.slice(0, 2);
-  const rightRoutes = state.routes.slice(2, 4);
+  const tabLayouts = useSharedValue<Record<number, { x: number; width: number; height: number }>>({});
+  const startX = useSharedValue(0);
+  const startWidth = useSharedValue(0);
+  const targetX = useSharedValue(0);
+  const targetWidth = useSharedValue(0);
+  const indicatorProgress = useSharedValue(1);
+  const initialized = useSharedValue(false);
+
+  useAnimatedReaction(
+    () => tabLayouts.value[state.index],
+    (layout) => {
+      if (!layout) return;
+      if (!initialized.value) {
+        startX.value = layout.x;
+        startWidth.value = layout.width;
+        targetX.value = layout.x;
+        targetWidth.value = layout.width;
+        initialized.value = true;
+        return;
+      }
+      // Re-triggering mid-flight (rapid taps) starts the new leg from wherever
+      // the rect currently sits, rather than jump-cutting to the old target.
+      startX.value = startX.value + (targetX.value - startX.value) * indicatorProgress.value;
+      startWidth.value = startWidth.value + (targetWidth.value - startWidth.value) * indicatorProgress.value;
+      targetX.value = layout.x;
+      targetWidth.value = layout.width;
+      indicatorProgress.value = 0;
+      indicatorProgress.value = withTiming(1, { duration: INDICATOR_DURATION_MS, easing: INDICATOR_EASING });
+    },
+  );
+
+  const indicatorStyle = useAnimatedStyle(() => {
+    const p = indicatorProgress.value;
+    return {
+      width: startWidth.value + (targetWidth.value - startWidth.value) * p,
+      transform: [{ translateX: startX.value + (targetX.value - startX.value) * p }],
+    };
+  });
 
   function renderTab(route: (typeof state.routes)[number]) {
     const index = state.routes.indexOf(route);
     const { options } = descriptors[route.key];
     const focused = state.index === index;
-    const icons = TAB_ICONS[route.name] ?? TAB_ICONS.recipes;
+    const icon = TAB_ICONS[route.name] ?? TAB_ICONS.recipes;
     const label =
       typeof options.title === 'string' ? options.title : route.name.charAt(0).toUpperCase() + route.name.slice(1);
 
@@ -37,13 +101,24 @@ export function MiseTabBar({ state, descriptors, navigation }: BottomTabBarProps
       if (!focused && !event.defaultPrevented) navigation.navigate(route.name);
     };
 
+    const onLayout = (event: LayoutChangeEvent) => {
+      const { x, width, height } = event.nativeEvent.layout;
+      tabLayouts.modify((value) => {
+        'worklet';
+        value[index] = { x, width, height };
+        return value;
+      });
+    };
+
     return (
       <TabButton
         key={route.key}
+        testID={`tab-${route.name}`}
         focused={focused}
-        icon={focused ? icons.active : icons.inactive}
+        icon={icon}
         label={label}
         onPress={onPress}
+        onLayout={onLayout}
       />
     );
   }
@@ -51,48 +126,58 @@ export function MiseTabBar({ state, descriptors, navigation }: BottomTabBarProps
   return (
     <View style={[styles.host, { bottom: bottomGap }]}>
       <View style={styles.barRow}>
-        <View style={styles.pill}>{leftRoutes.map(renderTab)}</View>
-        <View style={styles.notch} />
-        <View style={styles.pill}>{rightRoutes.map(renderTab)}</View>
+        <View style={styles.pill}>
+          <Animated.View style={[styles.indicator, indicatorStyle]} pointerEvents="none" />
+          {state.routes.map(renderTab)}
+        </View>
       </View>
-      <Pressable style={styles.centerButton} onPress={() => router.push('/quick-add-sheet')}>
-        <LinearGradient
-          colors={[MiseColors.brandLight, MiseColors.brand]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={styles.centerButtonInner}>
-          <Ionicons name="add" size={28} color="#fff" />
-        </LinearGradient>
-      </Pressable>
     </View>
   );
 }
 
 function TabButton({
+  testID,
   focused,
   icon,
   label,
   onPress,
+  onLayout,
 }: {
+  testID: string;
   focused: boolean;
-  icon: keyof typeof Ionicons.glyphMap;
+  icon: TabIconName;
   label: string;
   onPress: () => void;
+  onLayout: (event: LayoutChangeEvent) => void;
 }) {
-  const backgroundStyle = useAnimatedStyle(() => ({
-    opacity: withSpring(focused ? 1 : 0, { damping: 14, stiffness: 260, mass: 0.6 }),
-    transform: [{ scale: withSpring(focused ? 1 : 0.5, { damping: 10, stiffness: 220, mass: 0.6 }) }],
+  const progress = useDerivedValue(() => withSpring(focused ? 1 : 0, FOCUS_SPRING));
+
+  const colorStyle = useAnimatedStyle(() => ({
+    color: interpolateColor(progress.value, [0, 1], [ICON_INACTIVE_COLOR, MiseColors.brandLight]),
   }));
 
   return (
     <Pressable
+      testID={testID}
       onPress={onPress}
+      onLayout={onLayout}
       accessibilityRole="tab"
       accessibilityLabel={label}
       accessibilityState={{ selected: focused }}
       style={styles.tab}>
-      <Animated.View style={[styles.tabActive, backgroundStyle]} />
-      <Ionicons name={icon} size={20} color={focused ? MiseColors.brandLight : '#9A8F82'} />
+      <View style={styles.iconStack}>
+        <TabIcon
+          name={icon}
+          size={20}
+          progress={progress}
+          focused={focused}
+          inactiveColor={ICON_INACTIVE_COLOR}
+          activeColor={MiseColors.brandLight}
+        />
+      </View>
+      <Animated.Text style={[styles.tabLabel, colorStyle]} numberOfLines={1}>
+        {label}
+      </Animated.Text>
     </Pressable>
   );
 }
@@ -107,47 +192,34 @@ const styles = StyleSheet.create({
   barRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: TAB_BAR_HEIGHT,
-    width: '100%',
+    minHeight: TAB_BAR_HEIGHT,
     backgroundColor: MiseColors.near,
-    borderRadius: 999,
-    paddingHorizontal: 14,
+    borderRadius: BAR_RADIUS,
+    paddingHorizontal: BAR_INSET,
+    paddingVertical: BAR_INSET,
     shadowColor: '#000',
     shadowOpacity: 0.28,
     shadowRadius: 18,
     shadowOffset: { width: 0, height: 10 },
     elevation: 10,
   },
-  pill: { flex: 1, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 18 },
-  notch: { width: BUTTON_SIZE + 12 },
-  tab: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', borderRadius: 22 },
-  tabActive: {
+  pill: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  indicator: {
     position: 'absolute',
     top: 0,
-    left: 0,
-    right: 0,
     bottom: 0,
-    borderRadius: 22,
+    left: 0,
+    borderRadius: INDICATOR_RADIUS,
     backgroundColor: 'rgba(255,255,255,0.14)',
   },
-  centerButton: {
-    position: 'absolute',
-    top: -(BUTTON_SIZE / 2 - TAB_BAR_HEIGHT / 2),
-    alignSelf: 'center',
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    borderRadius: BUTTON_SIZE / 2,
-  },
-  centerButtonInner: {
-    width: '100%',
-    height: '100%',
-    borderRadius: BUTTON_SIZE / 2,
+  tab: {
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: MiseColors.brandDark,
-    shadowOpacity: 0.45,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    borderRadius: INDICATOR_RADIUS,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 3,
   },
+  iconStack: { width: 20, height: 20 },
+  tabLabel: { fontFamily: MiseFonts.bodySemiBold, fontSize: 10.5, color: ICON_INACTIVE_COLOR },
 });

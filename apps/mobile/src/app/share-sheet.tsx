@@ -4,15 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { MiseTile } from '@/components/mise/mise-tile';
 import { MiseColors, MiseFonts } from '@/constants/theme';
-
-const DEMO_URL = 'https://cooking.example.com/best-lemon-herb-chicken';
+import { usePressFeedback } from '@/hooks/usePressFeedback';
 
 export default function ShareSheetScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const [step, setStep] = useState(0);
+  const backPress = usePressFeedback();
+  const nextPress = usePressFeedback();
+  const appSlotPress = usePressFeedback();
 
   const STEPS = [
     { title: t('shareSheet.step1Title'), body: t('shareSheet.step1Body') },
@@ -26,7 +29,7 @@ export default function ShareSheetScreen() {
 
   function next() {
     if (step >= 2) {
-      router.replace({ pathname: '/import', params: { url: DEMO_URL, autostart: '1' } });
+      dismiss();
       return;
     }
     setStep((s) => s + 1);
@@ -57,13 +60,21 @@ export default function ShareSheetScreen() {
           </View>
           <View style={styles.coachmarkButtons}>
             {step > 0 ? (
-              <Pressable onPress={back} style={styles.backButton}>
+              <AnimatedPressable
+                onPress={back}
+                onPressIn={backPress.onPressIn}
+                onPressOut={backPress.onPressOut}
+                style={[styles.backButton, backPress.style]}>
                 <Text style={styles.backButtonLabel}>{t('shareSheet.back')}</Text>
-              </Pressable>
+              </AnimatedPressable>
             ) : null}
-            <Pressable onPress={next} style={styles.nextButton}>
+            <AnimatedPressable
+              onPress={next}
+              onPressIn={nextPress.onPressIn}
+              onPressOut={nextPress.onPressOut}
+              style={[styles.nextButton, nextPress.style]}>
               <Text style={styles.nextButtonLabel}>{step === 2 ? t('shareSheet.importIt') : t('shareSheet.next')}</Text>
-            </Pressable>
+            </AnimatedPressable>
           </View>
         </View>
       </View>
@@ -83,10 +94,14 @@ export default function ShareSheetScreen() {
         <View style={[styles.shareToWrap, step === 1 && styles.highlight]}>
           <Text style={styles.shareToLabel}>{t('shareSheet.shareTo')}</Text>
           <View style={styles.appsRow}>
-            <Pressable onPress={next} style={styles.appSlot}>
+            <AnimatedPressable
+              onPress={next}
+              onPressIn={appSlotPress.onPressIn}
+              onPressOut={appSlotPress.onPressOut}
+              style={[styles.appSlot, appSlotPress.style]}>
               <MiseTile pulsing={step === 2} />
               <Text style={styles.appLabel}>{t('shareSheet.appMise')}</Text>
-            </Pressable>
+            </AnimatedPressable>
             <View style={styles.appSlot}>
               <View style={[styles.appIcon, { backgroundColor: '#25D366' }]} />
               <Text style={styles.appLabelDim}>{t('shareSheet.appMessages')}</Text>
@@ -179,6 +194,13 @@ const styles = StyleSheet.create({
   appsRow: { flexDirection: 'row', gap: 16 },
   appSlot: { alignItems: 'center', gap: 7 },
   appIcon: { width: 58, height: 58, borderRadius: 17, opacity: 0.5 },
-  appLabel: { fontFamily: MiseFonts.bodyBold, fontSize: 11, color: MiseColors.ink },
-  appLabelDim: { fontFamily: MiseFonts.body, fontSize: 11, color: MiseColors.muted, opacity: 0.5 },
+  appLabel: { width: 58, textAlign: 'center', fontFamily: MiseFonts.bodyBold, fontSize: 11, color: MiseColors.ink },
+  appLabelDim: {
+    width: 58,
+    textAlign: 'center',
+    fontFamily: MiseFonts.body,
+    fontSize: 11,
+    color: MiseColors.muted,
+    opacity: 0.5,
+  },
 });

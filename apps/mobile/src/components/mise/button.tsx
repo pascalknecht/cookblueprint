@@ -1,8 +1,11 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated from 'react-native-reanimated';
 import { ReactNode } from 'react';
 import { ActivityIndicator, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
+
+import { usePressFeedback } from '@/hooks/usePressFeedback';
 
 type ButtonVariant = 'primary' | 'secondary' | 'gradient';
 
@@ -15,6 +18,7 @@ type ButtonProps = {
   disabled?: boolean;
   loading?: boolean;
   compact?: boolean;
+  testID?: string;
 };
 
 export function Button({
@@ -26,6 +30,7 @@ export function Button({
   disabled,
   loading,
   compact,
+  testID,
 }: ButtonProps) {
   const content = (
     <View style={styles.content}>
@@ -51,24 +56,38 @@ export function Button({
     borderRadius: MiseRadius.lg,
     paddingHorizontal: compact ? 18 : 0,
   };
+  const { onPressIn, onPressOut, style: pressStyle } = usePressFeedback();
 
   if (variant === 'gradient') {
     return (
-      <Pressable onPress={onPress} disabled={disabled || loading} style={[{ opacity: disabled ? 0.5 : 1 }, style]}>
-        <LinearGradient
-          colors={[MiseColors.brandLight, MiseColors.brand]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={[shape, styles.gradientShadow, styles.center]}>
-          {content}
-        </LinearGradient>
+      <Pressable
+        accessibilityLabel={testID}
+        testID={testID}
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        disabled={disabled || loading}
+        style={[{ opacity: disabled ? 0.5 : 1 }, style]}>
+        <Animated.View style={[styles.scaleWrap, pressStyle]}>
+          <LinearGradient
+            colors={[MiseColors.brandLight, MiseColors.brand]}
+            start={{ x: 0.1, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[shape, styles.gradientShadow, styles.center, styles.scaleInner]}>
+            {content}
+          </LinearGradient>
+        </Animated.View>
       </Pressable>
     );
   }
 
   return (
     <Pressable
+      accessibilityLabel={testID}
+      testID={testID}
       onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       disabled={disabled || loading}
       style={[
         shape,
@@ -77,7 +96,9 @@ export function Button({
         { opacity: disabled ? 0.5 : 1 },
         style,
       ]}>
-      {content}
+      <Animated.View style={[styles.scaleWrap, pressStyle]}>
+        <View style={[shape, styles.center, styles.scaleInner]}>{content}</View>
+      </Animated.View>
     </Pressable>
   );
 }
@@ -85,6 +106,8 @@ export function Button({
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
   content: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  scaleWrap: { borderRadius: MiseRadius.lg, overflow: 'hidden' },
+  scaleInner: { borderRadius: MiseRadius.lg },
   primary: { backgroundColor: MiseColors.near },
   secondary: {
     backgroundColor: MiseColors.card,

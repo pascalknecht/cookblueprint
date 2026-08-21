@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image, ImageSource } from 'expo-image';
-import { StyleProp, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 
 type PhotoPlaceholderProps = {
   color: string;
@@ -14,7 +14,17 @@ export function PhotoPlaceholder({ color, style, iconSize = 28, source, children
   if (source) {
     return (
       <View style={[{ backgroundColor: color }, style]}>
-        <Image source={source} style={{ flex: 1 }} contentFit="cover" transition={200} />
+        {/* Absolutely positioned so it always fills its parent regardless of
+            the parent's alignItems/justifyContent — callers use those to
+            position overlay children (e.g. a badge), which would otherwise
+            disable cross-axis stretch and collapse this image to 0 width. */}
+        <Image
+          source={source}
+          style={StyleSheet.absoluteFill}
+          contentFit="cover"
+          transition={200}
+          pointerEvents="none"
+        />
         {children}
       </View>
     );

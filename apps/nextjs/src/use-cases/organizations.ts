@@ -2,6 +2,7 @@ import { randomUUID } from "crypto";
 
 import { normalizeEnabledMealTypes } from "@/lib/meal-types";
 import { prisma } from "@/lib/prisma";
+import { normalizeShoppingCategoryOrder } from "@/lib/shopping-categories";
 
 function slugify(value: string) {
   return (
@@ -50,10 +51,12 @@ export async function resolveDefaultActiveOrganizationId(userId: string) {
   return membership?.organizationId ?? null;
 }
 
+const SETTINGS_SELECT = { enabledMealTypes: true, shoppingCategoryOrder: true };
+
 export async function getOrganizationSettings(organizationId: string) {
   const organization = await prisma.organization.findUnique({
     where: { id: organizationId },
-    select: { enabledMealTypes: true },
+    select: SETTINGS_SELECT,
   });
   return organization;
 }
@@ -62,6 +65,14 @@ export function updateEnabledMealTypes(organizationId: string, enabledMealTypes:
   return prisma.organization.update({
     where: { id: organizationId },
     data: { enabledMealTypes: normalizeEnabledMealTypes(enabledMealTypes) },
-    select: { enabledMealTypes: true },
+    select: SETTINGS_SELECT,
+  });
+}
+
+export function updateShoppingCategoryOrder(organizationId: string, shoppingCategoryOrder: string[]) {
+  return prisma.organization.update({
+    where: { id: organizationId },
+    data: { shoppingCategoryOrder: normalizeShoppingCategoryOrder(shoppingCategoryOrder) },
+    select: SETTINGS_SELECT,
   });
 }

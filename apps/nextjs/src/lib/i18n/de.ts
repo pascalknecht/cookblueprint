@@ -2,9 +2,9 @@ import type { Translations } from './en';
 
 export const de = {
   meta: {
-    title: 'Mise — Rezepte, Essensplanung und Einkaufslisten für deinen Haushalt',
+    title: 'CookBlueprint — Rezepte, Essensplanung und Einkaufslisten für deinen Haushalt',
     description:
-      'Speichere Rezepte, plane die Woche gemeinsam und kaufe von einer gemeinsamen Liste ein. Mise hält deinen ganzen Haushalt auf dem gleichen Stand.',
+      'Speichere Rezepte, plane die Woche gemeinsam und kaufe von einer gemeinsamen Liste ein. CookBlueprint hält deinen ganzen Haushalt auf dem gleichen Stand.',
   },
   header: {
     features: 'Funktionen',
@@ -21,7 +21,7 @@ export const de = {
     ctaPrimary: 'Kostenlos loslegen',
     ctaSecondary: 'So funktioniert es',
     disclaimer: 'Kostenlos nutzbar · Keine Kreditkarte nötig',
-    screenshotAlt: 'Screenshot des Rezepte-Bildschirms in der Mise-App',
+    screenshotAlt: 'Screenshot des Rezepte-Bildschirms in der CookBlueprint-App',
   },
   trustBar: {
     highlight1: 'Schluss mit „Was gibt\'s heute zu essen?"-Nachrichten',
@@ -51,7 +51,7 @@ export const de = {
     planEyebrow: 'Essensplan',
     planTitle: 'Eine echte Woche, keine vage Ideenliste',
     planDescription:
-      'Weise Rezepte dem Frühstück, Mittag- oder Abendessen einer echten Woche von Montag bis Sonntag zu, oder lass Mise eine Woche aus deinen gespeicherten Rezepten erstellen.',
+      'Weise Rezepte dem Frühstück, Mittag- oder Abendessen einer echten Woche von Montag bis Sonntag zu, oder lass CookBlueprint eine Woche aus deinen gespeicherten Rezepten erstellen.',
     planBullet1: 'Rezepte jedem Mahlzeiten-Slot zuweisen',
     planBullet2: 'Eine ganze Woche automatisch erstellen',
     planBullet3: 'Alle sehen denselben Plan',
@@ -108,28 +108,28 @@ export const de = {
     step1Description:
       'Füge die hinzu, die du bereits kochst, oder importiere sie per Link. Sie werden in deinem Haushalt gespeichert, bereit zur Planung.',
     step2Title: 'Die Woche planen',
-    step2Description: 'Ziehe Rezepte in ein Raster von Montag bis Sonntag, oder lass Mise die Woche automatisch für dich erstellen.',
+    step2Description: 'Ziehe Rezepte in ein Raster von Montag bis Sonntag, oder lass CookBlueprint die Woche automatisch für dich erstellen.',
     step3Title: 'Gemeinsam einkaufen',
     step3Description: "Sende die Zutaten der Woche an eine gemeinsame Liste. Hake Artikel ab, egal wer gerade im Laden ist.",
   },
   faq: {
     eyebrow: 'FAQ',
     title: 'Fragen, beantwortet',
-    q1: 'Ist Mise kostenlos?',
-    a1: 'Ja. Rezepte, Essensplanung und die gemeinsame Einkaufsliste sind für deinen ganzen Haushalt kostenlos. Mise Pro bietet ein paar Extras für alle, die die laufende Entwicklung unterstützen möchten.',
+    q1: 'Ist CookBlueprint kostenlos?',
+    a1: 'Ja. Rezepte, Essensplanung und die gemeinsame Einkaufsliste sind für deinen ganzen Haushalt kostenlos. CookBlueprint Pro bietet ein paar Extras für alle, die die laufende Entwicklung unterstützen möchten.',
     q2: 'Wie füge ich meinen Haushalt hinzu?',
     a2: 'Lade sie direkt aus der App per E-Mail ein. Sobald sie annehmen, werden Rezepte, der Essensplan und die Einkaufsliste automatisch mit allen geteilt.',
     q3: 'Kann ich ein Rezept per Link importieren?',
-    a3: 'Ja, du kannst einen Link einfügen, und Mise übernimmt das Rezept, statt dass du es abtippen musst. Du kannst Rezepte auch manuell hinzufügen.',
+    a3: 'Ja, du kannst einen Link einfügen, und CookBlueprint übernimmt das Rezept, statt dass du es abtippen musst. Du kannst Rezepte auch manuell hinzufügen.',
     q4: 'Brauche ich die mobile App?',
-    a4: 'Mise ist als mobile App für den Alltag gebaut — Essen planen, Einkäufe abhaken, vom Handy aus kochen. Diese Website verwaltet dein Konto und die Abrechnung.',
+    a4: 'CookBlueprint ist als mobile App für den Alltag gebaut — Essen planen, Einkäufe abhaken, vom Handy aus kochen. Diese Website verwaltet dein Konto und die Abrechnung.',
     q5: 'Kann ich jederzeit kündigen?',
-    a5: 'Ja. Mise Pro ist ein monatliches Abo, das du jederzeit in den Kontoeinstellungen kündigen kannst — der kostenlose Plan funktioniert in jedem Fall weiter.',
+    a5: 'Ja. CookBlueprint Pro ist ein monatliches Abo, das du jederzeit in den Kontoeinstellungen kündigen kannst — der kostenlose Plan funktioniert in jedem Fall weiter.',
   },
   pricing: {
     eyebrow: 'Preise',
     title: 'Einfache, transparente Preise',
-    subtitle: 'Der Kern von Mise ist für jeden Haushalt kostenlos. Upgrade nur, wenn du die Extras möchtest.',
+    subtitle: 'Der Kern von CookBlueprint ist für jeden Haushalt kostenlos. Upgrade nur, wenn du die Extras möchtest.',
     freeName: 'Kostenlos',
     freeDescription: 'Alles, was ein Haushalt zum gemeinsamen Planen und Einkaufen braucht',
     freeCta: 'Loslegen',
@@ -137,7 +137,7 @@ export const de = {
     freeFeature2: 'Wöchentliche Essensplanung',
     freeFeature3: 'Gemeinsame Einkaufsliste',
     freeFeature4: 'Deinen ganzen Haushalt einladen',
-    proName: 'Mise Pro',
+    proName: 'CookBlueprint Pro',
     proDescription: 'Für Haushalte, die etwas mehr möchten',
     proCta: 'Kostenlos testen',
     proBadge: 'Am beliebtesten',
@@ -167,7 +167,7 @@ export const de = {
     linkGetStarted: 'Loslegen',
     linkPrivacyPolicy: 'Datenschutzerklärung',
     linkTermsOfService: 'Nutzungsbedingungen',
-    copyright: '© {{year}} Mise. Alle Rechte vorbehalten.',
+    copyright: '© {{year}} CookBlueprint. Alle Rechte vorbehalten.',
     privacy: 'Datenschutz',
     terms: 'AGB',
   },

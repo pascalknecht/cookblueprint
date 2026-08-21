@@ -14,7 +14,7 @@ export async function Header() {
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <ChefHat className="size-4.5" />
           </div>
-          <span className="font-display text-xl italic">Mise</span>
+          <span className="font-display text-xl italic">CookBlueprint</span>
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex">

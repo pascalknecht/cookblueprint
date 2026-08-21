@@ -9,7 +9,7 @@ model Recipe {
   time            Int
   servings        Int
   kcal            String
-  tags            String[]
+  mealTypes       String[]
   ingredients     Json
   steps           String[]
   mealPlanEntries MealPlanEntry[]

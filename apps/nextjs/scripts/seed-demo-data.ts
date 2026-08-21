@@ -35,7 +35,7 @@ type SeedRecipe = {
   time: number;
   servings: number;
   kcal: string;
-  tags: string[];
+  mealTypes: string[];
   sourceImageUrl: string;
   ingredients: { n: string; q: string; cat: string }[];
   steps: string[];
@@ -50,7 +50,7 @@ const RECIPES: SeedRecipe[] = [
     time: 55,
     servings: 4,
     kcal: "520",
-    tags: ["Dinner"],
+    mealTypes: ["dinner"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1670398564097-0762e1b30b3a?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -78,7 +78,7 @@ const RECIPES: SeedRecipe[] = [
     time: 20,
     servings: 2,
     kcal: "410",
-    tags: ["Breakfast"],
+    mealTypes: ["breakfast"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -105,7 +105,7 @@ const RECIPES: SeedRecipe[] = [
     time: 8,
     servings: 1,
     kcal: "320",
-    tags: ["Breakfast", "Veg"],
+    mealTypes: ["breakfast"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -128,7 +128,7 @@ const RECIPES: SeedRecipe[] = [
     time: 30,
     servings: 2,
     kcal: "540",
-    tags: ["Dinner"],
+    mealTypes: ["dinner"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -155,7 +155,7 @@ const RECIPES: SeedRecipe[] = [
     time: 15,
     servings: 2,
     kcal: "430",
-    tags: ["Lunch", "Veg"],
+    mealTypes: ["lunch"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -182,7 +182,7 @@ const RECIPES: SeedRecipe[] = [
     time: 35,
     servings: 3,
     kcal: "610",
-    tags: ["Dinner"],
+    mealTypes: ["dinner"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1551183053-bf91a1d81141?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -209,7 +209,7 @@ const RECIPES: SeedRecipe[] = [
     time: 40,
     servings: 4,
     kcal: "260",
-    tags: ["Lunch", "Veg"],
+    mealTypes: ["lunch"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -235,7 +235,7 @@ const RECIPES: SeedRecipe[] = [
     time: 25,
     servings: 2,
     kcal: "390",
-    tags: ["Dinner", "Lunch"],
+    mealTypes: ["dinner", "lunch"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -261,7 +261,7 @@ const RECIPES: SeedRecipe[] = [
     time: 20,
     servings: 2,
     kcal: "470",
-    tags: ["Lunch"],
+    mealTypes: ["lunch"],
     sourceImageUrl:
       "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&h=900&fit=crop&crop=entropy&q=80",
     ingredients: [
@@ -370,7 +370,7 @@ async function main() {
         time: recipe.time,
         servings: recipe.servings,
         kcal: recipe.kcal,
-        tags: recipe.tags,
+        mealTypes: recipe.mealTypes,
         ingredients: recipe.ingredients,
         steps: recipe.steps,
       },

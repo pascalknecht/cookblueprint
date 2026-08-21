@@ -1,0 +1,25 @@
+appId: com.mise.app
+tags:
+  - offline
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "welcome-try-it-out"
+- assertVisible:
+    id: "recipes-screen"
+- tapOn:
+    id: "recipes-add-button"
+- tapOn:
+    id: "add-recipe-manual-option"
+- tapOn:
+    id: "manual-title-input"
+- inputText: "E2E Test Recipe"
+- tapOn:
+    id: "manual-ingredients-input"
+- inputText: "Flour"
+- tapOn:
+    id: "manual-save-button"
+- assertVisible:
+    id: "recipes-screen"
+- assertVisible: "E2E Test Recipe"

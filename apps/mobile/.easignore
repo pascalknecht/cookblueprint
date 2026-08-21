@@ -1,0 +1,11 @@
+# EAS Build re-installs dependencies and re-runs prebuild on its own workers,
+# so none of this needs to be in the uploaded archive — and skipping it is
+# what keeps the "Compressing project files" step from having to walk the
+# whole monorepo's node_modules (~11GB) and the local Gradle build output.
+node_modules
+android/app/build
+android/build
+android/.gradle
+android/app/.cxx
+ios
+.expo

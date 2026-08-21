@@ -1,10 +1,15 @@
 import type { Ionicons } from '@expo/vector-icons';
+import { ALL_SHOPPING_CATEGORIES, type ShoppingCategory } from '@repo/shared';
 
 import { MiseColors } from '@/constants/theme';
 
-export const SHOPPING_CATEGORIES = ['Produce', 'Dairy & Eggs', 'Meat & Fish', 'Bakery', 'Pantry'] as const;
+// Canonical list/order-normalization live in packages/shared/src/shopping-categories.ts,
+// shared with apps/nextjs/src/lib/shopping-categories.ts. Icons/colors below are UI-only.
 
-export type ShoppingCategory = (typeof SHOPPING_CATEGORIES)[number];
+export { DEFAULT_SHOPPING_CATEGORY_ORDER, normalizeShoppingCategoryOrder } from '@repo/shared';
+export type { ShoppingCategory } from '@repo/shared';
+
+export const SHOPPING_CATEGORIES = ALL_SHOPPING_CATEGORIES;
 
 export const DEFAULT_SHOPPING_CATEGORY: ShoppingCategory = 'Produce';
 

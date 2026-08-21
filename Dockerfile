@@ -26,6 +26,15 @@ ENV DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholde
 RUN pnpm db:generate
 RUN pnpm build
 
+# ── Stage: dev ────────────────────────────────────────
+# Used by docker-compose.dev.yml. Source and prisma/ arrive via bind mount
+# at container start (not COPY'd here), so install runs then instead of at
+# build time — installing at build would fail with no schema present yet.
+FROM base AS dev
+WORKDIR /app
+EXPOSE 3000
+CMD ["sh", "-c", "pnpm install --frozen-lockfile && pnpm --filter @repo/nextjs dev"]
+
 # ── Stage 4: production runner ────────────────────────
 FROM base AS runner
 WORKDIR /app

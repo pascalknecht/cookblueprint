@@ -6,8 +6,8 @@ import { organizationClient } from 'better-auth/client/plugins';
 import { secureStorage } from './secure-storage';
 
 const rawExpoPlugin = expoClient({
-  scheme: 'mise',
-  storagePrefix: 'mise',
+  scheme: 'cookblueprint',
+  storagePrefix: 'cookblueprint',
   storage: secureStorage,
 });
 

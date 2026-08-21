@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { toPaginationEnvelope, toSkipTake, type PaginationQuery } from "@/lib/pagination";
 import type { RecipeFrequency } from "@/lib/recipe-frequency";
+import type { RecipeMealType } from "@/lib/recipe-meal-types";
 import { Prisma } from "@/lib/generated/prisma/client/client";
 
 export type RecipeIngredientInput = {
@@ -17,7 +18,7 @@ export type RecipeInput = {
   time: number;
   servings: number;
   kcal: string;
-  tags: string[];
+  mealTypes: RecipeMealType[];
   ingredients: RecipeIngredientInput[];
   steps: string[];
 };
@@ -27,14 +28,14 @@ const RECIPE_ORDER_FIELDS = new Set(["createdAt", "updatedAt", "title", "time", 
 export async function listRecipes(
   organizationId: string,
   pagination: PaginationQuery,
-  filters: { tag?: string },
+  filters: { mealType?: RecipeMealType },
 ) {
   const where: Prisma.RecipeWhereInput = {
     organizationId,
     ...(pagination.queryFilter
       ? { title: { contains: pagination.queryFilter, mode: "insensitive" } }
       : {}),
-    ...(filters.tag ? { tags: { has: filters.tag } } : {}),
+    ...(filters.mealType ? { mealTypes: { has: filters.mealType } } : {}),
   };
 
   const orderByField =

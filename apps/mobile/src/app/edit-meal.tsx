@@ -1,12 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
+import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Sheet } from '@/components/mise/sheet';
+import { AnimatedPressable } from '@/components/mise/animated-pressable';
+import { BottomSheetView, Sheet } from '@/components/mise/sheet';
 import { type MealType } from '@/constants/meal-types';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useDeleteMealAssignment } from '@/hooks/use-meal-plan';
+import { usePressFeedback } from '@/hooks/usePressFeedback';
 import { useToast } from '@/store/toast';
 
 export default function EditMealScreen() {
@@ -20,9 +24,25 @@ export default function EditMealScreen() {
   }>();
   const deleteMutation = useDeleteMealAssignment();
   const { showToast } = useToast();
+  const sheetRef = useRef<BottomSheetModal>(null);
+  // The sheet closes itself (animated, in its own portal) before we leave
+  // this route, then its onDismiss below does the actual navigation — so
+  // there's never a screen swap racing the close animation.
+  const switchingRef = useRef(false);
+  const switchPress = usePressFeedback();
+  const removePress = usePressFeedback();
 
   function handleSwitch() {
-    router.replace({ pathname: '/pick-recipe', params: { date, meal } });
+    switchingRef.current = true;
+    sheetRef.current?.dismiss();
+  }
+
+  function handleDismiss() {
+    router.back();
+    if (switchingRef.current) {
+      switchingRef.current = false;
+      router.push({ pathname: '/pick-recipe', params: { date, meal } });
+    }
   }
 
   function handleRemove() {
@@ -36,7 +56,8 @@ export default function EditMealScreen() {
   }
 
   return (
-    <Sheet onDismiss={() => router.back()}>
+    <Sheet ref={sheetRef} onDismiss={handleDismiss}>
+      <BottomSheetView>
       <View style={styles.header}>
         <View style={[styles.swatch, { backgroundColor: color }]} />
         <View style={styles.headerBody}>
@@ -47,15 +68,25 @@ export default function EditMealScreen() {
         </View>
       </View>
 
-      <Pressable style={styles.action} onPress={handleSwitch}>
+      <AnimatedPressable
+        style={[styles.action, switchPress.style]}
+        onPress={handleSwitch}
+        onPressIn={switchPress.onPressIn}
+        onPressOut={switchPress.onPressOut}>
         <Ionicons name="swap-horizontal-outline" size={20} color={MiseColors.ink} />
         <Text style={styles.actionLabel}>{t('editMeal.switchRecipe')}</Text>
-      </Pressable>
+      </AnimatedPressable>
 
-      <Pressable style={styles.action} onPress={handleRemove} disabled={deleteMutation.isPending}>
+      <AnimatedPressable
+        style={[styles.action, removePress.style]}
+        onPress={handleRemove}
+        onPressIn={removePress.onPressIn}
+        onPressOut={removePress.onPressOut}
+        disabled={deleteMutation.isPending}>
         <Ionicons name="trash-outline" size={20} color={MiseColors.brand} />
         <Text style={[styles.actionLabel, styles.destructiveLabel]}>{t('editMeal.removeFromPlan')}</Text>
-      </Pressable>
+      </AnimatedPressable>
+      </BottomSheetView>
     </Sheet>
   );
 }
@@ -71,7 +102,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
-  title: { fontFamily: MiseFonts.display, fontSize: 20, color: MiseColors.ink },
+  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 20, color: MiseColors.ink },
   action: {
     flexDirection: 'row',
     alignItems: 'center',

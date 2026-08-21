@@ -1,0 +1,29 @@
+appId: com.mise.app
+tags:
+  - server
+---
+# Requires the Next.js backend running and reachable. Doesn't need the seeded
+# e2e account — registers a fresh, throwaway account every run instead (a
+# timestamped email keeps repeat runs from colliding with a prior one).
+#
+# Can't go further than the verification gate: there's no working email
+# sender in local dev (see apps/mobile/README.md), so this only asserts the
+# "check your email" screen is reached, not that login afterwards works.
+- launchApp:
+    clearState: true
+- evalScript: ${output.email = "maestro-" + Date.now() + "@example.com"}
+- tapOn:
+    id: "welcome-get-started-button"
+- tapOn:
+    id: "register-name-input"
+- inputText: "Maestro Tester"
+- tapOn:
+    id: "register-email-input"
+- inputText: ${output.email}
+- tapOn:
+    id: "register-password-input"
+- inputText: "maestro-test-password-1234"
+- tapOn:
+    id: "register-submit-button"
+- assertVisible:
+    id: "register-check-email-screen"

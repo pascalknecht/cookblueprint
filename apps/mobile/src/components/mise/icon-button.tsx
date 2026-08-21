@@ -1,8 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import Animated from 'react-native-reanimated';
 import { Pressable, StyleProp, StyleSheet, ViewStyle } from 'react-native';
 
 import { MiseColors } from '@/constants/theme';
+
+import { usePressFeedback } from '@/hooks/usePressFeedback';
 
 type IconButtonVariant = 'surface' | 'translucent' | 'gradient' | 'tint';
 
@@ -14,6 +17,7 @@ type IconButtonProps = {
   iconSize?: number;
   color?: string;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 };
 
 export function IconButton({
@@ -24,20 +28,30 @@ export function IconButton({
   iconSize,
   color,
   style,
+  testID,
 }: IconButtonProps) {
   const radius = size * 0.32;
   const resolvedIconSize = iconSize ?? size * 0.42;
+  const { onPressIn, onPressOut, style: pressStyle } = usePressFeedback();
 
   if (variant === 'gradient') {
     return (
-      <Pressable onPress={onPress} style={style}>
-        <LinearGradient
-          colors={[MiseColors.brandLight, MiseColors.brand]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 0.85, y: 1 }}
-          style={[styles.center, styles.shadow, { width: size, height: size, borderRadius: radius }]}>
-          <Ionicons name={name} size={resolvedIconSize} color={color ?? '#fff'} />
-        </LinearGradient>
+      <Pressable
+        accessibilityLabel={testID}
+        testID={testID}
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={style}>
+        <Animated.View style={[styles.scaleWrap, { borderRadius: radius }, pressStyle]}>
+          <LinearGradient
+            colors={[MiseColors.brandLight, MiseColors.brand]}
+            start={{ x: 0.1, y: 0 }}
+            end={{ x: 0.85, y: 1 }}
+            style={[styles.center, styles.shadow, { width: size, height: size, borderRadius: radius }]}>
+            <Ionicons name={name} size={resolvedIconSize} color={color ?? '#fff'} />
+          </LinearGradient>
+        </Animated.View>
       </Pressable>
     );
   }
@@ -53,25 +67,45 @@ export function IconButton({
 
   return (
     <Pressable
+      accessibilityLabel={testID}
+      testID={testID}
       onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}
       style={[
         styles.center,
         { width: size, height: size, borderRadius: variant === 'translucent' ? size / 2 : radius },
         variantStyle,
+        variant === 'translucent' && styles.translucentShadow,
         style,
       ]}>
-      <Ionicons name={name} size={resolvedIconSize} color={color ?? defaultColor} />
+      <Animated.View
+        style={[
+          styles.scaleWrap,
+          { borderRadius: variant === 'translucent' ? size / 2 : radius },
+          pressStyle,
+        ]}>
+        <Ionicons name={name} size={resolvedIconSize} color={color ?? defaultColor} />
+      </Animated.View>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   center: { alignItems: 'center', justifyContent: 'center' },
+  scaleWrap: { overflow: 'hidden' },
   shadow: {
     shadowColor: MiseColors.brandDark,
     shadowOpacity: 0.35,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
     elevation: 4,
+  },
+  translucentShadow: {
+    shadowColor: '#000',
+    shadowOpacity: 0.18,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
   },
 });

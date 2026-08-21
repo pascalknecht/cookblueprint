@@ -1,0 +1,20 @@
+appId: com.mise.app
+tags:
+  - server
+---
+# Requires the Next.js backend running and reachable, and the seeded account
+# from `pnpm seed:e2e-user` (apps/nextjs) — see .maestro/README notes.
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "welcome-login-button"
+- tapOn:
+    id: "login-email-input"
+- inputText: "e2e@example.com"
+- tapOn:
+    id: "login-password-input"
+- inputText: "e2e-test-password-1234"
+- tapOn:
+    id: "login-submit-button"
+- assertVisible:
+    id: "recipes-screen"

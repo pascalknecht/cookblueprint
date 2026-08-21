@@ -6,7 +6,6 @@ import { z } from "zod";
 const generateBodySchema = z.object({
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
-  vegetarianOnly: z.boolean().optional(),
   avoidRepeats: z.boolean().optional(),
 });
 

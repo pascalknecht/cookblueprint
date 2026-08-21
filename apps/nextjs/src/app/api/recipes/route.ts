@@ -2,6 +2,7 @@ import { parseJsonBody, unauthorizedResponse } from "@/lib/api";
 import { getActiveOrganizationContext } from "@/lib/get-active-organization";
 import { paginationQuerySchema } from "@/lib/pagination";
 import { ALL_RECIPE_FREQUENCIES, DEFAULT_RECIPE_FREQUENCY } from "@/lib/recipe-frequency";
+import { RECIPE_MEAL_TYPES } from "@/lib/recipe-meal-types";
 import { createRecipe, listRecipes } from "@/use-cases/recipes";
 import { z } from "zod";
 
@@ -19,7 +20,7 @@ const recipeBodySchema = z.object({
   time: z.coerce.number().int().min(0),
   servings: z.coerce.number().int().min(1),
   kcal: z.string().min(1),
-  tags: z.array(z.string()).default([]),
+  mealTypes: z.array(z.enum(RECIPE_MEAL_TYPES)).default([]),
   ingredients: z.array(recipeIngredientSchema).default([]),
   steps: z.array(z.string()).default([]),
 });
@@ -37,8 +38,9 @@ export async function GET(request: Request) {
     );
   }
 
-  const tag = url.searchParams.get("tag") ?? undefined;
-  const result = await listRecipes(ctx.organizationId, pagination.data, { tag });
+  const mealTypeParam = url.searchParams.get("mealType") ?? undefined;
+  const mealType = RECIPE_MEAL_TYPES.find((type) => type === mealTypeParam);
+  const result = await listRecipes(ctx.organizationId, pagination.data, { mealType });
   return Response.json(result);
 }
 

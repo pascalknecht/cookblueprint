@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "animate-expo": {
+      "source": "emilkowalski/skills",
+      "sourceType": "github",
+      "skillPath": "skills/animate-expo/SKILL.md",
+      "computedHash": "897529a1a4b130684406628326d065b807de405666fc9627795f80b74f3c7215"
+    },
     "caveman": {
       "source": "mattpocock/skills",
       "sourceType": "github",
@@ -48,6 +54,12 @@
       "sourceType": "github",
       "skillPath": "skills/engineering/setup-matt-pocock-skills/SKILL.md",
       "computedHash": "ab6e8143f9237f970435d95e94a0f79703faf125a0b8c583b35ee7fe340eeefe"
+    },
+    "stow": {
+      "source": "theislampill/stow",
+      "sourceType": "github",
+      "skillPath": "skills/stow/SKILL.md",
+      "computedHash": "1c658c7226c102d1dd53660bac63082f0f7cad2fa46babce922f8a1166289f8d"
     },
     "tdd": {
       "source": "mattpocock/skills",

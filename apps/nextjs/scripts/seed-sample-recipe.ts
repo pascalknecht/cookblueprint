@@ -34,7 +34,7 @@ const SAMPLE_RECIPE = {
   time: 55,
   servings: 4,
   kcal: "520",
-  tags: ["Dinner"],
+  mealTypes: ["dinner"],
   ingredients: [
     { n: "Chicken breast", q: "4 pieces", cat: "Meat & Fish" },
     { n: "Cherry tomatoes", q: "200 g", cat: "Produce" },

@@ -1,0 +1,33 @@
+{
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000",
+        "EXPO_PUBLIC_WEB_APP_URL": "http://10.0.2.2:3000"
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://cookblueprint.com",
+        "EXPO_PUBLIC_WEB_APP_URL": "https://cookblueprint.com"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://cookblueprint.com",
+        "EXPO_PUBLIC_WEB_APP_URL": "https://cookblueprint.com"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

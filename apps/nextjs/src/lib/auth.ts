@@ -17,9 +17,9 @@ const prisma = new PrismaClient({ adapter });
 
 export const auth = betterAuth({
   baseURL: env.BETTER_AUTH_URL,
-  // The mise:// entry trusts the Expo app's custom scheme for real native
-  // builds.
-  trustedOrigins: ["mise://", ...mobileWebDevOrigins],
+  // The cookblueprint:// entry trusts the Expo app's custom scheme for
+  // real native builds.
+  trustedOrigins: ["cookblueprint://", ...mobileWebDevOrigins],
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,

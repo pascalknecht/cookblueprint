@@ -40,7 +40,7 @@ export async function Footer() {
               <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <ChefHat className="size-4" />
               </div>
-              <span className="font-display text-lg italic">Mise</span>
+              <span className="font-display text-lg italic">CookBlueprint</span>
             </Link>
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
               {t("footer.tagline")}

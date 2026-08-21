@@ -1,0 +1,15 @@
+appId: com.mise.app
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "welcome-try-it-out"
+- assertVisible:
+    id: "recipes-screen"
+- tapOn:
+    id: "recipes-add-button"
+- assertVisible:
+    id: "add-recipe-manual-option"
+- tapOn:
+    id: "add-recipe-manual-option"
+- assertVisible: "New recipe"

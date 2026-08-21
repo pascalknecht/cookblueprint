@@ -1,15 +1,37 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { type BottomSheetModal } from '@gorhom/bottom-sheet';
+import { router, type Href } from 'expo-router';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet } from '@/components/mise/sheet';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 
 export default function AddRecipeSheetScreen() {
   const { t } = useTranslation();
+  const sheetRef = useRef<BottomSheetModal>(null);
+  // The sheet closes itself (animated, in its own portal) before we leave
+  // this route, then its onDismiss below does the actual navigation — so
+  // there's never a screen swap racing the close animation.
+  const nextHrefRef = useRef<Href | null>(null);
+
+  function goTo(href: Href) {
+    nextHrefRef.current = href;
+    sheetRef.current?.dismiss();
+  }
+
+  function handleDismiss() {
+    router.back();
+    if (nextHrefRef.current) {
+      router.push(nextHrefRef.current);
+      nextHrefRef.current = null;
+    }
+  }
+
   return (
-    <Sheet onDismiss={() => router.back()}>
+    <Sheet ref={sheetRef} onDismiss={handleDismiss}>
+      <BottomSheetView>
       <Text style={styles.title}>{t('addRecipe.title')}</Text>
       <Text style={styles.subtitle}>{t('addRecipe.subtitle')}</Text>
 
@@ -20,7 +42,7 @@ export default function AddRecipeSheetScreen() {
           iconBg={MiseColors.tint}
           title={t('addRecipe.linkTitle')}
           subtitle={t('addRecipe.linkSubtitle')}
-          onPress={() => router.replace('/import')}
+          onPress={() => goTo('/import')}
         />
         <SheetRow
           icon="share-social"
@@ -28,17 +50,19 @@ export default function AddRecipeSheetScreen() {
           iconBg={MiseColors.tintStrong}
           title={t('addRecipe.shareTitle')}
           subtitle={t('addRecipe.shareSubtitle')}
-          onPress={() => router.replace('/share-sheet')}
+          onPress={() => goTo('/share-sheet')}
         />
         <SheetRow
+          testID="add-recipe-manual-option"
           icon="create"
           iconColor={MiseColors.success}
           iconBg={MiseColors.successBg}
           title={t('addRecipe.manualTitle')}
           subtitle={t('addRecipe.manualSubtitle')}
-          onPress={() => router.replace('/manual')}
+          onPress={() => goTo('/manual')}
         />
       </View>
+      </BottomSheetView>
     </Sheet>
   );
 }
@@ -50,6 +74,7 @@ function SheetRow({
   title,
   subtitle,
   onPress,
+  testID,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   iconColor: string;
@@ -57,9 +82,10 @@ function SheetRow({
   title: string;
   subtitle: string;
   onPress: () => void;
+  testID?: string;
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.row}>
+    <Pressable accessibilityLabel={testID} testID={testID} onPress={onPress} style={styles.row}>
       <View style={[styles.rowIcon, { backgroundColor: iconBg }]}>
         <Ionicons name={icon} size={20} color={iconColor} />
       </View>
@@ -73,7 +99,7 @@ function SheetRow({
 }
 
 const styles = StyleSheet.create({
-  title: { fontFamily: MiseFonts.display, fontSize: 25, color: MiseColors.ink, marginBottom: 4 },
+  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 25, color: MiseColors.ink, marginBottom: 4 },
   subtitle: { fontFamily: MiseFonts.body, fontSize: 14, color: MiseColors.muted, marginBottom: 18 },
   rows: { gap: 11 },
   row: {
