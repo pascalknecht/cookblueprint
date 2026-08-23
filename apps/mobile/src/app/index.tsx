@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { useShareIntentContext } from 'expo-share-intent';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -21,9 +22,12 @@ export default function WelcomeScreen() {
   const { showToast } = useToast();
   const startTrialMode = useStartTrialMode();
   const isPending = sessionPending || trialPending;
+  // Let use-share-intent-redirect.ts own navigation while a share is pending,
+  // instead of racing its redirect to /import.
+  const { hasShareIntent } = useShareIntentContext();
 
   useAuthRedirect({
-    isPending,
+    isPending: isPending || hasShareIntent,
     isAuthenticated: !!session || !!isTrial,
     redirectWhen: 'authenticated',
     to: '/(tabs)/recipes',

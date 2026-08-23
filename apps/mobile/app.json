@@ -48,7 +48,8 @@
       [
         "expo-navigation-bar",
         {
-          "style": "dark"
+          "style": "light",
+          "enforceContrast": false
         }
       ],
       "expo-web-browser",

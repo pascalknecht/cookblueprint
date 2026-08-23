@@ -63,6 +63,7 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <I18nextProvider i18n={i18n}>
           <QueryClientProvider client={queryClient}>
+            <ShareIntentRedirect />
             <SafeAreaProvider>
               <ToastProvider>
                 <HtmlFetcherProvider>
@@ -102,7 +103,6 @@ export default function RootLayout() {
             </SafeAreaProvider>
           </QueryClientProvider>
         </I18nextProvider>
-        <ShareIntentRedirect />
       </GestureHandlerRootView>
     </ShareIntentProvider>
   );

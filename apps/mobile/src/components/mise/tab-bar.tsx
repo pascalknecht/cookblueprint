@@ -48,7 +48,10 @@ export const TAB_BAR_HEIGHT = 72;
 
 export function MiseTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const bottomGap = Math.max(insets.bottom, 16);
+  // Devices with a bottom system nav bar (insets.bottom > 0) need extra breathing
+  // room above it, or the pill reads as glued to it — gesture-nav devices have no
+  // such bar and just get the flat 16 floor.
+  const bottomGap = insets.bottom > 0 ? insets.bottom + 16 : 16;
   const tabLayouts = useSharedValue<Record<number, { x: number; width: number; height: number }>>({});
   const startX = useSharedValue(0);
   const startWidth = useSharedValue(0);
@@ -124,14 +127,20 @@ export function MiseTabBar({ state, descriptors, navigation }: BottomTabBarProps
   }
 
   return (
-    <View style={[styles.host, { bottom: bottomGap }]}>
-      <View style={styles.barRow}>
-        <View style={styles.pill}>
-          <Animated.View style={[styles.indicator, indicatorStyle]} pointerEvents="none" />
-          {state.routes.map(renderTab)}
+    <>
+      {/* Only ever as tall as the true system nav bar inset — independent of the
+          pill's floating offset, so there's visible page background separating
+          the two instead of the cover growing to chase the pill upward. */}
+      <View style={[styles.systemBarCover, { height: insets.bottom }]} pointerEvents="none" />
+      <View style={[styles.host, { bottom: bottomGap }]}>
+        <View style={styles.barRow}>
+          <View style={styles.pill}>
+            <Animated.View style={[styles.indicator, indicatorStyle]} pointerEvents="none" />
+            {state.routes.map(renderTab)}
+          </View>
         </View>
       </View>
-    </View>
+    </>
   );
 }
 
@@ -183,6 +192,13 @@ function TabButton({
 }
 
 const styles = StyleSheet.create({
+  systemBarCover: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: MiseColors.near,
+  },
   host: {
     position: 'absolute',
     left: 18,
