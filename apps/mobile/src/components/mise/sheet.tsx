@@ -9,6 +9,7 @@ import {
 } from '@gorhom/bottom-sheet';
 import { forwardRef, useCallback, useImperativeHandle, useRef, type ComponentProps, type ComponentRef } from 'react';
 import { StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MiseColors } from '@/constants/theme';
 import { useMountEffect } from '@/hooks/use-mount-effect';
@@ -37,11 +38,15 @@ export const BottomSheetScrollView = forwardRef<
 });
 
 export const Sheet = forwardRef<BottomSheetModal, BottomSheetModalProps>(function Sheet(
-  { backdropComponent, backgroundStyle, handleIndicatorStyle, enablePanDownToClose = true, ...rest },
+  { backdropComponent, backgroundStyle, handleIndicatorStyle, enablePanDownToClose = true, bottomInset, ...rest },
   forwardedRef,
 ) {
   const innerRef = useRef<BottomSheetModal>(null);
   useImperativeHandle(forwardedRef, () => innerRef.current as BottomSheetModal, []);
+  // Android no longer lets the sheet sit "under" the system nav bar — its own
+  // transparent inset needs to be added as a real bottom margin here, or the
+  // sheet's bottom content renders behind the bar.
+  const insets = useSafeAreaInsets();
 
   useMountEffect(() => {
     innerRef.current?.present();
@@ -70,6 +75,7 @@ export const Sheet = forwardRef<BottomSheetModal, BottomSheetModalProps>(functio
       backdropComponent={backdropComponent ?? defaultBackdrop}
       backgroundStyle={backgroundStyle ?? styles.card}
       handleIndicatorStyle={handleIndicatorStyle ?? styles.handle}
+      bottomInset={bottomInset ?? insets.bottom}
       {...rest}
     />
   );

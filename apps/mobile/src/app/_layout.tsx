@@ -18,9 +18,9 @@ import { StatusBar } from 'expo-status-bar';
 import { ShareIntentProvider } from 'expo-share-intent';
 import { useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HtmlFetcherWebView } from '@/components/mise/html-fetcher-webview';
 import { ShareIntentRedirect } from '@/components/mise/share-intent-redirect';
@@ -32,6 +32,15 @@ import { HtmlFetcherProvider } from '@/store/html-fetcher';
 import { ToastProvider } from '@/store/toast';
 
 SplashScreen.preventAutoHideAsync();
+
+// Android no longer lets an app paint the system nav bar itself (it's always
+// transparent past SDK 35) — this fills the safe-area gutter behind it so the
+// bar reads as dark on every screen, not just ones that happen to have dark
+// content of their own back there.
+function SystemBarCover() {
+  const insets = useSafeAreaInsets();
+  return <View style={[styles.systemBarCover, { height: insets.bottom }]} pointerEvents="none" />;
+}
 
 const modalScreenOptions = {
   // BottomSheetModal (@gorhom/bottom-sheet) drives its own present/dismiss
@@ -96,6 +105,7 @@ export default function RootLayout() {
                       </Stack>
                       <Toast />
                       <HtmlFetcherWebView />
+                      <SystemBarCover />
                     </View>
                   </BottomSheetModalProvider>
                 </HtmlFetcherProvider>
@@ -107,3 +117,13 @@ export default function RootLayout() {
     </ShareIntentProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  systemBarCover: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: MiseColors.near,
+  },
+});

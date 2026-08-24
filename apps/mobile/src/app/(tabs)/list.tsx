@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/mise/empty-state';
 import { IconButton } from '@/components/mise/icon-button';
 import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
 import { ShoppingTile } from '@/components/mise/shopping-tile';
-import { TAB_BAR_HEIGHT } from '@/components/mise/tab-bar';
+import { TAB_BAR_HEIGHT, getTabBarBottomGap } from '@/components/mise/tab-bar';
 import { SHOPPING_CATEGORY_COLOR, SHOPPING_CATEGORY_KEY, type ShoppingCategory } from '@/constants/shopping-categories';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useShoppingCategoryOrder } from '@/hooks/use-organization-settings';
@@ -43,8 +43,7 @@ export default function ListScreen() {
   const { onScroll, onHeaderLayout, compactStyle, compactShown } = useScrollHeader();
   const insets = useSafeAreaInsets();
 
-  // Keep in sync with MiseTabBar's own bottom-gap logic so the add-item bar clears the pill consistently.
-  const tabBarHeight = TAB_BAR_HEIGHT + Math.max(insets.bottom, 16);
+  const tabBarHeight = TAB_BAR_HEIGHT + getTabBarBottomGap(insets.bottom);
   const addItemPress = usePressFeedback();
 
   const groups = useMemo(() => {
