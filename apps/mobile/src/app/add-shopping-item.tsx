@@ -47,8 +47,15 @@ export default function AddShoppingItemScreen() {
   // Focus once the sheet has actually settled at its open snap point,
   // instead of via autoFocus — opening the keyboard at the same time as
   // mount makes gorhom's dynamic content-height measurement miscalculate.
+  // `onChange` fires as soon as the animated index crosses into range, not
+  // once the open animation has actually finished, so focusing here directly
+  // starts the keyboard's rise animation while the sheet is still settling —
+  // two motions competing for the same frames read as one janky one. Gorhom's
+  // Android open animation is a fixed 250ms timing (see ANIMATION_DURATION in
+  // @gorhom/bottom-sheet/src/constants.ts), so wait that long before focusing.
   const handleSheetChange = useCallback((index: number) => {
-    if (index === 0) nameInputRef.current?.focus();
+    if (index !== 0) return;
+    setTimeout(() => nameInputRef.current?.focus(), 250);
   }, []);
 
   const suggestions = useMemo(() => {
