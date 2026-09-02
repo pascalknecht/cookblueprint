@@ -11,14 +11,15 @@ import { MiseColors } from "@/constants/theme";
 import type { MealPlanEntry } from "@/hooks/use-meal-plan";
 import { api } from "@/lib/api-client";
 import {
-  getCurrentWeekDates,
+  formatWeekRange,
+  getVisibleWeekDates,
   isSameDate,
   toISODate,
   weekdayShort,
 } from "@/lib/date-utils";
 import i18n from "@/lib/i18n";
 import { listMealPlanEntries } from "@/lib/local-db/meal-plan";
-import { isTrialActive } from "@/lib/local-db/trial-state";
+import { isLocalModeActive } from "@/lib/local-db/local-mode-state";
 
 type MealPlanResponse = { items: MealPlanEntry[] };
 
@@ -224,15 +225,15 @@ function MealPlanWidget({
   );
 }
 
-/** Fetches the current week's meal plan (local-db in trial mode, API otherwise) and renders the widget JSX. */
+/** Fetches the current week's meal plan (local-db in local mode, API otherwise) and renders the widget JSX. */
 export async function renderMealPlanWidget() {
-  const weekDates = getCurrentWeekDates();
+  const weekDates = getVisibleWeekDates();
   const startISO = toISODate(weekDates[0]);
   const endISO = toISODate(weekDates[weekDates.length - 1]);
 
   try {
-    const isTrial = await isTrialActive();
-    const items = isTrial
+    const isLocal = await isLocalModeActive();
+    const items = isLocal
       ? await listMealPlanEntries(weekDates[0], weekDates[weekDates.length - 1])
       : (
           await api.get<MealPlanResponse>(
@@ -269,22 +270,10 @@ export async function renderMealPlanWidget() {
       <MealPlanWidget
         days={days}
         signedOut={false}
-        weekRange={formatWeekRange(weekDates)}
+        weekRange={formatWeekRange(weekDates, i18n.language)}
       />
     );
   } catch {
     return <MealPlanWidget days={[]} signedOut={true} weekRange="" />;
   }
-}
-
-function formatWeekRange(weekDates: Date[]) {
-  const start = weekDates[0];
-  const end = weekDates.at(-1);
-  if (!start || !end) return "";
-  const month = new Intl.DateTimeFormat(i18n.language, {
-    month: "short",
-  }).format(start);
-  return i18n.language.startsWith("de")
-    ? `${start.getDate()}.–${end.getDate()}. ${month}`
-    : `${month} ${start.getDate()}–${end.getDate()}`;
 }

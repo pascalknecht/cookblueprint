@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { HashLink } from "./hash-link";
 
 export async function CallToAction() {
   const t = await getServerTranslator();
@@ -17,14 +18,18 @@ export async function CallToAction() {
             {t("callToAction.subtitle")}
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" asChild>
+            <Button
+              size="lg"
+              className="rounded-full bg-near text-near-foreground hover:bg-near/90"
+              asChild
+            >
               <Link href="/register">
                 {t("callToAction.ctaPrimary")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link href="#pricing">{t("callToAction.ctaSecondary")}</Link>
+              <HashLink href="#pricing">{t("callToAction.ctaSecondary")}</HashLink>
             </Button>
           </div>
           <p className="text-muted-foreground mt-4 text-xs">

@@ -68,12 +68,17 @@ export function Button({
         onPressOut={onPressOut}
         disabled={disabled || loading}
         style={[{ opacity: disabled ? 0.5 : 1 }, style]}>
-        <Animated.View style={[styles.scaleWrap, pressStyle]}>
+        {/* Android composites this whole subtree as one semi-transparent
+            layer once the Pressable above is faded for disabled — the
+            elevation shadow gets composited (and thus visible) right along
+            with it, showing through as a pale smudge on the gradient. Only
+            cast it while enabled, when it's actually meant to be seen. */}
+        <Animated.View style={[styles.scaleWrap, !disabled && styles.gradientShadow, pressStyle]}>
           <LinearGradient
             colors={[MiseColors.brandLight, MiseColors.brand]}
             start={{ x: 0.1, y: 0 }}
             end={{ x: 0.85, y: 1 }}
-            style={[shape, styles.gradientShadow, styles.center, styles.scaleInner]}>
+            style={[shape, styles.center, styles.scaleInner]}>
             {content}
           </LinearGradient>
         </Animated.View>

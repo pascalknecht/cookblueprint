@@ -5,17 +5,19 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
 import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
+import { getTabBarScrollPadding } from '@/components/mise/tab-bar-metrics';
 import { type MealType } from '@/constants/meal-types';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useMealPlan, type MealPlanEntry } from '@/hooks/use-meal-plan';
 import { useEnabledMealTypes } from '@/hooks/use-organization-settings';
 import { useAddMealPlanToShoppingList } from '@/hooks/use-shopping-list';
 import { usePressFeedback } from '@/hooks/usePressFeedback';
-import { dayOfMonth, formatWeekRange, getCurrentWeekDates, isSameDate, toISODate, weekdayShort } from '@/lib/date-utils';
+import { dayOfMonth, formatWeekRange, getVisibleWeekDates, isSameDate, toISODate, weekdayShort } from '@/lib/date-utils';
 import { useReducedMotionFlag } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
@@ -25,7 +27,7 @@ export default function PlanScreen() {
   const weekDates = useMemo(() => {
     const reference = new Date();
     reference.setDate(reference.getDate() + weekOffset * 7);
-    return getCurrentWeekDates(reference);
+    return getVisibleWeekDates(reference);
   }, [weekOffset]);
   const startDate = weekDates[0];
   const endDate = weekDates[weekDates.length - 1];
@@ -35,6 +37,7 @@ export default function PlanScreen() {
   const today = new Date();
   const reduced = useReducedMotionFlag();
   const { onScroll, onHeaderLayout, compactStyle, compactShown } = useScrollHeader();
+  const insets = useSafeAreaInsets();
   const lastWeekPress = usePressFeedback();
   const nextWeekPress = usePressFeedback();
   const weekActions = (
@@ -93,7 +96,7 @@ export default function PlanScreen() {
       <StatusBar style="light" />
       <Animated.ScrollView
         testID="plan-screen"
-        contentContainerStyle={{ paddingBottom: 108 }}
+        contentContainerStyle={{ paddingBottom: getTabBarScrollPadding(insets.bottom) }}
         onScroll={onScroll}
         scrollEventThrottle={16}>
         <PageHeader

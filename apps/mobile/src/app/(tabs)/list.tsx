@@ -13,7 +13,7 @@ import { EmptyState } from '@/components/mise/empty-state';
 import { IconButton } from '@/components/mise/icon-button';
 import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
 import { ShoppingTile } from '@/components/mise/shopping-tile';
-import { TAB_BAR_HEIGHT, getTabBarBottomGap } from '@/components/mise/tab-bar';
+import { TAB_BAR_HEIGHT, getTabBarBottomGap, getTabBarScrollPadding } from '@/components/mise/tab-bar-metrics';
 import { SHOPPING_CATEGORY_COLOR, SHOPPING_CATEGORY_KEY, type ShoppingCategory } from '@/constants/shopping-categories';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useShoppingCategoryOrder } from '@/hooks/use-organization-settings';
@@ -45,6 +45,7 @@ export default function ListScreen() {
 
   const tabBarHeight = TAB_BAR_HEIGHT + getTabBarBottomGap(insets.bottom);
   const addItemPress = usePressFeedback();
+  const addItemOverlay = ADD_ITEM_BAR_HEIGHT + ADD_ITEM_BAR_GAP;
 
   const groups = useMemo(() => {
     return categoryOrder
@@ -62,7 +63,7 @@ export default function ListScreen() {
         testID="list-screen"
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: 140 }}>
+        contentContainerStyle={{ paddingBottom: getTabBarScrollPadding(insets.bottom, addItemOverlay) }}>
         <PageHeader
           onLayout={onHeaderLayout}
           title={t('shoppingScreen.title')}
@@ -84,6 +85,17 @@ export default function ListScreen() {
             icon="cart-outline"
             title={t('shoppingScreen.emptyTitle')}
             subtitle={t('shoppingScreen.emptySubtitle')}
+            action={<Button label={t('shoppingScreen.addItem')} onPress={() => router.push('/add-shopping-item')} />}
+            style={styles.emptyState}
+          />
+        ) : groups.length === 0 ? (
+          // Every item exists but is checked — checked items never render in
+          // the grouped grid below, so without this the screen would just go
+          // blank instead of confirming the list is actually done.
+          <EmptyState
+            icon="checkmark-circle-outline"
+            title={t('shoppingScreen.allCheckedTitle')}
+            subtitle={t('shoppingScreen.allCheckedSubtitle')}
             action={<Button label={t('shoppingScreen.addItem')} onPress={() => router.push('/add-shopping-item')} />}
             style={styles.emptyState}
           />
@@ -134,22 +146,38 @@ export default function ListScreen() {
 
       <AnimatedPressable
         testID="shopping-add-item-bar"
-        style={[styles.addItemBar, { bottom: tabBarHeight + 12 }, addItemPress.style]}
+        style={[styles.addItemBar, { bottom: tabBarHeight + ADD_ITEM_BAR_GAP }, addItemPress.style]}
         onPress={() => router.push('/add-shopping-item')}
         onPressIn={addItemPress.onPressIn}
         onPressOut={addItemPress.onPressOut}>
         <Ionicons name="search" size={16} color={MiseColors.mutedLight} />
-        <TextInput
-          placeholder={t('nav.addItemPlaceholder')}
-          placeholderTextColor={MiseColors.mutedLight}
-          style={styles.addItemInput}
-          showSoftInputOnFocus={false}
-          onFocus={() => router.push('/add-shopping-item')}
-        />
+        {/* Decoy field — never actually typed into (no value/onChangeText,
+            showSoftInputOnFocus disabled). It exists purely for the visual
+            "search bar" look. The wrapping View's pointerEvents="none" routes
+            every tap straight to the Pressable's onPress above instead of
+            letting the native EditText capture it for its own cursor
+            placement — pointerEvents="none" on the TextInput itself doesn't
+            reliably stop that, since it handles its own touch dispatch. A
+            direct-tap-triggers-onFocus approach was tried here before and was
+            unreliable: this view's Android-level focus survives the round
+            trip through the sheet's separate dialog window without a real
+            blur/focus cycle, so a second tap produced no new focus event to
+            react to. */}
+        <View pointerEvents="none" style={styles.addItemInputWrapper}>
+          <TextInput
+            placeholder={t('nav.addItemPlaceholder')}
+            placeholderTextColor={MiseColors.mutedLight}
+            style={styles.addItemInput}
+            showSoftInputOnFocus={false}
+          />
+        </View>
       </AnimatedPressable>
     </View>
   );
 }
+
+const ADD_ITEM_BAR_HEIGHT = 50;
+const ADD_ITEM_BAR_GAP = 12;
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
@@ -174,7 +202,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    height: 50,
+    height: ADD_ITEM_BAR_HEIGHT,
     paddingHorizontal: 16,
     borderRadius: MiseRadius.md,
     backgroundColor: MiseColors.card,
@@ -186,5 +214,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-  addItemInput: { flex: 1, fontFamily: MiseFonts.body, fontSize: 14.5, color: MiseColors.ink },
+  addItemInputWrapper: { flex: 1 },
+  addItemInput: { fontFamily: MiseFonts.body, fontSize: 14.5, color: MiseColors.ink },
 });

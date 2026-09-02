@@ -1,17 +1,25 @@
-export const TRIAL_KEYS = {
-  active: 'trial.active',
-  recipes: 'trial.recipes',
-  mealPlanEntries: 'trial.mealPlanEntries',
-  shoppingItems: 'trial.shoppingItems',
-  recentShoppingItems: 'trial.recentShoppingItems',
-  settings: 'trial.settings',
+export const LOCAL_KEYS = {
+  active: 'local.active',
+  recipes: 'local.recipes',
+  mealPlanEntries: 'local.mealPlanEntries',
+  shoppingItems: 'local.shoppingItems',
+  recentShoppingItems: 'local.recentShoppingItems',
+  settings: 'local.settings',
 } as const;
 
-/** Storage keys holding actual trial data — cleared on reconciliation, but not the flags themselves. */
-export const TRIAL_DATA_KEYS = [
-  TRIAL_KEYS.recipes,
-  TRIAL_KEYS.mealPlanEntries,
-  TRIAL_KEYS.shoppingItems,
-  TRIAL_KEYS.recentShoppingItems,
-  TRIAL_KEYS.settings,
+/** Previous key prefix — getJSON still reads these if the new key is empty. */
+const LEGACY_KEY_PREFIX = 'trial.';
+
+export function legacyKeyFor(localKey: string): string | null {
+  if (!localKey.startsWith('local.')) return null;
+  return `${LEGACY_KEY_PREFIX}${localKey.slice('local.'.length)}`;
+}
+
+/** Storage keys holding actual local data — cleared on reconciliation, but not the flags themselves. */
+export const LOCAL_DATA_KEYS = [
+  LOCAL_KEYS.recipes,
+  LOCAL_KEYS.mealPlanEntries,
+  LOCAL_KEYS.shoppingItems,
+  LOCAL_KEYS.recentShoppingItems,
+  LOCAL_KEYS.settings,
 ] as const;

@@ -9,14 +9,18 @@
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_URL": "http://10.0.2.2:3000",
-        "EXPO_PUBLIC_WEB_APP_URL": "http://10.0.2.2:3000"
+        "EXPO_PUBLIC_WEB_APP_URL": "http://10.0.2.2:3000",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "test_LlXWcfMnIsBuUMfPHFzkgfZTKmn",
+        "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "test_LlXWcfMnIsBuUMfPHFzkgfZTKmn"
       }
     },
     "preview": {
       "distribution": "internal",
       "env": {
         "EXPO_PUBLIC_API_URL": "https://cookblueprint.com",
-        "EXPO_PUBLIC_WEB_APP_URL": "https://cookblueprint.com"
+        "EXPO_PUBLIC_WEB_APP_URL": "https://cookblueprint.com",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "test_LlXWcfMnIsBuUMfPHFzkgfZTKmn",
+        "EXPO_PUBLIC_REVENUECAT_ANDROID_API_KEY": "test_LlXWcfMnIsBuUMfPHFzkgfZTKmn"
       }
     },
     "production": {

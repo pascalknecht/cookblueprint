@@ -32,15 +32,15 @@ struct MealPlanProvider: TimelineProvider {
     }
 
     private func loadEntry() async -> MealPlanWidgetEntry {
-        let weekDates = miseCurrentWeekDates()
+        let weekDates = miseVisibleWeekDates()
         guard let start = weekDates.first, let end = weekDates.last else {
             return MealPlanWidgetEntry(date: Date(), days: [], signedOut: false)
         }
 
-        // Trial mode has no server account — the app mirrors local-db data here
-        // instead (syncTrialWidgetData, src/widgets/sync-trial-widget-data.ts).
-        if MiseShared.trialModeActive {
-            let response = MiseShared.trialMealPlanData.flatMap {
+        // Local mode has no server account — the app mirrors local-db data here
+        // instead (syncLocalWidgetData, src/widgets/sync-local-widget-data.ts).
+        if MiseShared.localModeActive {
+            let response = MiseShared.localMealPlanData.flatMap {
                 try? JSONDecoder().decode(MiseMealPlanResponse.self, from: $0)
             }
             let days = buildDays(from: response?.items ?? [], weekDates: weekDates)
@@ -78,7 +78,7 @@ struct MealPlanProvider: TimelineProvider {
     }
 
     private func placeholderDays() -> [MealPlanDay] {
-        miseCurrentWeekDates().map { date in
+        miseVisibleWeekDates().map { date in
             MealPlanDay(label: miseWeekdayShort(date), isToday: Calendar.current.isDateInToday(date), summary: "—")
         }
     }
@@ -159,11 +159,14 @@ struct MealPlanWidgetView: View {
     }
 
     private var weekRange: String {
-        let dates = miseCurrentWeekDates()
+        let dates = miseVisibleWeekDates()
         guard let start = dates.first, let end = dates.last else { return "" }
         let formatter = DateFormatter()
         formatter.locale = Locale.current
         formatter.setLocalizedDateFormatFromTemplate("MMM d")
+        if Calendar.current.isDate(start, inSameDayAs: end) {
+            return formatter.string(from: start)
+        }
         if MiseShared.locale == "de" || (MiseShared.locale == nil && Locale.current.languageCode == "de") {
             return "\(Calendar.current.component(.day, from: start)).–\(Calendar.current.component(.day, from: end)). \(formatter.string(from: start).components(separatedBy: " ").last ?? "")"
         }

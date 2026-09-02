@@ -11,7 +11,7 @@ import type { ShoppingItem } from "@/hooks/use-shopping-list";
 import { api } from "@/lib/api-client";
 import i18n from "@/lib/i18n";
 import { listShoppingItems } from "@/lib/local-db/shopping-items";
-import { isTrialActive } from "@/lib/local-db/trial-state";
+import { isLocalModeActive } from "@/lib/local-db/local-mode-state";
 
 type ShoppingItemsResponse = { items: ShoppingItem[]; total: number };
 
@@ -203,11 +203,11 @@ function ShoppingListWidget({
   );
 }
 
-/** Fetches unchecked shopping-list items (local-db in trial mode, API otherwise) and renders the widget JSX. */
+/** Fetches unchecked shopping-list items (local-db in local mode, API otherwise) and renders the widget JSX. */
 export async function renderShoppingListWidget() {
   try {
-    const isTrial = await isTrialActive();
-    const items = isTrial
+    const isLocal = await isLocalModeActive();
+    const items = isLocal
       ? await listShoppingItems()
       : (
           await api.get<ShoppingItemsResponse>(

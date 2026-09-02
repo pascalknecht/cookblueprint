@@ -16,4 +16,18 @@ config.resolver.nodeModulesPaths = [
 config.resolver.unstable_enableSymlinks = true;
 config.resolver.disableHierarchicalLookup = true;
 
+// Metro watches the monorepo root, so a Next.js Chrome profile that appears
+// and vanishes (screenshot tooling) would otherwise crash the file watcher.
+const existingBlockList = config.resolver.blockList;
+const blockPatterns = Array.isArray(existingBlockList)
+  ? existingBlockList
+  : existingBlockList
+    ? [existingBlockList]
+    : [];
+const blockFlags = blockPatterns[0]?.flags ?? '';
+config.resolver.blockList = [
+  ...blockPatterns,
+  new RegExp(String.raw`[/\\]\.chrome-shot-profile[/\\].*`, blockFlags),
+];
+
 module.exports = config;

@@ -37,7 +37,7 @@ function frequencyOf(recipe: MealPlanGeneratorRecipe): RecipeFrequency {
 /**
  * Pure meal-plan-generation algorithm, shared between the Next.js backend
  * (apps/nextjs/src/use-cases/meal-plans.ts, for signed-in accounts) and the
- * mobile app's local trial-mode generator (apps/mobile/src/lib/local-db) —
+ * mobile app's local-mode generator (apps/mobile/src/lib/local-db) —
  * each wraps this with its own data fetching/persistence, but the actual
  * weekly-cap / cooldown / avoid-repeats scheduling rules live here exactly
  * once. `priorEntries` should already be filtered to the `MAX_COOLDOWN_DAYS`

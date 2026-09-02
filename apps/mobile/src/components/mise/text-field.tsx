@@ -10,7 +10,7 @@ type TextFieldProps = TextInputProps & {
   multiline?: boolean;
   // Pass @/components/mise/sheet's BottomSheetTextInput when this field lives
   // inside a Sheet, so the sheet can track keyboard focus for auto-sizing.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   InputComponent?: ComponentType<any>;
 };
 
@@ -18,7 +18,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
   { label, icon, containerStyle, style, multiline, InputComponent, ...inputProps },
   ref,
 ) {
-  const Input: ComponentType<any> = InputComponent ?? TextInput; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const Input: ComponentType<any> = InputComponent ?? TextInput;  
   return (
     <View style={containerStyle}>
       {label ? <Text style={styles.label}>{label}</Text> : null}

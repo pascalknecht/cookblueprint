@@ -2,16 +2,16 @@ import { ExtensionStorage } from '@bacons/apple-targets';
 import { Platform } from 'react-native';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 
-import { syncTrialWidgetData } from './sync-trial-widget-data';
+import { syncLocalWidgetData } from './sync-local-widget-data';
 import { MEAL_PLAN_WIDGET_NAME, SHOPPING_LIST_WIDGET_NAME } from './widget-names';
 
 /**
  * Nudges the home-screen widgets to redraw right after the app changes data
  * they display, instead of waiting for the OS's own refresh schedule
  * (Android's `updatePeriodMillis`, iOS's WidgetKit refresh budget). Signed-in
- * widgets still fetch live from the API themselves; trial-mode ones read
+ * widgets still fetch live from the API themselves; local-mode ones read
  * local-db (Android directly, iOS via the App Group snapshot refreshed here
- * — `syncTrialWidgetData` no-ops outside trial mode, safe to call always).
+ * — `syncLocalWidgetData` no-ops outside local mode, safe to call always).
  * Safe to call on every platform; each branch only calls into the native
  * module for its own OS.
  */
@@ -22,7 +22,7 @@ export async function refreshMealPlanWidget() {
       renderWidget: () => import('./android/meal-plan-widget').then((m) => m.renderMealPlanWidget()),
     });
   } else if (Platform.OS === 'ios') {
-    await syncTrialWidgetData();
+    await syncLocalWidgetData();
     ExtensionStorage.reloadWidget(MEAL_PLAN_WIDGET_NAME);
   }
 }
@@ -34,7 +34,7 @@ export async function refreshShoppingListWidget() {
       renderWidget: () => import('./android/shopping-list-widget').then((m) => m.renderShoppingListWidget()),
     });
   } else if (Platform.OS === 'ios') {
-    await syncTrialWidgetData();
+    await syncLocalWidgetData();
     ExtensionStorage.reloadWidget(SHOPPING_LIST_WIDGET_NAME);
   }
 }

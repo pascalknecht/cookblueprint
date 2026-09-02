@@ -12,7 +12,7 @@ import { setLocaleCookie } from '@/lib/i18n/set-locale-action';
 
 const LOCALE_LABEL: Record<AppLocale, string> = { en: 'English', de: 'Deutsch' };
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const { i18n } = useTranslation();
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -24,12 +24,19 @@ export function LanguageSwitcher() {
     });
   }
 
+  const localeLabel = LOCALE_LABEL[i18n.language as AppLocale] ?? LOCALE_LABEL.en;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5">
+        <Button
+          variant="ghost"
+          size={compact ? "icon-sm" : "sm"}
+          className={compact ? undefined : "gap-1.5"}
+          aria-label={localeLabel}
+        >
           <Globe className="size-4" />
-          {LOCALE_LABEL[i18n.language as AppLocale] ?? LOCALE_LABEL.en}
+          {compact ? null : localeLabel}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

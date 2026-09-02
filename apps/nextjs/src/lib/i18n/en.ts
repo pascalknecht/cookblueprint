@@ -10,6 +10,7 @@ export const en = {
     pricing: 'Pricing',
     logIn: 'Log In',
     getStarted: 'Get Started',
+    menu: 'Open menu',
   },
   hero: {
     titleLine1: 'Plan meals your whole household',

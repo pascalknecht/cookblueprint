@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-28T07:30:00.000Z",
+  "title": "Design System: CookBlueprint",
+  "extensions": {
+    "colorMeta": {
+      "clay-terracotta": {
+        "role": "primary",
+        "displayName": "Clay Terracotta",
+        "canonical": "oklch(0.58 0.14 35)",
+        "tonalRamp": [
+          "oklch(0.18 0.08 35)",
+          "oklch(0.32 0.12 35)",
+          "oklch(0.45 0.14 35)",
+          "oklch(0.58 0.14 35)",
+          "oklch(0.68 0.11 35)",
+          "oklch(0.78 0.07 35)",
+          "oklch(0.88 0.04 35)",
+          "oklch(0.95 0.015 35)"
+        ]
+      },
+      "brand-dark": {
+        "role": "primary",
+        "displayName": "Brand Dark",
+        "canonical": "oklch(0.48 0.12 35)",
+        "tonalRamp": [
+          "oklch(0.16 0.07 35)",
+          "oklch(0.28 0.10 35)",
+          "oklch(0.38 0.12 35)",
+          "oklch(0.48 0.12 35)",
+          "oklch(0.62 0.09 35)",
+          "oklch(0.74 0.06 35)",
+          "oklch(0.86 0.03 35)",
+          "oklch(0.95 0.012 35)"
+        ]
+      },
+      "brand-light": {
+        "role": "primary",
+        "displayName": "Brand Light",
+        "canonical": "oklch(0.66 0.13 40)",
+        "tonalRamp": [
+          "oklch(0.20 0.08 40)",
+          "oklch(0.34 0.11 40)",
+          "oklch(0.50 0.13 40)",
+          "oklch(0.66 0.13 40)",
+          "oklch(0.74 0.10 40)",
+          "oklch(0.82 0.06 40)",
+          "oklch(0.90 0.03 40)",
+          "oklch(0.96 0.012 40)"
+        ]
+      },
+      "recipe-paper": {
+        "role": "neutral",
+        "displayName": "Recipe Paper",
+        "canonical": "oklch(0.975 0.012 80)",
+        "tonalRamp": [
+          "oklch(0.18 0.015 80)",
+          "oklch(0.32 0.015 80)",
+          "oklch(0.48 0.014 80)",
+          "oklch(0.62 0.014 80)",
+          "oklch(0.78 0.013 80)",
+          "oklch(0.88 0.012 80)",
+          "oklch(0.94 0.012 80)",
+          "oklch(0.975 0.012 80)"
+        ]
+      },
+      "porcelain": {
+        "role": "neutral",
+        "displayName": "Porcelain",
+        "canonical": "oklch(1 0.005 80)",
+        "tonalRamp": [
+          "oklch(0.20 0.01 80)",
+          "oklch(0.35 0.01 80)",
+          "oklch(0.50 0.008 80)",
+          "oklch(0.65 0.008 80)",
+          "oklch(0.80 0.006 80)",
+          "oklch(0.90 0.006 80)",
+          "oklch(0.96 0.005 80)",
+          "oklch(1 0.005 80)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.24 0.015 50)",
+        "tonalRamp": [
+          "oklch(0.15 0.015 50)",
+          "oklch(0.24 0.015 50)",
+          "oklch(0.38 0.015 50)",
+          "oklch(0.50 0.014 50)",
+          "oklch(0.64 0.012 50)",
+          "oklch(0.78 0.01 50)",
+          "oklch(0.90 0.008 50)",
+          "oklch(0.96 0.006 50)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Ink Soft",
+        "canonical": "oklch(0.36 0.02 55)",
+        "tonalRamp": [
+          "oklch(0.16 0.02 55)",
+          "oklch(0.26 0.02 55)",
+          "oklch(0.36 0.02 55)",
+          "oklch(0.48 0.018 55)",
+          "oklch(0.62 0.014 55)",
+          "oklch(0.76 0.01 55)",
+          "oklch(0.88 0.008 55)",
+          "oklch(0.95 0.006 55)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "oklch(0.62 0.025 60)",
+        "tonalRamp": [
+          "oklch(0.18 0.02 60)",
+          "oklch(0.32 0.022 60)",
+          "oklch(0.46 0.024 60)",
+          "oklch(0.62 0.025 60)",
+          "oklch(0.72 0.02 60)",
+          "oklch(0.82 0.015 60)",
+          "oklch(0.90 0.01 60)",
+          "oklch(0.96 0.006 60)"
+        ]
+      },
+      "muted-light": {
+        "role": "neutral",
+        "displayName": "Muted Light",
+        "canonical": "oklch(0.72 0.02 65)",
+        "tonalRamp": [
+          "oklch(0.20 0.018 65)",
+          "oklch(0.34 0.02 65)",
+          "oklch(0.48 0.02 65)",
+          "oklch(0.62 0.02 65)",
+          "oklch(0.72 0.02 65)",
+          "oklch(0.82 0.014 65)",
+          "oklch(0.90 0.01 65)",
+          "oklch(0.96 0.006 65)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "oklch(0.91 0.02 75)",
+        "tonalRamp": [
+          "oklch(0.22 0.02 75)",
+          "oklch(0.38 0.02 75)",
+          "oklch(0.54 0.02 75)",
+          "oklch(0.70 0.02 75)",
+          "oklch(0.82 0.02 75)",
+          "oklch(0.91 0.02 75)",
+          "oklch(0.95 0.015 75)",
+          "oklch(0.98 0.01 75)"
+        ]
+      },
+      "border-soft": {
+        "role": "neutral",
+        "displayName": "Border Soft",
+        "canonical": "oklch(0.93 0.018 75)",
+        "tonalRamp": [
+          "oklch(0.22 0.018 75)",
+          "oklch(0.38 0.018 75)",
+          "oklch(0.54 0.018 75)",
+          "oklch(0.70 0.018 75)",
+          "oklch(0.84 0.018 75)",
+          "oklch(0.93 0.018 75)",
+          "oklch(0.96 0.012 75)",
+          "oklch(0.98 0.008 75)"
+        ]
+      },
+      "ink-night": {
+        "role": "neutral",
+        "displayName": "Ink Night",
+        "canonical": "oklch(0.175 0.014 320)",
+        "tonalRamp": [
+          "oklch(0.12 0.014 320)",
+          "oklch(0.175 0.014 320)",
+          "oklch(0.28 0.014 320)",
+          "oklch(0.42 0.012 320)",
+          "oklch(0.58 0.01 320)",
+          "oklch(0.74 0.008 320)",
+          "oklch(0.88 0.006 320)",
+          "oklch(0.96 0.005 320)"
+        ]
+      },
+      "cream-text": {
+        "role": "neutral",
+        "displayName": "Cream Text",
+        "canonical": "oklch(0.985 0.012 80)",
+        "tonalRamp": [
+          "oklch(0.20 0.012 80)",
+          "oklch(0.36 0.012 80)",
+          "oklch(0.52 0.012 80)",
+          "oklch(0.68 0.012 80)",
+          "oklch(0.82 0.012 80)",
+          "oklch(0.90 0.012 80)",
+          "oklch(0.96 0.012 80)",
+          "oklch(0.985 0.012 80)"
+        ]
+      },
+      "tint": {
+        "role": "neutral",
+        "displayName": "Tint",
+        "canonical": "oklch(0.96 0.02 50)",
+        "tonalRamp": [
+          "oklch(0.22 0.04 50)",
+          "oklch(0.38 0.04 50)",
+          "oklch(0.54 0.035 50)",
+          "oklch(0.70 0.03 50)",
+          "oklch(0.84 0.025 50)",
+          "oklch(0.92 0.022 50)",
+          "oklch(0.96 0.02 50)",
+          "oklch(0.98 0.012 50)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Gold",
+        "canonical": "oklch(0.76 0.14 75)",
+        "tonalRamp": [
+          "oklch(0.22 0.08 75)",
+          "oklch(0.38 0.12 75)",
+          "oklch(0.54 0.14 75)",
+          "oklch(0.76 0.14 75)",
+          "oklch(0.82 0.10 75)",
+          "oklch(0.88 0.06 75)",
+          "oklch(0.93 0.03 75)",
+          "oklch(0.97 0.015 75)"
+        ]
+      },
+      "berry": {
+        "role": "secondary",
+        "displayName": "Berry",
+        "canonical": "oklch(0.50 0.14 350)",
+        "tonalRamp": [
+          "oklch(0.18 0.08 350)",
+          "oklch(0.32 0.12 350)",
+          "oklch(0.50 0.14 350)",
+          "oklch(0.62 0.12 350)",
+          "oklch(0.74 0.08 350)",
+          "oklch(0.84 0.05 350)",
+          "oklch(0.92 0.025 350)",
+          "oklch(0.97 0.01 350)"
+        ]
+      },
+      "fired-clay": {
+        "role": "secondary",
+        "displayName": "Fired Clay",
+        "canonical": "oklch(0.62 0.12 55)",
+        "tonalRamp": [
+          "oklch(0.20 0.08 55)",
+          "oklch(0.34 0.11 55)",
+          "oklch(0.48 0.12 55)",
+          "oklch(0.62 0.12 55)",
+          "oklch(0.74 0.09 55)",
+          "oklch(0.84 0.05 55)",
+          "oklch(0.92 0.025 55)",
+          "oklch(0.97 0.01 55)"
+        ]
+      },
+      "amber": {
+        "role": "secondary",
+        "displayName": "Amber",
+        "canonical": "oklch(0.68 0.14 60)",
+        "tonalRamp": [
+          "oklch(0.22 0.08 60)",
+          "oklch(0.36 0.12 60)",
+          "oklch(0.52 0.14 60)",
+          "oklch(0.68 0.14 60)",
+          "oklch(0.78 0.10 60)",
+          "oklch(0.86 0.06 60)",
+          "oklch(0.93 0.03 60)",
+          "oklch(0.97 0.012 60)"
+        ]
+      },
+      "success": {
+        "role": "secondary",
+        "displayName": "Success",
+        "canonical": "oklch(0.64 0.13 155)",
+        "tonalRamp": [
+          "oklch(0.20 0.08 155)",
+          "oklch(0.34 0.11 155)",
+          "oklch(0.48 0.13 155)",
+          "oklch(0.64 0.13 155)",
+          "oklch(0.74 0.10 155)",
+          "oklch(0.84 0.06 155)",
+          "oklch(0.92 0.03 155)",
+          "oklch(0.97 0.012 155)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Marketing heroes and app large page titles. Rethink Sans 700 only." },
+      "headline": { "displayName": "Headline", "purpose": "Section titles on marketing and in-app." },
+      "title": { "displayName": "Title", "purpose": "Compact app header and marketing wordmark." },
+      "body": { "displayName": "Body", "purpose": "Paragraphs, lists, field values. Plus Jakarta Sans." },
+      "label": { "displayName": "Label", "purpose": "Eyebrows, tab labels, field labels." }
+    },
+    "shadows": [
+      {
+        "name": "recipe-card",
+        "value": "0 6px 16px rgba(90, 60, 20, 0.05)",
+        "purpose": "Warm lift under recipe cards on the grid."
+      },
+      {
+        "name": "floating-chrome",
+        "value": "0 10px 28px oklch(0.2 0.03 50 / 0.14)",
+        "purpose": "Marketing nav after it becomes a capsule."
+      },
+      {
+        "name": "tab-bar",
+        "value": "0 10px 18px rgba(0, 0, 0, 0.28)",
+        "purpose": "Ink Night tab pill sitting over photographs."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Marketing nav chrome transitions, 400ms."
+      },
+      {
+        "name": "indicator-out",
+        "value": "cubic-bezier(0.33, 1, 0.68, 1)",
+        "purpose": "Tab indicator slide, 280ms."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "2xl", "value": "1400px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink Night fill. The action, never terracotta.",
+      "html": "<button class=\"ds-btn-primary\">Get Started</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 18px; border: 0; border-radius: 16px; background: #141118; color: #FFF9F3; font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), background-color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-primary:hover { background: color-mix(in oklch, #141118 90%, #FFF9F3); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, #C4553E 30%, transparent); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Porcelain fill with a 1.5px hairline. Quiet sibling to Ink Night.",
+      "html": "<button class=\"ds-btn-secondary\">See How It Works</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; height: 56px; padding: 0 18px; border: 1.5px solid #EAE1D4; border-radius: 16px; background: #FFFFFF; color: #221E1B; font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-secondary:hover { background: #F0E8DD; } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, #C4553E 30%, transparent); }"
+    },
+    {
+      "name": "Marketing CTA",
+      "kind": "button",
+      "refersTo": "button-cta",
+      "description": "Pill Get Started used in the marketing header and hero.",
+      "html": "<button class=\"ds-btn-cta\">Get Started <svg class=\"ds-btn-cta-icon\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M13 6l6 6-6 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button>",
+      "css": ".ds-btn-cta { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border: 0; border-radius: 999px; background: #141118; color: #FFF9F3; font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 160ms cubic-bezier(0.16, 1, 0.3, 1); } .ds-btn-cta-icon { width: 14px; height: 14px; } .ds-btn-cta:hover { background: color-mix(in oklch, #141118 90%, #FFF9F3); } .ds-btn-cta:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, #C4553E 30%, transparent); }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Porcelain field, 14px corners, 54px tall. Label sits above in Ink Soft.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Email</span><input class=\"ds-field-input\" type=\"email\" placeholder=\"you@household.com\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 7px; font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; } .ds-field-label { font-size: 13px; font-weight: 600; color: #4A423B; } .ds-field-input { height: 54px; padding: 0 15px; border: 1.5px solid #EAE1D4; border-radius: 14px; background: #FFFFFF; color: #221E1B; font-size: 15px; font-family: inherit; } .ds-field-input::placeholder { color: #B3A99D; } .ds-field-input:focus-visible { outline: none; border-color: #C4553E; box-shadow: 0 0 0 3px color-mix(in oklch, #C4553E 30%, transparent); }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Meal-type filter. Selected is Ink Soft, never terracotta.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip ds-chip-on\">All</button><button class=\"ds-chip\">Dinner</button></div>",
+      "css": ".ds-chips { display: flex; gap: 8px; } .ds-chip { height: 32px; padding: 0 14px; border: 1px solid #EAE1D4; border-radius: 999px; background: #FFFFFF; color: #221E1B; font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; } .ds-chip-on { background: #4A423B; border-color: #4A423B; color: #FFF9F3; } .ds-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, #C4553E 30%, transparent); }"
+    },
+    {
+      "name": "Recipe Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Porcelain tile with a food photograph, time badge, and warm 5% shadow.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-photo\"><span class=\"ds-card-badge\">20m</span></div><div class=\"ds-card-body\"><p class=\"ds-card-title\">Lentil soup</p><p class=\"ds-card-meta\">2 servings · Dinner</p></div></article>",
+      "css": ".ds-card { width: 220px; overflow: hidden; border: 1px solid #F0E8DD; border-radius: 18px; background: #FFFFFF; box-shadow: 0 6px 16px rgba(90, 60, 20, 0.05); font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; } .ds-card-photo { position: relative; height: 112px; background: #FBEDE7; } .ds-card-badge { position: absolute; top: 8px; right: 8px; padding: 3px 8px; border-radius: 999px; background: rgba(20, 17, 24, 0.62); color: #FFF9F3; font-size: 11px; font-weight: 600; } .ds-card-body { padding: 12px; } .ds-card-title { margin: 0; font-size: 15px; font-weight: 700; color: #221E1B; } .ds-card-meta { margin: 4px 0 0; font-size: 12px; color: #97887C; }"
+    },
+    {
+      "name": "Marketing Nav",
+      "kind": "nav",
+      "refersTo": "nav-floating",
+      "description": "Scrolled capsule. Docked state is the same layout with no fill, radius, or shadow.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Main\"><a class=\"ds-nav-brand\" href=\"#\"><span class=\"ds-nav-mark\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M12 3c-1.2 0-2.4.3-3.4.9a6 6 0 0 0-8.6 5.1c0 1.8.8 3.5 2.1 4.7.9 1.5 2.4 2.3 4.1 2.3h11.6c1.7 0 3.2-.8 4.1-2.3 1.3-1.2 2.1-2.9 2.1-4.7a6 6 0 0 0-8.6-5.1C14.4 3.3 13.2 3 12 3Z\" fill=\"currentColor\"/></svg></span>CookBlueprint</a><div class=\"ds-nav-links\"><a href=\"#\">Features</a><a href=\"#\">How It Works</a><a href=\"#\">Pricing</a></div><a class=\"ds-nav-cta\" href=\"#\">Get Started</a></nav>",
+      "css": ".ds-nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 56px; padding: 0 20px; border: 1px solid color-mix(in oklch, #EAE1D4 70%, transparent); border-radius: 28px; background: color-mix(in oklch, #FBF6EF 78%, transparent); box-shadow: 0 10px 28px oklch(0.2 0.03 50 / 0.14); font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; } .ds-nav-brand { display: flex; align-items: center; gap: 8px; color: #221E1B; text-decoration: none; font-family: 'Rethink Sans', ui-sans-serif, sans-serif; font-weight: 700; letter-spacing: -0.02em; } .ds-nav-mark { display: flex; width: 32px; height: 32px; align-items: center; justify-content: center; border-radius: 10px; background: #C4553E; color: #FFF9F3; } .ds-nav-mark svg { width: 18px; height: 18px; } .ds-nav-links { display: flex; gap: 32px; } .ds-nav-links a { color: #97887C; text-decoration: none; font-size: 14px; } .ds-nav-links a:hover { color: #221E1B; } .ds-nav-cta { height: 32px; padding: 0 12px; border-radius: 999px; background: #141118; color: #FFF9F3; text-decoration: none; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; } .ds-nav-cta:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, #C4553E 30%, transparent); }"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "custom",
+      "refersTo": "tab-bar",
+      "description": "Ink Night floating pill. Signature app chrome. Inner indicator radius is 16px (26 minus 10).",
+      "html": "<nav class=\"ds-tabs\" aria-label=\"Tabs\"><span class=\"ds-tabs-indicator\"></span><button class=\"ds-tab ds-tab-on\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 11h16v9H4zM8 11V7a4 4 0 0 1 8 0v4\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/></svg>Recipes</button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"16\" rx=\"2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/><path d=\"M8 3v4M16 3v4M4 11h16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/></svg>Plan</button><button class=\"ds-tab\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M6 7h15l-1.5 9h-12zM6 7 5 4H2\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"/></svg>List</button></nav>",
+      "css": ".ds-tabs { position: relative; display: flex; align-items: center; gap: 4px; height: 72px; padding: 10px; border-radius: 26px; background: #141118; box-shadow: 0 10px 18px rgba(0, 0, 0, 0.28); font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; } .ds-tabs-indicator { position: absolute; top: 10px; bottom: 10px; left: 10px; width: 72px; border-radius: 16px; background: rgba(255, 255, 255, 0.14); } .ds-tab { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-width: 72px; padding: 8px 12px; border: 0; background: transparent; color: #9A8F82; font-size: 10.5px; font-weight: 600; cursor: pointer; } .ds-tab svg { width: 20px; height: 20px; } .ds-tab-on { color: #D9714E; } .ds-tab:focus-visible { outline: 2px solid #C4553E; outline-offset: 2px; }"
+    },
+    {
+      "name": "Page Header",
+      "kind": "custom",
+      "refersTo": "page-header",
+      "description": "Ink Night block with 26px bottom corners. Scrolls away; compact bar crossfades in.",
+      "html": "<header class=\"ds-page-header\"><h1 class=\"ds-page-title\">Recipes</h1><p class=\"ds-page-sub\">Hi Sam</p></header>",
+      "css": ".ds-page-header { padding: 24px 22px 20px; border-bottom-left-radius: 26px; border-bottom-right-radius: 26px; background: #141118; } .ds-page-title { margin: 0; color: #FFF9F3; font-family: 'Rethink Sans', ui-sans-serif, sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; line-height: 38px; } .ds-page-sub { margin: 2px 0 0; color: #D7B49D; font-family: 'Plus Jakarta Sans', ui-sans-serif, sans-serif; font-size: 12.5px; font-weight: 500; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Kitchen Counter",
+    "overview": "This system is a kitchen counter in late afternoon: recipe paper under the hands, a copper pot on the back burner, nothing performing. Surfaces are warm cream. Chrome is Ink Night, like a cast-iron handle. Clay Terracotta is the one cooked note, used the way you use a tomato: visible, rare, never the whole plate.\n\nThe mood is warm premium. Paper, copper, and quiet confidence. Density stays scannable. This is for weeknight decisions, not a gallery. PRODUCT.md asks for premium, calm, trustworthy craft: expert and practical, with proof over hype. The counter does that by showing the actual tools: recipes, a real week, a shared list.\n\nIt rejects dark neon or crypto-style aesthetics, overly playful consumer-app styling, and gradient-heavy visual noise and decorative effects.",
+    "keyCharacteristics": [
+      "Recipe Paper ground, Ink Night chrome, Clay Terracotta as the scarce accent",
+      "Rethink Sans display plus Plus Jakarta Sans body",
+      "Floating pills for chrome (app tab bar, marketing nav after scroll); dark rounded headers in the app",
+      "Soft kitchen radii (10px to 26px); true pills only for CTAs, chips, and capsules",
+      "Shadows only on floating chrome and recipe cards; cream tone does the rest"
+    ],
+    "rules": [
+      { "name": "The Clay Rule", "body": "Clay Terracotta occupies at most a tenth of any screen. Logo marks, italic emphasis, brand chips, focus. Primary actions are Ink Night. If a layout is mostly orange, it has failed.", "section": "colors" },
+      { "name": "The Warm Neutral Rule", "body": "Every gray is tinted toward clay. Cold slate, cool zinc, and pure #000 / #fff as a palette choice are forbidden. Porcelain is the one near-white, and it sits on Recipe Paper so it never reads as hospital white.", "section": "colors" },
+      { "name": "The Tight Display Rule", "body": "Display type is always Rethink Sans 700 with tracking -0.02em (app: -0.5px at 34px). Default tracking on this face looks loose. Never substitute a serif or a second display family.", "section": "typography" },
+      { "name": "The One Italic Rule", "body": "Italic is a single cooked word, not a paragraph style. Marketing uses it on the terracotta emphasis span. Body copy stays roman.", "section": "typography" },
+      { "name": "The Paper First Rule", "body": "If a surface can read as a sheet of paper on the counter, use tone and a 1px border. Shadows are for things that float: the tab bar, the scrolled marketing capsule, a recipe card that has to lift off the grid.", "section": "elevation" },
+      { "name": "The No Layout Motion Rule", "body": "Animate color, shadow, transform, border-radius, backdrop-filter. Never width, height, margin, padding, or top. Marketing nav eases 400ms cubic-bezier(0.16, 1, 0.3, 1). App tab indicator is 280ms cubic-out. Press scale uses a snappy spring (damping 20, stiffness 500). Honor prefers-reduced-motion by dropping those transitions.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do put primary actions on Ink Night ({colors.ink-night}) with Cream Text.",
+      "Do keep Clay Terracotta under 10% of the screen: mark, emphasis, focus, one chip.",
+      "Do set Rethink Sans display at 700 with tracking -0.02em.",
+      "Do use Recipe Paper as the page ground and Porcelain only for sitting objects (cards, fields, secondary buttons).",
+      "Do compute inner radius as outer radius minus inset (tab indicator is the canonical example: 26px minus 10px equals 16px).",
+      "Do float chrome: tab bar, compact header, marketing capsule after scroll.",
+      "Do tint every shadow toward clay brown. Recipe cards use #5A3C14 at 5%.",
+      "Do meet WCAG 2.2 AA: text contrast, visible focus rings, keyboard paths, semantic structure."
+    ],
+    "donts": [
+      "Don't use dark neon or crypto-style aesthetics.",
+      "Don't use overly playful consumer-app styling.",
+      "Don't use gradient-heavy visual noise and decorative effects. The app gradient button is a single exception, never a marketing pattern.",
+      "Don't fill primary buttons with Clay Terracotta. That color is the accent, not the action.",
+      "Don't set border-left or border-right greater than 1px as a colored stripe on cards, lists, or callouts.",
+      "Don't clip type to a gradient (background-clip: text).",
+      "Don't default to glassmorphism. Frost is allowed on the scrolled marketing nav only.",
+      "Don't ship the hero-metric template (big number, small label, supporting stats, gradient accent).",
+      "Don't tile identical icon-title-text cards.",
+      "Don't nest cards inside cards.",
+      "Don't animate width, height, margin, padding, or top.",
+      "Don't introduce Inter, a display serif, or monospace as \"technical\" costume.",
+      "Don't use cold gray, pure black, or pure white as the palette. Porcelain on Recipe Paper is the white; Ink Night is the black."
+    ]
+  }
+}

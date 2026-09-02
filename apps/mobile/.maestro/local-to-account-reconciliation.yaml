@@ -5,13 +5,12 @@ tags:
 # Requires the Next.js backend running and reachable, and the seeded account
 # from `pnpm seed:e2e-user` (apps/nextjs) — see .maestro/README notes.
 #
-# Exercises reconcileTrialData() (src/lib/reconcile-trial-data.ts): local
-# trial-mode data gets pushed to the account on login. There's currently no
-# in-app link from trial mode to the Login screen (the Household trial banner
-# only offers "Create account"), so this deep-links straight to /login —
-# the same screen, just reached a different way than a real user could today.
+# Exercises reconcileLocalData() (src/lib/reconcile-local-data.ts): on-device
+# local-mode data gets pushed to the account on login. Settings' local-mode
+# banner also links to Login; this deep-links straight to /login so the flow
+# doesn't depend on navigating Settings first.
 #
-# Reuses the seeded e2e account, so "Reconciled Trial Recipe" accumulates one
+# Reuses the seeded e2e account, so "Reconciled Local Recipe" accumulates one
 # more copy of itself in that account's household on every run — harmless for
 # the assertion below, but worth knowing if you're inspecting that account's
 # data directly.
@@ -28,7 +27,7 @@ tags:
     id: "add-recipe-manual-option"
 - tapOn:
     id: "manual-title-input"
-- inputText: "Reconciled Trial Recipe"
+- inputText: "Reconciled Local Recipe"
 - tapOn:
     id: "manual-ingredients-input"
 - inputText: "Flour"
@@ -36,7 +35,7 @@ tags:
     id: "manual-save-button"
 - assertVisible:
     id: "recipes-screen"
-- assertVisible: "Reconciled Trial Recipe"
+- assertVisible: "Reconciled Local Recipe"
 
 - openLink: "mise://login"
 - tapOn:
@@ -49,4 +48,4 @@ tags:
     id: "login-submit-button"
 - assertVisible:
     id: "recipes-screen"
-- assertVisible: "Reconciled Trial Recipe"
+- assertVisible: "Reconciled Local Recipe"

@@ -1,10 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 
-import { BottomSheetScrollView, BottomSheetTextInput, Sheet } from "@/components/mise/sheet";
+import { BottomSheetTextInput, BottomSheetView, Sheet, type SheetRef } from "@/components/mise/sheet";
 import { ShoppingTile } from "@/components/mise/shopping-tile";
 import { TextField } from "@/components/mise/text-field";
 import {
@@ -43,20 +43,14 @@ export default function AddShoppingItemScreen() {
   const { showToast } = useToast();
   const [name, setName] = useState("");
   const nameInputRef = useRef<TextInput>(null);
+  const sheetRef = useRef<SheetRef>(null);
 
-  // Focus once the sheet has actually settled at its open snap point,
-  // instead of via autoFocus — opening the keyboard at the same time as
-  // mount makes gorhom's dynamic content-height measurement miscalculate.
-  // `onChange` fires as soon as the animated index crosses into range, not
-  // once the open animation has actually finished, so focusing here directly
-  // starts the keyboard's rise animation while the sheet is still settling —
-  // two motions competing for the same frames read as one janky one. Gorhom's
-  // Android open animation is a fixed 250ms timing (see ANIMATION_DURATION in
-  // @gorhom/bottom-sheet/src/constants.ts), so wait that long before focusing.
-  const handleSheetChange = useCallback((index: number) => {
-    if (index !== 0) return;
-    setTimeout(() => nameInputRef.current?.focus(), 250);
-  }, []);
+  // Focusing as soon as the input mounts is too early — TrueSheet's content
+  // isn't attached to the native window yet at that point, so the keyboard
+  // never shows. Wait for the sheet to actually finish presenting instead.
+  function handleDidPresent() {
+    nameInputRef.current?.focus();
+  }
 
   const suggestions = useMemo(() => {
     const q = name.trim().toLowerCase();
@@ -113,12 +107,8 @@ export default function AddShoppingItemScreen() {
   }
 
   return (
-    <Sheet
-      onDismiss={() => router.back()}
-      onChange={handleSheetChange}
-      keyboardBehavior="interactive"
-      android_keyboardInputMode="adjustPan">
-      <BottomSheetScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+    <Sheet ref={sheetRef} onDismiss={() => router.back()} onDidPresent={handleDidPresent}>
+      <BottomSheetView>
         <Text style={styles.title}>{t("addShoppingItem.title")}</Text>
         <Text style={styles.subtitle}>{t("addShoppingItem.subtitle")}</Text>
 
@@ -161,7 +151,7 @@ export default function AddShoppingItemScreen() {
             </View>
           </>
         ) : null}
-      </BottomSheetScrollView>
+      </BottomSheetView>
     </Sheet>
   );
 }

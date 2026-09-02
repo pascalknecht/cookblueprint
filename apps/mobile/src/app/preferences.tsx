@@ -7,14 +7,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BackHeader } from '@/components/mise/back-header';
 import { MiseColors, MiseFonts } from '@/constants/theme';
-import { useTrialMode } from '@/hooks/use-trial-mode';
+import { useLocalMode } from '@/hooks/use-local-mode';
 import { signOut } from '@/lib/auth-client';
 import { setAppLocale, SUPPORTED_LOCALES, type AppLocale } from '@/lib/i18n';
 
 export default function PreferencesScreen() {
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
-  const { data: isTrial } = useTrialMode();
+  const { data: isLocal } = useLocalMode();
 
   const logoutMutation = useMutation({
     mutationFn: () => signOut(),
@@ -43,7 +43,7 @@ export default function PreferencesScreen() {
           })}
         </View>
 
-        {isTrial ? null : (
+        {isLocal ? null : (
           <Text style={styles.logout} onPress={() => logoutMutation.mutate()}>
             {logoutMutation.isPending ? t('preferences.loggingOut') : t('preferences.logOut')}
           </Text>

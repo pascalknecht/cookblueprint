@@ -207,7 +207,7 @@ export default function RecipeDetailScreen() {
 
         <CompactHeader title={recipe.title} compactStyle={compactStyle} compactShown={compactShown} titleInset={40} />
 
-        {/* Back/edit buttons stay pinned above everything and always
+        {/* Back/options buttons stay pinned above everything and always
             visible — they carry their own translucent backing, so they
             don't need the compact bar to be shown to read clearly. */}
         <View pointerEvents="box-none" style={styles.chrome}>
@@ -225,11 +225,18 @@ export default function RecipeDetailScreen() {
             ]}
           />
           <IconButton
-            name="create-outline"
+            name="ellipsis-vertical"
             variant="translucent"
             size={38}
-            onPress={() => router.push({ pathname: '/edit-recipe', params: { id } })}
-            style={[styles.cornerButton, styles.editButton, { top: insets.top + 9 }]}
+            testID="recipe-options-button"
+            accessibilityLabel={t('recipeDetail.options')}
+            onPress={() =>
+              router.push({
+                pathname: '/recipe-options',
+                params: { id, title: recipe.title, color: recipe.color },
+              })
+            }
+            style={[styles.cornerButton, styles.optionsButton, { top: insets.top + 9 }]}
           />
         </View>
 
@@ -304,7 +311,7 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   backButton: { left: 16 },
-  editButton: { right: 16 },
+  optionsButton: { right: 16 },
   content: {
     backgroundColor: MiseColors.background,
     borderTopLeftRadius: MiseRadius.xxl,

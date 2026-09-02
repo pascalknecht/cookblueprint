@@ -3,27 +3,33 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { MiseTabBar } from '@/components/mise/tab-bar';
+import { useAuthLookupPending } from '@/hooks/use-auth-lookup-pending';
 import { useAuthRedirect } from '@/hooks/use-auth-redirect';
 import { useSyncWidgetAuth } from '@/hooks/use-sync-widget-auth';
-import { useSyncWidgetTrialData } from '@/hooks/use-sync-widget-trial-data';
-import { useTrialMode } from '@/hooks/use-trial-mode';
+import { useSyncWidgetLocalData } from '@/hooks/use-sync-widget-local-data';
+import { useLocalMode } from '@/hooks/use-local-mode';
 import { useSession } from '@/lib/auth-client';
 
 export default function TabsLayout() {
   const { t } = useTranslation();
   const { data: session, isPending: sessionPending } = useSession();
-  const { data: isTrial, isPending: trialPending } = useTrialMode();
+  const { data: isLocal, isPending: localPending } = useLocalMode();
+
+  const isPending = useAuthLookupPending(sessionPending, localPending, isLocal);
 
   useAuthRedirect({
-    isPending: sessionPending || trialPending,
-    isAuthenticated: !!session || !!isTrial,
+    isPending,
+    isAuthenticated: !!session || !!isLocal,
     redirectWhen: 'unauthenticated',
     to: '/',
   });
+  // No app-wide entitlement gate — free (non-entitled) accounts get full
+  // access to the app itself. Premium is gated per-feature instead (see the
+  // advanced auto-plan lock in plan-options.tsx).
   useSyncWidgetAuth(!!session);
-  // Mirrors local trial data into the iOS widget's shared storage — Android's
+  // Mirrors on-device data into the iOS widget's shared storage — Android's
   // widget reads local-db directly and needs no such syncing.
-  useSyncWidgetTrialData(!!isTrial);
+  useSyncWidgetLocalData(!!isLocal);
 
   return (
     <View style={{ flex: 1 }}>

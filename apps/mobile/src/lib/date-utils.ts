@@ -19,6 +19,17 @@ export function toISODate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+/**
+ * Week dates shown on the meal plan. The current week is clipped to today
+ * and later so past days drop off; other weeks stay Monday–Sunday.
+ */
+export function getVisibleWeekDates(reference = new Date(), today = new Date()): Date[] {
+  const dates = getCurrentWeekDates(reference);
+  const todayISO = toISODate(today);
+  if (!dates.some((date) => toISODate(date) === todayISO)) return dates;
+  return dates.filter((date) => toISODate(date) >= todayISO);
+}
+
 /** Parses a "YYYY-MM-DD" string as local midnight (avoids `new Date(str)`'s UTC-parsing gotcha). */
 export function fromISODate(isoDate: string): Date {
   const [year, month, day] = isoDate.split('-').map(Number);
@@ -47,7 +58,11 @@ export function dayOfMonth(date: Date): string {
 export function formatWeekRange(dates: Date[], locale = 'en'): string {
   const start = dates[0];
   const end = dates[dates.length - 1];
+  if (!start || !end) return '';
   const startMonth = start.toLocaleDateString(bcp47(locale), { month: 'short' });
+  if (toISODate(start) === toISODate(end)) {
+    return `${startMonth} ${dayOfMonth(start)}`;
+  }
   const endMonth = end.toLocaleDateString(bcp47(locale), { month: 'short' });
 
   if (startMonth === endMonth) {

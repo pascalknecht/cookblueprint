@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
-import { BottomSheetView, Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet, type SheetRef } from '@/components/mise/sheet';
 import { type MealType } from '@/constants/meal-types';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useDeleteMealAssignment } from '@/hooks/use-meal-plan';
@@ -24,7 +23,7 @@ export default function EditMealScreen() {
   }>();
   const deleteMutation = useDeleteMealAssignment();
   const { showToast } = useToast();
-  const sheetRef = useRef<BottomSheetModal>(null);
+  const sheetRef = useRef<SheetRef>(null);
   // The sheet closes itself (animated, in its own portal) before we leave
   // this route, then its onDismiss below does the actual navigation — so
   // there's never a screen swap racing the close animation.

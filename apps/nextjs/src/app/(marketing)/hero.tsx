@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getLocale, getServerTranslator } from "@/lib/i18n/server";
+import { HashLink } from "./hash-link";
 import { PhoneMockup } from "./phone-mockup";
 
 export async function HeroSection() {
@@ -17,7 +18,7 @@ export async function HeroSection() {
 
       <div className="relative container mx-auto grid gap-16 px-4 md:grid-cols-2 md:items-center md:gap-8">
         <div className="mx-auto max-w-xl text-center md:mx-0 md:text-left">
-          <h1 className="font-display text-foreground mb-6 text-4xl md:text-5xl lg:text-6xl">
+          <h1 className="font-display text-foreground mb-6 text-4xl tracking-tight md:text-5xl lg:text-6xl">
             {t("hero.titleLine1")}
             <br />
             <span className="text-primary italic">{t("hero.titleEmphasis")}</span>
@@ -28,14 +29,18 @@ export async function HeroSection() {
           </p>
 
           <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
-            <Button size="lg" asChild>
+            <Button
+              size="lg"
+              className="rounded-full bg-near text-near-foreground hover:bg-near/90"
+              asChild
+            >
               <Link href="/register">
                 {t("hero.ctaPrimary")}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
-              <Link href="#features">{t("hero.ctaSecondary")}</Link>
+              <HashLink href="#features">{t("hero.ctaSecondary")}</HashLink>
             </Button>
           </div>
 

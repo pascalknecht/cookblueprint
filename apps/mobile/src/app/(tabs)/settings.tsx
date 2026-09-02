@@ -4,22 +4,25 @@ import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
 import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
+import { getTabBarScrollPadding } from '@/components/mise/tab-bar-metrics';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
-import { useTrialMode } from '@/hooks/use-trial-mode';
+import { useLocalMode } from '@/hooks/use-local-mode';
 import { usePressFeedback } from '@/hooks/usePressFeedback';
 import { useActiveOrganization } from '@/lib/auth-client';
 
 export default function SettingsScreen() {
   const { t } = useTranslation();
-  const { data: isTrial } = useTrialMode();
+  const { data: isLocal } = useLocalMode();
   const { data: activeOrganization } = useActiveOrganization();
 
   const { onScroll, onHeaderLayout, compactStyle, compactShown } = useScrollHeader();
-  const householdName = isTrial ? t('settings.defaultName') : (activeOrganization?.name ?? t('settings.defaultName'));
+  const insets = useSafeAreaInsets();
+  const householdName = isLocal ? t('settings.defaultName') : (activeOrganization?.name ?? t('settings.defaultName'));
   const householdSwitcherPress = usePressFeedback();
   const householdLinkPress = usePressFeedback();
   const editAccountPress = usePressFeedback();
@@ -32,21 +35,21 @@ export default function SettingsScreen() {
         testID="settings-screen"
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: 108 }}>
-        <PageHeader onLayout={onHeaderLayout} title={t('settings.title')} subtitle={isTrial ? t('settings.eyebrow') : undefined} />
+        contentContainerStyle={{ paddingBottom: getTabBarScrollPadding(insets.bottom) }}>
+        <PageHeader onLayout={onHeaderLayout} title={t('settings.title')} subtitle={isLocal ? t('settings.eyebrow') : undefined} />
         <View style={styles.content}>
 
-      {isTrial ? (
-        <View style={styles.trialBanner}>
-          <Text style={styles.trialBannerTitle}>{t('settings.trialBannerTitle')}</Text>
-          <Text style={styles.trialBannerBody}>{t('settings.trialBannerBody')}</Text>
+      {isLocal ? (
+        <View style={styles.localBanner}>
+          <Text style={styles.localBannerTitle}>{t('settings.localBannerTitle')}</Text>
+          <Text style={styles.localBannerBody}>{t('settings.localBannerBody')}</Text>
           <Button
-            label={t('settings.trialCreateAccount')}
+            label={t('settings.localCreateAccount')}
             onPress={() => router.push('/register')}
             style={styles.inviteButton}
           />
-          <Text style={styles.trialLogIn} onPress={() => router.push('/login')}>
-            {t('settings.trialLogIn')}
+          <Text style={styles.localLogIn} onPress={() => router.push('/login')}>
+            {t('settings.localLogIn')}
           </Text>
         </View>
       ) : (
@@ -68,7 +71,7 @@ export default function SettingsScreen() {
       )}
 
       <View style={styles.card}>
-        {isTrial ? null : (
+        {isLocal ? null : (
           <AnimatedPressable
             testID="household-link"
             style={[styles.navRow, styles.navRowDivider, householdLinkPress.style]}
@@ -80,7 +83,7 @@ export default function SettingsScreen() {
           </AnimatedPressable>
         )}
 
-        {isTrial ? null : (
+        {isLocal ? null : (
           <AnimatedPressable
             testID="edit-account-link"
             style={[styles.navRow, styles.navRowDivider, editAccountPress.style]}
@@ -113,7 +116,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
   content: { paddingHorizontal: 22, paddingTop: 18 },
-  trialBanner: {
+  localBanner: {
     backgroundColor: MiseColors.tint,
     borderWidth: 1,
     borderColor: MiseColors.borderTint,
@@ -121,15 +124,15 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 22,
   },
-  trialBannerTitle: { fontFamily: MiseFonts.bodyBold, fontSize: 15, color: MiseColors.brand, marginBottom: 6 },
-  trialBannerBody: {
+  localBannerTitle: { fontFamily: MiseFonts.bodyBold, fontSize: 15, color: MiseColors.brand, marginBottom: 6 },
+  localBannerBody: {
     fontFamily: MiseFonts.body,
     fontSize: 13.5,
     color: MiseColors.inkSoft,
     lineHeight: 20,
     marginBottom: 14,
   },
-  trialLogIn: {
+  localLogIn: {
     textAlign: 'center',
     color: MiseColors.brand,
     fontFamily: MiseFonts.bodyBold,

@@ -6,9 +6,9 @@ tags:
 # e2e account — registers a fresh, throwaway account every run instead (a
 # timestamped email keeps repeat runs from colliding with a prior one).
 #
-# Can't go further than the verification gate: there's no working email
-# sender in local dev (see apps/mobile/README.md), so this only asserts the
-# "check your email" screen is reached, not that login afterwards works.
+# Can't go further than the paywall: it's a hard gate (no skip) and there's
+# no sandboxed store purchase available in this environment, so this only
+# asserts the paywall is reached after registering, not what's past it.
 - launchApp:
     clearState: true
 - evalScript: ${output.email = "maestro-" + Date.now() + "@example.com"}
@@ -26,4 +26,4 @@ tags:
 - tapOn:
     id: "register-submit-button"
 - assertVisible:
-    id: "register-check-email-screen"
+    id: "paywall-subscribe-button"

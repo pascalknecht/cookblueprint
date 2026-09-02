@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 
 import { authClient } from './auth-client';
+import { isLocalModeActive } from './local-db/local-mode-state';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -8,7 +9,16 @@ type ApiErrorBody = { error?: string };
 
 export class ApiError extends Error {}
 
-async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
+export type ApiCallOptions = {
+  /** Login reconciliation is the only path that may hit the API while local mode is still on. */
+  allowInLocalMode?: boolean;
+};
+
+async function apiFetch<T>(path: string, init: RequestInit = {}, options?: ApiCallOptions): Promise<T> {
+  if (!options?.allowInLocalMode && (await isLocalModeActive())) {
+    throw new ApiError(`Local mode blocked request to ${path}`);
+  }
+
   const headers = new Headers(init.headers);
   if (init.body) headers.set('Content-Type', 'application/json');
 
@@ -36,12 +46,12 @@ async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  get: <T>(path: string) => apiFetch<T>(path),
-  post: <T>(path: string, body?: unknown) =>
-    apiFetch<T>(path, { method: 'POST', body: body !== undefined ? JSON.stringify(body) : undefined }),
-  put: <T>(path: string, body?: unknown) =>
-    apiFetch<T>(path, { method: 'PUT', body: body !== undefined ? JSON.stringify(body) : undefined }),
-  patch: <T>(path: string, body?: unknown) =>
-    apiFetch<T>(path, { method: 'PATCH', body: body !== undefined ? JSON.stringify(body) : undefined }),
-  delete: <T>(path: string) => apiFetch<T>(path, { method: 'DELETE' }),
+  get: <T>(path: string, options?: ApiCallOptions) => apiFetch<T>(path, {}, options),
+  post: <T>(path: string, body?: unknown, options?: ApiCallOptions) =>
+    apiFetch<T>(path, { method: 'POST', body: body !== undefined ? JSON.stringify(body) : undefined }, options),
+  put: <T>(path: string, body?: unknown, options?: ApiCallOptions) =>
+    apiFetch<T>(path, { method: 'PUT', body: body !== undefined ? JSON.stringify(body) : undefined }, options),
+  patch: <T>(path: string, body?: unknown, options?: ApiCallOptions) =>
+    apiFetch<T>(path, { method: 'PATCH', body: body !== undefined ? JSON.stringify(body) : undefined }, options),
+  delete: <T>(path: string, options?: ApiCallOptions) => apiFetch<T>(path, { method: 'DELETE' }, options),
 };

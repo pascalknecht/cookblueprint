@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { ChefHat } from "lucide-react";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { HashLink } from "./hash-link";
 
 export async function Footer() {
   const t = await getServerTranslator();
@@ -40,7 +41,7 @@ export async function Footer() {
               <div className="flex size-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <ChefHat className="size-4" />
               </div>
-              <span className="font-display text-lg italic">CookBlueprint</span>
+              <span className="font-display text-lg">CookBlueprint</span>
             </Link>
             <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
               {t("footer.tagline")}
@@ -53,12 +54,21 @@ export async function Footer() {
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      {link.label}
-                    </a>
+                    {link.href.includes("#") ? (
+                      <HashLink
+                        href={link.href}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {link.label}
+                      </HashLink>
+                    ) : (
+                      <a
+                        href={link.href}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {link.label}
+                      </a>
+                    )}
                   </li>
                 ))}
               </ul>

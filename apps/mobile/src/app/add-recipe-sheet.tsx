@@ -1,16 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
-import { type BottomSheetModal } from '@gorhom/bottom-sheet';
 import { router, type Href } from 'expo-router';
 import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { BottomSheetView, Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet, type SheetRef } from '@/components/mise/sheet';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 
 export default function AddRecipeSheetScreen() {
   const { t } = useTranslation();
-  const sheetRef = useRef<BottomSheetModal>(null);
+  const sheetRef = useRef<SheetRef>(null);
   // The sheet closes itself (animated, in its own portal) before we leave
   // this route, then its onDismiss below does the actual navigation — so
   // there's never a screen swap racing the close animation.

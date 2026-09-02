@@ -76,11 +76,11 @@ Screens and interactive elements used by these flows carry stable `testID`s (e.g
 
 ### Offline flows (`pnpm e2e:android`)
 
-Each one is self-contained: it clears app data and starts the local trial flow (`useTrialMode`, see `src/hooks/use-trial-mode.ts`), so none of them need the backend, a real account, or email verification.
+Each one is self-contained: it clears app data and starts on-device local mode (`useLocalMode`, see `src/hooks/use-local-mode.ts`), so none of them need the backend, a real account, or email verification.
 
 | Flow | Covers |
 | --- | --- |
-| `trial-mode.yaml` | Smoke test: trial mode starts and lands on the Recipes screen |
+| `local-mode.yaml` | Smoke test: local mode starts and lands on the Recipes screen |
 | `tab-navigation.yaml` | Tab bar navigation across Recipes/Plan/List/Household |
 | `add-recipe-manual.yaml` | Add Recipe sheet → manual entry form → recipe appears in the list |
 | `plan-assign-recipe.yaml` | Add a recipe, then assign it to Monday's breakfast slot on the Plan tab |
@@ -119,7 +119,7 @@ This upserts `e2e@example.com` / `e2e-test-password-1234` (hardcoded into the fl
 | `login.yaml` | Login screen with the seeded account → real backend session → Recipes screen |
 | `register-verification-gate.yaml` | Register screen → submit (fresh, timestamped email each run) → "check your email" screen. Can't go further — no working email sender locally |
 | `household-invite.yaml` | Log in as the seeded user → Household tab → invite by email → pending invitation appears |
-| `trial-to-account-reconciliation.yaml` | Add a recipe in trial mode, then log into the seeded account and confirm the recipe was pushed up (`reconcileTrialData`, see `src/lib/reconcile-trial-data.ts`) — deep-links to `/login` since trial mode currently has no in-app link to it (only "Create account") |
+| `local-to-account-reconciliation.yaml` | Add a recipe in local mode, then log into the seeded account and confirm the recipe was pushed up (`reconcileLocalData`, see `src/lib/reconcile-local-data.ts`) |
 
 ```bash
 pnpm dev -- --dev-client

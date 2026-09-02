@@ -9,7 +9,7 @@ import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useAssignMeal, type MealType } from '@/hooks/use-meal-plan';
 import { useEnabledMealTypes } from '@/hooks/use-organization-settings';
 import { usePressFeedback } from '@/hooks/usePressFeedback';
-import { getCurrentWeekDates, isSameDate, toISODate, weekdayShort, dayOfMonth } from '@/lib/date-utils';
+import { getVisibleWeekDates, isSameDate, toISODate, weekdayShort, dayOfMonth } from '@/lib/date-utils';
 import { useReducedMotionFlag, colorTransition } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
@@ -20,7 +20,7 @@ export default function AddToPlanScreen() {
   const assignMealMutation = useAssignMeal();
   const enabledMealTypes = useEnabledMealTypes();
 
-  const weekDates = getCurrentWeekDates();
+  const weekDates = getVisibleWeekDates();
   const today = new Date();
   const [selectedDate, setSelectedDate] = useState(() => weekDates.find((d) => isSameDate(d, today)) ?? weekDates[0]);
   const [selectedMeal, setSelectedMeal] = useState<MealType>(enabledMealTypes[0]);

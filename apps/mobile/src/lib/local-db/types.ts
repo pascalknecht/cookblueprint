@@ -4,9 +4,9 @@ import type { RecipeMealType } from '@/constants/recipe-meal-types';
 import type { ShoppingCategory } from '@/constants/shopping-categories';
 
 // Single source of truth for the data shapes shared between the remote
-// (API-backed) and local (trial-mode) implementations of the data hooks —
+// (API-backed) and local (on-device) implementations of the data hooks —
 // both apps/mobile/src/hooks/*.ts and apps/mobile/src/lib/local-db/*.ts
-// import from here, so a trial user's local data and a signed-in user's
+// import from here, so a local-mode user's data and a signed-in user's
 // server data always look identical to the UI.
 
 export type Ingredient = { n: string; q: string; cat: string };

@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { Gesture, GestureDetector, GestureHandlerRootView } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -11,7 +12,7 @@ import Animated, {
   type SharedValue,
 } from "react-native-reanimated";
 
-import { BottomSheetView, Sheet } from "@/components/mise/sheet";
+import { BottomSheetView, Sheet, type SheetRef } from "@/components/mise/sheet";
 import {
   SHOPPING_CATEGORY_COLOR,
   SHOPPING_CATEGORY_ICON,
@@ -30,6 +31,7 @@ const ROW_SLOT = ROW_HEIGHT + ROW_GAP;
 
 export default function ShoppingCategorySettingsScreen() {
   const { t } = useTranslation();
+  const sheetRef = useRef<SheetRef>(null);
   const order = useShoppingCategoryOrder();
   const updateMutation = useUpdateShoppingCategoryOrder();
 
@@ -45,26 +47,29 @@ export default function ShoppingCategorySettingsScreen() {
   }
 
   return (
-    // Row reordering is itself a vertical pan — enableContentPanningGesture
-    // would have the sheet's own pan-to-dismiss compete with it for the same
-    // touch, so dismiss is handle-drag/backdrop-tap only here.
-    <Sheet onDismiss={() => router.back()} enableContentPanningGesture={false}>
-      <BottomSheetView>
-        <Text style={styles.title}>{t("shoppingCategorySettings.title")}</Text>
-        <Text style={styles.subtitle}>{t("shoppingCategorySettings.subtitle")}</Text>
-
-        <View style={[styles.rows, { height: order.length * ROW_SLOT - ROW_GAP }]}>
-          {order.map((cat) => (
-            <CategoryRow
-              key={cat}
-              cat={cat}
-              positions={positions}
-              total={order.length}
-              onDragEnd={handleDragEnd}
-            />
-          ))}
-        </View>
-      </BottomSheetView>
+    <Sheet ref={sheetRef} onDismiss={() => router.back()}>
+      <GestureHandlerRootView style={styles.gestureRoot}>
+        <BottomSheetView style={styles.headerText}>
+          <Text style={styles.title}>{t("shoppingCategorySettings.title")}</Text>
+          <Text style={styles.subtitle}>{t("shoppingCategorySettings.subtitle")}</Text>
+        </BottomSheetView>
+        {/* Not BottomSheetScrollView: nested inside TrueSheet's content on
+            Android, its scroll viewport collapses to zero height and the
+            rows never paint. The five rows fit without scrolling anyway. */}
+        <BottomSheetView style={styles.content}>
+          <View style={[styles.rows, { height: order.length * ROW_SLOT - ROW_GAP }]}>
+            {order.map((cat) => (
+              <CategoryRow
+                key={cat}
+                cat={cat}
+                positions={positions}
+                total={order.length}
+                onDragEnd={handleDragEnd}
+              />
+            ))}
+          </View>
+        </BottomSheetView>
+      </GestureHandlerRootView>
     </Sheet>
   );
 }
@@ -150,8 +155,21 @@ function CategoryRow({
 }
 
 const styles = StyleSheet.create({
-  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 25, color: MiseColors.ink, marginBottom: 4 },
-  subtitle: { fontFamily: MiseFonts.body, fontSize: 14, lineHeight: 20, color: MiseColors.muted, marginBottom: 20 },
+  // TrueSheet's Android content lives in a separate native surface from the
+  // app root, so the single GestureHandlerRootView in _layout.tsx doesn't
+  // reach it — re-establish gesture handling locally. flexGrow (not flex)
+  // per TrueSheet's own troubleshooting guide, to avoid layout issues.
+  gestureRoot: { flexGrow: 1 },
+  headerText: { paddingBottom: 0 },
+  title: {
+    fontFamily: MiseFonts.display,
+    letterSpacing: MiseFonts.displayTracking,
+    fontSize: 25,
+    color: MiseColors.ink,
+    marginBottom: 4,
+  },
+  subtitle: { fontFamily: MiseFonts.body, fontSize: 14, lineHeight: 20, color: MiseColors.muted },
+  content: { paddingTop: 18 },
   rows: { position: "relative" },
   row: {
     position: "absolute",

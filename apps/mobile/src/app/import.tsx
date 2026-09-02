@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { StatusBar } from 'expo-status-bar';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useShareIntentContext } from 'expo-share-intent';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -33,6 +34,7 @@ export default function ImportScreen() {
   const importRecipeMutation = useImportRecipe();
   const { showToast } = useToast();
   const params = useLocalSearchParams<{ url?: string; autostart?: string }>();
+  const { resetShareIntent } = useShareIntentContext();
   const [url, setUrl] = useState(params.url ?? '');
   const [stage, setStage] = useState<Stage>(params.autostart === '1' ? 'parsing' : 'input');
   const preview = importRecipeMutation.data;
@@ -49,7 +51,10 @@ export default function ImportScreen() {
   }
 
   useMountEffect(() => {
-    if (params.autostart === '1' && params.url) startParsing(params.url);
+    if (params.autostart === '1' && params.url) {
+      resetShareIntent();
+      startParsing(params.url);
+    }
   });
 
   function handleImport() {
@@ -144,12 +149,10 @@ export default function ImportScreen() {
             </View>
           </View>
           <View style={styles.doneActions}>
-            <Button label={t('importRecipe.redo')} variant="secondary" compact onPress={() => setStage('input')} />
             <Button
               label={t('importRecipe.saveToLibrary')}
               onPress={handleSave}
               loading={createRecipeMutation.isPending}
-              style={{ flex: 1 }}
             />
           </View>
         </View>
@@ -227,5 +230,5 @@ const styles = StyleSheet.create({
   previewDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: MiseColors.amber },
   previewIngName: { flex: 1, fontFamily: MiseFonts.body, fontSize: 14, color: MiseColors.ink },
   previewIngQty: { fontFamily: MiseFonts.body, fontSize: 13, color: MiseColors.muted },
-  doneActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
+  doneActions: { marginTop: 16 },
 });

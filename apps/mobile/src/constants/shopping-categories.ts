@@ -11,7 +11,11 @@ export type { ShoppingCategory } from '@repo/shared';
 
 export const SHOPPING_CATEGORIES = ALL_SHOPPING_CATEGORIES;
 
-export const DEFAULT_SHOPPING_CATEGORY: ShoppingCategory = 'Produce';
+// Pantry is the generic catch-all everywhere else an unrecognized category
+// string is handled (see the categoryOf() fallbacks in list.tsx and
+// add-shopping-item.tsx) — an unmatched free-typed item should land there
+// too, rather than being guessed into Produce.
+export const DEFAULT_SHOPPING_CATEGORY: ShoppingCategory = 'Pantry';
 
 export const SHOPPING_CATEGORY_ICON: Record<ShoppingCategory, keyof typeof Ionicons.glyphMap> = {
   Produce: 'leaf-outline',

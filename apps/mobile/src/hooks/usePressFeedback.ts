@@ -1,5 +1,4 @@
-import { Easing } from 'react-native-reanimated';
-import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { Easing , useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { useReducedMotionFlag } from '@/lib/motion';
 

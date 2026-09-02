@@ -18,6 +18,7 @@ type IconButtonProps = {
   color?: string;
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  accessibilityLabel?: string;
 };
 
 export function IconButton({
@@ -29,6 +30,7 @@ export function IconButton({
   color,
   style,
   testID,
+  accessibilityLabel,
 }: IconButtonProps) {
   const radius = size * 0.32;
   const resolvedIconSize = iconSize ?? size * 0.42;
@@ -37,7 +39,7 @@ export function IconButton({
   if (variant === 'gradient') {
     return (
       <Pressable
-        accessibilityLabel={testID}
+        accessibilityLabel={accessibilityLabel ?? testID}
         testID={testID}
         onPress={onPress}
         onPressIn={onPressIn}
@@ -67,7 +69,7 @@ export function IconButton({
 
   return (
     <Pressable
-      accessibilityLabel={testID}
+      accessibilityLabel={accessibilityLabel ?? testID}
       testID={testID}
       onPress={onPress}
       onPressIn={onPressIn}

@@ -18,9 +18,11 @@
     },
     "android": {
       "package": "com.cookblueprint.app",
+      "icon": "./assets/images/android-icon.png",
       "adaptiveIcon": {
-        "backgroundColor": "#221E1B",
-        "foregroundImage": "./assets/images/android-icon-foreground.png"
+        "backgroundColor": "#241C16",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false
     },
@@ -29,27 +31,18 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#9E3F2C",
-          "image": "./assets/images/splash-ios.png",
-          "resizeMode": "cover",
-          "android": {
-            "image": "./assets/images/splash-icon-android.png",
-            "imageWidth": 160,
-            "resizeMode": "contain",
-            "backgroundColor": "#221E1B"
-          },
-          "ios": {
-            "image": "./assets/images/splash-ios.png",
-            "resizeMode": "cover",
-            "backgroundColor": "#9E3F2C"
-          }
+          "backgroundColor": "#241C16",
+          "image": "./assets/images/splash-mark.png",
+          "imageWidth": 128,
+          "resizeMode": "contain"
         }
       ],
       [
-        "expo-navigation-bar",
+        "@zoontek/react-native-navigation-bar",
         {
-          "style": "light",
-          "enforceContrast": false
+          "android": {
+            "enforceNavigationBarContrast": true
+          }
         }
       ],
       "expo-web-browser",

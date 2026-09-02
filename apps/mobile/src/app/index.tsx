@@ -6,11 +6,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/mise/button';
 import { LogoMark } from '@/components/mise/logo-mark';
-import { MiseSpinner } from '@/components/mise/spinner';
 import { PhotoPlaceholder } from '@/components/mise/photo-placeholder';
 import { MiseColors, MiseFonts } from '@/constants/theme';
+import { useAuthLookupPending } from '@/hooks/use-auth-lookup-pending';
 import { useAuthRedirect } from '@/hooks/use-auth-redirect';
-import { useStartTrialMode, useTrialMode } from '@/hooks/use-trial-mode';
+import { useStartLocalMode, useLocalMode } from '@/hooks/use-local-mode';
 import { useSession } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
 
@@ -18,35 +18,31 @@ export default function WelcomeScreen() {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const { data: session, isPending: sessionPending } = useSession();
-  const { data: isTrial, isPending: trialPending } = useTrialMode();
+  const { data: isLocal, isPending: localPending } = useLocalMode();
   const { showToast } = useToast();
-  const startTrialMode = useStartTrialMode();
-  const isPending = sessionPending || trialPending;
+  const startLocalMode = useStartLocalMode();
+  const isPending = useAuthLookupPending(sessionPending, localPending, isLocal);
   // Let use-share-intent-redirect.ts own navigation while a share is pending,
   // instead of racing its redirect to /import.
   const { hasShareIntent } = useShareIntentContext();
 
   useAuthRedirect({
     isPending: isPending || hasShareIntent,
-    isAuthenticated: !!session || !!isTrial,
+    isAuthenticated: !!session || !!isLocal,
     redirectWhen: 'authenticated',
     to: '/(tabs)/recipes',
   });
 
   async function handleTryItOut() {
     try {
-      await startTrialMode.mutateAsync();
+      await startLocalMode.mutateAsync();
     } catch {
       showToast(t('auth.tryItOutError'));
     }
   }
 
-  if (isPending || session || isTrial) {
-    return (
-      <View style={[styles.screen, styles.loading]}>
-        <MiseSpinner size={48} />
-      </View>
-    );
+  if (isPending || session || isLocal) {
+    return <View style={styles.screen} />;
   }
 
   return (
@@ -98,8 +94,8 @@ export default function WelcomeScreen() {
           accessibilityLabel="welcome-try-it-out"
           testID="welcome-try-it-out"
           style={styles.tryItOut}
-          onPress={startTrialMode.isPending ? undefined : handleTryItOut}>
-          {startTrialMode.isPending ? t('auth.tryItOutLoading') : t('auth.tryItOut')}
+          onPress={startLocalMode.isPending ? undefined : handleTryItOut}>
+          {startLocalMode.isPending ? t('auth.tryItOutLoading') : t('auth.tryItOut')}
         </Text>
       </View>
     </ScrollView>
@@ -108,7 +104,6 @@ export default function WelcomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
-  loading: { alignItems: 'center', justifyContent: 'center' },
   content: { flexGrow: 1, paddingHorizontal: 22 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 20 },
   wordmark: { flexShrink: 1, fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 17, color: MiseColors.ink },

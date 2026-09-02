@@ -1,5 +1,5 @@
 // Canonical definitions (including the generation-weighting constants used by
-// the local trial-mode meal-plan generator) live in
+// the local-mode meal-plan generator) live in
 // packages/shared/src/recipe-frequency.ts, shared with
 // apps/nextjs/src/lib/recipe-frequency.ts.
 

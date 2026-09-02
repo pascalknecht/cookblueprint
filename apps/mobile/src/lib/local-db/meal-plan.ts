@@ -4,7 +4,7 @@ import { ALL_MEAL_TYPES, generateMealPlanEntries, MAX_COOLDOWN_DAYS, type MealTy
 
 import { fromISODate, toISODate } from '@/lib/date-utils';
 
-import { TRIAL_KEYS } from './keys';
+import { LOCAL_KEYS } from './keys';
 import { listRecipes, getRecipe } from './recipes';
 import { getSettings } from './settings';
 import { getJSON, setJSON } from './store';
@@ -15,7 +15,7 @@ type StoredEntry = { id: string; date: string; mealType: MealType; recipeId: str
 const MEAL_TYPE_ORDER = new Map(ALL_MEAL_TYPES.map((type, index) => [type, index]));
 
 function readEntries(): Promise<StoredEntry[]> {
-  return getJSON<StoredEntry[]>(TRIAL_KEYS.mealPlanEntries, []);
+  return getJSON<StoredEntry[]>(LOCAL_KEYS.mealPlanEntries, []);
 }
 
 function addDays(date: Date, days: number): Date {
@@ -73,7 +73,7 @@ export async function assignMeal(input: { date: Date; mealType: MealType; recipe
   const next = [...entries];
   if (index === -1) next.push(stored);
   else next[index] = stored;
-  await setJSON(TRIAL_KEYS.mealPlanEntries, next);
+  await setJSON(LOCAL_KEYS.mealPlanEntries, next);
 
   return { ...stored, recipe };
 }
@@ -83,7 +83,7 @@ export async function deleteMealAssignment(id: string): Promise<boolean> {
   const next = entries.filter((entry) => entry.id !== id);
   if (next.length === entries.length) return false;
 
-  await setJSON(TRIAL_KEYS.mealPlanEntries, next);
+  await setJSON(LOCAL_KEYS.mealPlanEntries, next);
   return true;
 }
 
@@ -125,7 +125,7 @@ export async function generateMealPlan(options: {
     if (index === -1) next.push(stored);
     else next[index] = stored;
   }
-  await setJSON(TRIAL_KEYS.mealPlanEntries, next);
+  await setJSON(LOCAL_KEYS.mealPlanEntries, next);
 
   return listMealPlanEntries(options.startDate, options.endDate);
 }

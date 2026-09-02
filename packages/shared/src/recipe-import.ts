@@ -85,23 +85,136 @@ export function parseIsoDurationMinutes(duration: unknown): number {
   return Math.round(totalMinutes);
 }
 
+// Longest-first so "tl" wins over "l", "esslöffel" over "el", etc.
 const QUANTITY_UNIT_WORDS =
-  'cups?|tablespoons?|tbsp\\.?|teaspoons?|tsp\\.?|grams?|g|kilograms?|kg|ounces?|oz\\.?|pounds?|lbs?\\.?|' +
-  'milliliters?|ml|liters?|l|cloves?|pinch(?:es)?|cans?|slices?|bunch(?:es)?|heads?|sprigs?|pieces?|handfuls?';
+  'tablespoons?|teaspoons?|dessertspoons?|kilograms?|millilitres?|milliliters?|milligrams?|handfuls?|' +
+  'packages?|sachets?|' +
+  'teel[oö]ffel|essl[oö]ffel|messerspitze|p[äa]ckchen|packungen?|milliliter|kilogramm|' +
+  'tbsp\\.?|tsp\\.?|dsp\\.?|grams?|grammes?|gramm|fluid\\s+ounces?|ounces?|pounds?|cloves?|' +
+  'pinch(?:es)?|prise(?:n)?|' +
+  'cans?|tins?|dosen?|slices?|scheiben?|bunch(?:es)?|heads?|sprigs?|pieces?|' +
+  'st[uü]cke?|handvoll|tassen?|becher|zehen?|bund|' +
+  'cups?|pints?|quarts?|gallons?|litres?|liters?|liter|' +
+  'pck\\.?|msp\\.?|stk?\\.?|bd\\.?|tl\\.?|el\\.?|' +
+  'kg|mg|ml|cl|dl|fl\\.?\\s*oz\\.?|oz\\.?|lbs?\\.?|g|l';
 const FRACTION_CHARS = '¼½¾⅓⅔⅛⅜⅝⅞';
-const QUANTITY_PREFIX_RE = new RegExp(
-  `^([0-9${FRACTION_CHARS}][0-9${FRACTION_CHARS}./\\-\\s]*(?:\\s*(?:${QUANTITY_UNIT_WORDS}))?)\\s+(.+)$`,
+const APPROX_PREFIX = '(?:ca\\.?|circa|approx\\.?(?:imately)?|etwa|about|~)\\s*';
+const QUANTITY_NUMBER = `[0-9${FRACTION_CHARS}][0-9${FRACTION_CHARS}./\\-\\s]*`;
+const QUANTITY_WORDS = 'etwas|some|a\\s+little';
+const WITH_UNIT_RE = new RegExp(
+  `^((?:${APPROX_PREFIX})?(?:${QUANTITY_NUMBER}\\s*(?:${QUANTITY_UNIT_WORDS})|(?:${QUANTITY_UNIT_WORDS})))\\s+(.+)$`,
   'i',
 );
+const NUMBER_ONLY_RE = new RegExp(`^((?:${APPROX_PREFIX})?${QUANTITY_NUMBER})\\s+(.+)$`, 'i');
+const QUANTITY_WORD_RE = new RegExp(`^(${QUANTITY_WORDS})\\s+(.+)$`, 'i');
 
-/** Best-effort split of a raw ingredient line ("2 cups flour") into quantity and name. */
+/** Best-effort split of a raw ingredient line ("2 cups flour", "1 TL Kreuzkümmelpulver") into quantity and name. */
 export function parseIngredientLine(rawLine: string): { name: string; quantity: string } {
   const line = rawLine.trim();
-  const match = QUANTITY_PREFIX_RE.exec(line);
-  if (match) {
-    return { quantity: match[1].trim(), name: match[2].trim() };
-  }
+  const withUnit = WITH_UNIT_RE.exec(line);
+  if (withUnit) return { quantity: withUnit[1].trim(), name: withUnit[2].trim() };
+  const numberOnly = NUMBER_ONLY_RE.exec(line);
+  if (numberOnly) return { quantity: numberOnly[1].trim(), name: numberOnly[2].trim() };
+  const quantityWord = QUANTITY_WORD_RE.exec(line);
+  if (quantityWord) return { quantity: quantityWord[1].trim(), name: quantityWord[2].trim() };
   return { quantity: '', name: line };
+}
+
+export type NeedleIngredientExtract = {
+  amount?: number;
+  name?: string;
+  unit?: string;
+};
+
+/** Tool schema for Needle: one ingredient line → amount + unit + name. */
+export const NEEDLE_INGREDIENT_TOOLS = [
+  {
+    name: 'ingredient',
+    description:
+      'Parse one recipe ingredient line into amount, unit, and name. Units may be German (TL, EL, Prise, Zehe, g, ml) or English (tsp, tbsp, cups). Keep adjectives like chopped or gehackte in the name.',
+    parameters: {
+      type: 'object',
+      properties: {
+        amount: { type: 'number', description: 'Numeric amount' },
+        unit: { type: 'string', description: 'Unit only, e.g. TL, EL, g, tsp, cups, Prise, Zehe' },
+        name: {
+          type: 'string',
+          description: 'Ingredient name including adjectives, without amount or unit',
+        },
+      },
+      required: ['name'],
+    },
+  },
+] as const;
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Index of `unit` as its own token in `line`, or -1. */
+function findUnitTokenIndex(line: string, unit: string): { start: number; end: number } | null {
+  const trimmed = unit.trim();
+  if (!trimmed) return null;
+  const match = new RegExp(`(?:^|\\s)(${escapeRegExp(trimmed)})(?=\\s|$)`, 'i').exec(line);
+  if (!match || match.index === undefined) return null;
+  const start = match[0].startsWith(' ') ? match.index + 1 : match.index;
+  return { start, end: start + match[1].length };
+}
+
+/**
+ * Merge a Needle extract back onto the original line. Quantity is the prefix
+ * through the unit (so "gehackte" stays on the name); invented units are ignored.
+ */
+export function mergeNeedleIngredient(
+  rawLine: string,
+  extracted: NeedleIngredientExtract | null | undefined,
+  fallback: { name: string; quantity: string },
+): { name: string; quantity: string } {
+  const line = rawLine.trim();
+  if (!extracted) return fallback;
+
+  if (extracted.unit) {
+    const span = findUnitTokenIndex(line, extracted.unit);
+    if (!span) return fallback;
+    const quantity = line.slice(0, span.end).trim();
+    const name = line.slice(span.end).trim();
+    if (quantity && name) return { quantity, name };
+    return fallback;
+  }
+
+  const extractedName = extracted.name?.trim();
+  if (extractedName && extractedName.length < line.length) {
+    const lower = line.toLowerCase();
+    const nameLower = extractedName.toLowerCase();
+    if (lower.endsWith(nameLower)) {
+      const quantity = line.slice(0, line.length - extractedName.length).trim();
+      const name = line.slice(line.length - extractedName.length).trim();
+      if (quantity && name) return { quantity, name };
+    }
+  }
+
+  return fallback;
+}
+
+export function ingredientInputFromParsed(name: string, quantity: string): RecipeIngredientInput {
+  return { n: name, q: quantity, cat: guessIngredientCategory(name) };
+}
+
+/** Applies Needle extracts onto raw lines, falling back to the deterministic parser per line. */
+export function preprocessIngredientLines(
+  rawLines: string[],
+  extracts: Array<NeedleIngredientExtract | null | undefined> | null,
+): RecipeIngredientInput[] {
+  return rawLines.map((rawLine, index) => {
+    const line = decodeHtmlEntities(rawLine);
+    const fallback = parseIngredientLine(line);
+    const parsed = mergeNeedleIngredient(line, extracts?.[index], fallback);
+    return ingredientInputFromParsed(parsed.name, parsed.quantity);
+  });
+}
+
+export function extractIngredientLines(schemaRecipe: Record<string, unknown>): string[] {
+  return toStringArray(schemaRecipe.recipeIngredient ?? schemaRecipe.ingredients);
 }
 
 const CATEGORY_KEYWORDS: Partial<Record<ShoppingCategory, string[]>> = {
@@ -251,11 +364,7 @@ export function mapSchemaRecipeToInput(schemaRecipe: Record<string, unknown>): R
     parseIsoDurationMinutes(schemaRecipe.prepTime) + parseIsoDurationMinutes(schemaRecipe.cookTime) ||
     30;
 
-  const ingredientLines = toStringArray(schemaRecipe.recipeIngredient ?? schemaRecipe.ingredients);
-  const ingredients: RecipeIngredientInput[] = ingredientLines.map((line) => {
-    const { quantity, name } = parseIngredientLine(decodeHtmlEntities(line));
-    return { n: name, q: quantity, cat: guessIngredientCategory(name) };
-  });
+  const ingredients = preprocessIngredientLines(extractIngredientLines(schemaRecipe), null);
 
   const steps = extractInstructionSteps(schemaRecipe.recipeInstructions);
 

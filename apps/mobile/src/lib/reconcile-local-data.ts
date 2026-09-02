@@ -5,8 +5,10 @@ import { getSettings as getLocalSettings } from '@/lib/local-db/settings';
 import { listShoppingItems as listLocalShoppingItems } from '@/lib/local-db/shopping-items';
 import type { Recipe, ShoppingItem } from '@/lib/local-db/types';
 
+const localModeApi = { allowInLocalMode: true as const };
+
 export type ReconciliationSummary = {
-  /** Whether there was any local trial data to push at all. */
+  /** Whether there was any on-device data to push at all. */
   imported: boolean;
   recipesImported: number;
   mealPlanEntriesImported: number;
@@ -16,12 +18,12 @@ export type ReconciliationSummary = {
 };
 
 /**
- * Pushes everything accumulated during local trial mode up to the signed-in
+ * Pushes everything accumulated during local mode up to the signed-in
  * account, reusing the same REST endpoints the app already calls when
  * online — no dedicated bulk-reconciliation endpoint exists server-side.
  * Best-effort per item: one failed recipe/entry/item doesn't abort the rest.
  */
-export async function reconcileTrialData(): Promise<ReconciliationSummary> {
+export async function reconcileLocalData(): Promise<ReconciliationSummary> {
   const [recipes, entries, shoppingItems, settings] = await Promise.all([
     listLocalRecipes(),
     listAllMealPlanEntries(),
@@ -38,7 +40,7 @@ export async function reconcileTrialData(): Promise<ReconciliationSummary> {
   for (const recipe of recipes) {
     try {
       const { id, ...input } = recipe;
-      const created = await api.post<Recipe>('/api/recipes', input);
+      const created = await api.post<Recipe>('/api/recipes', input, localModeApi);
       recipeIdMap.set(id, created.id);
     } catch {
       hadErrors = true;
@@ -51,7 +53,7 @@ export async function reconcileTrialData(): Promise<ReconciliationSummary> {
     const serverRecipeId = recipeIdMap.get(entry.recipeId);
     if (!serverRecipeId) continue; // that recipe failed to push above — skip, don't guess.
     try {
-      await api.post('/api/meal-plans', { date: entry.date, mealType: entry.mealType, recipeId: serverRecipeId });
+      await api.post('/api/meal-plans', { date: entry.date, mealType: entry.mealType, recipeId: serverRecipeId }, localModeApi);
       mealPlanEntriesImported += 1;
     } catch {
       hadErrors = true;
@@ -63,9 +65,13 @@ export async function reconcileTrialData(): Promise<ReconciliationSummary> {
   let shoppingItemsImported = 0;
   if (shoppingItems.length > 0) {
     try {
-      const { items: created } = await api.post<{ items: ShoppingItem[] }>('/api/shopping-items/bulk', {
-        items: shoppingItems.map(({ name, quantity, category }) => ({ name, quantity, category })),
-      });
+      const { items: created } = await api.post<{ items: ShoppingItem[] }>(
+        '/api/shopping-items/bulk',
+        {
+          items: shoppingItems.map(({ name, quantity, category }) => ({ name, quantity, category })),
+        },
+        localModeApi,
+      );
       shoppingItemsImported = created.length;
 
       const createdByName = new Map(created.map((item) => [item.name, item]));
@@ -73,7 +79,7 @@ export async function reconcileTrialData(): Promise<ReconciliationSummary> {
         const match = createdByName.get(item.name);
         if (!match) continue;
         try {
-          await api.put(`/api/shopping-items/${match.id}`, { checked: true });
+          await api.put(`/api/shopping-items/${match.id}`, { checked: true }, localModeApi);
         } catch {
           hadErrors = true;
         }
@@ -86,10 +92,10 @@ export async function reconcileTrialData(): Promise<ReconciliationSummary> {
   // 4. Organization settings — the route only applies one field per call.
   try {
     if (settings.enabledMealTypes.length > 0) {
-      await api.patch('/api/organization/settings', { enabledMealTypes: settings.enabledMealTypes });
+      await api.patch('/api/organization/settings', { enabledMealTypes: settings.enabledMealTypes }, localModeApi);
     }
     if (settings.shoppingCategoryOrder.length > 0) {
-      await api.patch('/api/organization/settings', { shoppingCategoryOrder: settings.shoppingCategoryOrder });
+      await api.patch('/api/organization/settings', { shoppingCategoryOrder: settings.shoppingCategoryOrder }, localModeApi);
     }
   } catch {
     hadErrors = true;

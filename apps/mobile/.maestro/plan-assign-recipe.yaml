@@ -29,7 +29,7 @@ tags:
     id: "tab-plan"
 - assertVisible:
     id: "plan-screen"
-# Monday's breakfast slot, empty by default on a fresh trial account.
+# First visible day's breakfast slot (today onward), empty on a fresh local-mode kitchen.
 - tapOn:
     id: "meal-cell-empty-0-breakfast"
 - tapOn: "E2E Test Recipe"

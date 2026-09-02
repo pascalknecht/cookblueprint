@@ -1,6 +1,7 @@
 import {
   RethinkSans_700Bold,
   RethinkSans_700Bold_Italic,
+  RethinkSans_800ExtraBold,
 } from '@expo-google-fonts/rethink-sans';
 import {
   PlusJakartaSans_400Regular,
@@ -10,41 +11,42 @@ import {
   PlusJakartaSans_800ExtraBold,
   useFonts,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { NavigationBar } from '@zoontek/react-native-navigation-bar';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { ShareIntentProvider } from 'expo-share-intent';
 import { useState } from 'react';
 import { I18nextProvider } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { AnimatedSplash } from '@/components/mise/animated-splash';
 import { HtmlFetcherWebView } from '@/components/mise/html-fetcher-webview';
+import { NeedleWebView } from '@/components/mise/needle-webview';
 import { ShareIntentRedirect } from '@/components/mise/share-intent-redirect';
 import { Toast } from '@/components/mise/toast';
-import { MiseColors } from '@/constants/theme';
-import { useHideSplashWhenReady } from '@/hooks/use-hide-splash-when-ready';
+import { SPLASH_GROUND } from '@/components/mise/splash-artwork';
+import { useSplashVisible } from '@/hooks/use-splash-visible';
 import i18n from '@/lib/i18n';
+import '@/lib/purchases';
 import { HtmlFetcherProvider } from '@/store/html-fetcher';
+import { NeedleProvider, useNeedle } from '@/store/needle';
 import { ToastProvider } from '@/store/toast';
 
 SplashScreen.preventAutoHideAsync();
-
-// Android no longer lets an app paint the system nav bar itself (it's always
-// transparent past SDK 35) — this fills the safe-area gutter behind it so the
-// bar reads as dark on every screen, not just ones that happen to have dark
-// content of their own back there.
-function SystemBarCover() {
-  const insets = useSafeAreaInsets();
-  return <View style={[styles.systemBarCover, { height: insets.bottom }]} pointerEvents="none" />;
+try {
+  SplashScreen.setOptions({ duration: 0, fade: false });
+} catch {
+  // Expo Go has no native splash options.
 }
 
 const modalScreenOptions = {
-  // BottomSheetModal (@gorhom/bottom-sheet) drives its own present/dismiss
-  // animation, so the route itself must not also animate — that would double it up.
+  // TrueSheet (@lodev09/react-native-true-sheet) drives its own present/
+  // dismiss animation, so the route itself must not also animate — that
+  // would double it up.
   presentation: 'transparentModal' as const,
   animation: 'none' as const,
   headerShown: false,
@@ -53,7 +55,7 @@ const modalScreenOptions = {
 
 export default function RootLayout() {
   const [queryClient] = useState(() => new QueryClient());
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
     PlusJakartaSans_600SemiBold,
@@ -61,11 +63,9 @@ export default function RootLayout() {
     PlusJakartaSans_800ExtraBold,
     RethinkSans_700Bold,
     RethinkSans_700Bold_Italic,
+    RethinkSans_800ExtraBold,
   });
-
-  useHideSplashWhenReady(fontsLoaded);
-
-  if (!fontsLoaded) return null;
+  const fontsReady = fontsLoaded || !!fontError;
 
   return (
     <ShareIntentProvider>
@@ -76,38 +76,46 @@ export default function RootLayout() {
             <SafeAreaProvider>
               <ToastProvider>
                 <HtmlFetcherProvider>
-                  <BottomSheetModalProvider>
-                    <View style={{ flex: 1, backgroundColor: MiseColors.background }}>
+                  <NeedleProvider>
+                    <View style={{ flex: 1, backgroundColor: SPLASH_GROUND }}>
                       <StatusBar style="dark" />
+                      <NavigationBar barStyle="light-content" />
                       <Stack screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="index" />
-                        <Stack.Screen name="login" />
-                        <Stack.Screen name="register" />
-                        <Stack.Screen name="forgot-password" />
-                        <Stack.Screen name="(tabs)" />
-                        <Stack.Screen name="recipe/[id]" options={{ animation: 'slide_from_right' }} />
-                        <Stack.Screen name="import" options={{ animation: 'slide_from_right' }} />
-                        <Stack.Screen name="manual" options={{ animation: 'slide_from_right' }} />
-                        <Stack.Screen name="edit-recipe" options={{ animation: 'slide_from_right' }} />
-                        <Stack.Screen name="preferences" options={{ animation: 'slide_from_right' }} />
-                        <Stack.Screen name="household" options={{ animation: 'slide_from_right' }} />
-                        <Stack.Screen name="add-recipe-sheet" options={modalScreenOptions} />
-                        <Stack.Screen name="share-sheet" options={modalScreenOptions} />
-                        <Stack.Screen name="pick-recipe" options={modalScreenOptions} />
-                        <Stack.Screen name="add-to-plan" options={modalScreenOptions} />
-                        <Stack.Screen name="edit-meal" options={modalScreenOptions} />
-                        <Stack.Screen name="plan-options" options={modalScreenOptions} />
-                        <Stack.Screen name="invite" options={modalScreenOptions} />
-                        <Stack.Screen name="add-shopping-item" options={modalScreenOptions} />
-                        <Stack.Screen name="shopping-category-settings" options={modalScreenOptions} />
-                        <Stack.Screen name="select-household" options={modalScreenOptions} />
-                        <Stack.Screen name="edit-account" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="login" />
+                      <Stack.Screen name="register" />
+                      <Stack.Screen
+                        name="paywall"
+                        options={{ animation: 'slide_from_right', gestureEnabled: false }}
+                      />
+                      <Stack.Screen name="check-email" />
+                      <Stack.Screen name="forgot-password" />
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="recipe/[id]" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="import" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="manual" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="edit-recipe" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="preferences" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="household" options={{ animation: 'slide_from_right' }} />
+                      <Stack.Screen name="add-recipe-sheet" options={modalScreenOptions} />
+                      <Stack.Screen name="share-sheet" options={modalScreenOptions} />
+                      <Stack.Screen name="pick-recipe" options={modalScreenOptions} />
+                      <Stack.Screen name="add-to-plan" options={modalScreenOptions} />
+                      <Stack.Screen name="edit-meal" options={modalScreenOptions} />
+                      <Stack.Screen name="recipe-options" options={modalScreenOptions} />
+                      <Stack.Screen name="plan-options" options={modalScreenOptions} />
+                      <Stack.Screen name="invite" options={modalScreenOptions} />
+                      <Stack.Screen name="add-shopping-item" options={modalScreenOptions} />
+                      <Stack.Screen name="shopping-category-settings" options={modalScreenOptions} />
+                      <Stack.Screen name="select-household" options={modalScreenOptions} />
+                      <Stack.Screen name="edit-account" options={{ animation: 'slide_from_right' }} />
                       </Stack>
                       <Toast />
                       <HtmlFetcherWebView />
-                      <SystemBarCover />
+                      <MaybeNeedleWebView />
+                      <SplashOverlay fontsReady={fontsReady} />
                     </View>
-                  </BottomSheetModalProvider>
+                  </NeedleProvider>
                 </HtmlFetcherProvider>
               </ToastProvider>
             </SafeAreaProvider>
@@ -118,12 +126,19 @@ export default function RootLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  systemBarCover: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: MiseColors.near,
-  },
-});
+function SplashOverlay({ fontsReady }: { fontsReady: boolean }) {
+  const visible = useSplashVisible(fontsReady);
+  if (!visible) return null;
+  return <AnimatedSplash fontsReady={fontsReady} />;
+}
+
+// Mounting the hidden Needle WebView unconditionally (even delayed past the
+// splash) corrupts Fabric's layout on Android — the root Stack measures as a
+// square instead of filling the screen. Mirror HtmlFetcherWebView's already-
+// safe pattern instead: stay unmounted until something actually needs it
+// (the first extractIngredients call flips NeedleProvider's `mounted` flag).
+function MaybeNeedleWebView() {
+  const { mounted } = useNeedle();
+  if (!mounted) return null;
+  return <NeedleWebView />;
+}

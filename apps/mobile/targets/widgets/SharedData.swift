@@ -22,19 +22,24 @@ enum MiseShared {
         defaults?.string(forKey: "sessionCookie")
     }
 
-    /// Written by `syncTrialWidgetData` (src/widgets/sync-trial-widget-data.ts)
-    /// whenever local trial-mode data changes, since this extension has no
-    /// access to expo-sqlite and can't read the on-device trial data itself.
-    static var trialModeActive: Bool {
-        defaults?.bool(forKey: "trialModeActive") ?? false
+    /// Written by `syncLocalWidgetData` (src/widgets/sync-local-widget-data.ts)
+    /// whenever local-mode data changes, since this extension has no
+    /// access to expo-sqlite and can't read the on-device data itself.
+    static var localModeActive: Bool {
+        if defaults?.object(forKey: "localModeActive") != nil {
+            return defaults?.bool(forKey: "localModeActive") ?? false
+        }
+        return defaults?.bool(forKey: "trialModeActive") ?? false
     }
 
-    static var trialMealPlanData: Data? {
-        defaults?.string(forKey: "trialMealPlanJSON")?.data(using: .utf8)
+    static var localMealPlanData: Data? {
+        let json = defaults?.string(forKey: "localMealPlanJSON") ?? defaults?.string(forKey: "trialMealPlanJSON")
+        return json?.data(using: .utf8)
     }
 
-    static var trialShoppingListData: Data? {
-        defaults?.string(forKey: "trialShoppingListJSON")?.data(using: .utf8)
+    static var localShoppingListData: Data? {
+        let json = defaults?.string(forKey: "localShoppingListJSON") ?? defaults?.string(forKey: "trialShoppingListJSON")
+        return json?.data(using: .utf8)
     }
 
     static var locale: String? {
@@ -86,6 +91,14 @@ func miseCurrentWeekDates(reference: Date = Date()) -> [Date] {
     let daysSinceMonday = (weekday + 5) % 7
     let monday = calendar.date(byAdding: .day, value: -daysSinceMonday, to: startOfDay) ?? startOfDay
     return (0..<7).compactMap { calendar.date(byAdding: .day, value: $0, to: monday) }
+}
+
+/// Mirrors apps/mobile/src/lib/date-utils.ts's `getVisibleWeekDates`.
+func miseVisibleWeekDates(reference: Date = Date(), today: Date = Date()) -> [Date] {
+    let dates = miseCurrentWeekDates(reference: reference)
+    let todayISO = miseISODate(today)
+    guard dates.contains(where: { miseISODate($0) == todayISO }) else { return dates }
+    return dates.filter { miseISODate($0) >= todayISO }
 }
 
 /// Mirrors apps/mobile/src/lib/date-utils.ts's `toISODate` (local calendar date, not UTC).

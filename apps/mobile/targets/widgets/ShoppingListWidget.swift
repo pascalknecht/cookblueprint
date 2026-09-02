@@ -28,10 +28,10 @@ struct ShoppingListProvider: TimelineProvider {
     }
 
     private func loadEntry() async -> ShoppingListWidgetEntry {
-        // Trial mode has no server account — the app mirrors local-db data here
-        // instead (syncTrialWidgetData, src/widgets/sync-trial-widget-data.ts).
-        if MiseShared.trialModeActive {
-            let response = MiseShared.trialShoppingListData.flatMap {
+        // Local mode has no server account — the app mirrors local-db data here
+        // instead (syncLocalWidgetData, src/widgets/sync-local-widget-data.ts).
+        if MiseShared.localModeActive {
+            let response = MiseShared.localShoppingListData.flatMap {
                 try? JSONDecoder().decode(MiseShoppingItemsResponse.self, from: $0)
             }
             return buildEntry(from: response?.items ?? [])

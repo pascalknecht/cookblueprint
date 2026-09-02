@@ -1,9 +1,19 @@
 packages:
   - apps/*
   - packages/*
+overrides:
+  react: 19.2.3
+  react-dom: 19.2.3
 onlyBuiltDependencies:
   - "@prisma/client"
   - "@prisma/engines"
   - esbuild
   - prisma
   - sharp
+allowBuilds:
+  '@prisma/engines': true
+  esbuild: true
+  expo-share-intent@https://codeload.github.com/pascalknecht/expo-share-intent/tar.gz/09b8c499ee60e600fe7986570a546a5588dfbcdc: true
+  msw: true
+  prisma: true
+  unrs-resolver: true

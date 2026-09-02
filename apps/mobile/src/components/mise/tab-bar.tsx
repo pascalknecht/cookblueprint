@@ -14,7 +14,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MiseColors, MiseFonts } from '@/constants/theme';
 
+import { TAB_BAR_HEIGHT, getTabBarBottomGap } from './tab-bar-metrics';
 import { TabIcon, type TabIconName } from './tab-icon';
+
+export { TAB_BAR_HEIGHT, getTabBarBottomGap, getTabBarScrollPadding } from './tab-bar-metrics';
 
 const TAB_ICONS: Record<string, TabIconName> = {
   recipes: 'restaurant',
@@ -43,17 +46,6 @@ const ICON_INACTIVE_COLOR = '#9A8F82';
 const BAR_RADIUS = 26;
 const BAR_INSET = 10;
 const INDICATOR_RADIUS = BAR_RADIUS - BAR_INSET;
-
-export const TAB_BAR_HEIGHT = 72;
-
-// Devices with a bottom system nav bar (insetsBottom > 0) need extra breathing
-// room above it, or the pill reads as glued to it — gesture-nav devices have no
-// such bar and just get the flat 16 floor. Exported so screens that reserve
-// space for the floating pill (e.g. list.tsx's add-item bar) can't drift out
-// of sync with the pill's actual offset.
-export function getTabBarBottomGap(insetsBottom: number): number {
-  return insetsBottom > 0 ? insetsBottom + 16 : 16;
-}
 
 export function MiseTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();

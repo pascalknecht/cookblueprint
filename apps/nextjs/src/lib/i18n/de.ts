@@ -12,6 +12,7 @@ export const de = {
     pricing: 'Preise',
     logIn: 'Anmelden',
     getStarted: 'Loslegen',
+    menu: 'Menü öffnen',
   },
   hero: {
     titleLine1: 'Essensplanung, auf die sich dein ganzer Haushalt',

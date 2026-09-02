@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
@@ -12,6 +13,7 @@ import { EmptyState } from '@/components/mise/empty-state';
 import { IconButton } from '@/components/mise/icon-button';
 import { RecipeCard } from '@/components/mise/recipe-card';
 import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
+import { getTabBarScrollPadding } from '@/components/mise/tab-bar-metrics';
 import { RECIPE_MEAL_TYPES, type RecipeMealType } from '@/constants/recipe-meal-types';
 import { MiseColors, MiseFonts } from '@/constants/theme';
 import { useRecipes } from '@/hooks/use-recipes';
@@ -26,6 +28,7 @@ export default function RecipesScreen() {
   const { data: recipes = [] } = useRecipes({ mealType: filter === 'All' ? undefined : filter });
   const { onScroll, onHeaderLayout, compactStyle, compactShown } = useScrollHeader();
   const reduced = useReducedMotionFlag();
+  const insets = useSafeAreaInsets();
 
   function filterLabel(filterValue: (typeof FILTERS)[number]) {
     if (filterValue === 'All') return t('recipesScreen.filterAll');
@@ -59,7 +62,7 @@ export default function RecipesScreen() {
       <Animated.FlatList
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: 108 }}
+        contentContainerStyle={{ paddingBottom: getTabBarScrollPadding(insets.bottom) }}
         data={gridData}
         keyExtractor={(item) => item.id}
         numColumns={2}

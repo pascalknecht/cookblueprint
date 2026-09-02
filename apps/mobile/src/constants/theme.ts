@@ -40,6 +40,7 @@ export const RecipeAccentColors = [
 export const MiseFonts = {
   display: 'RethinkSans_700Bold',
   displayItalic: 'RethinkSans_700Bold_Italic',
+  displayExtraBold: 'RethinkSans_800ExtraBold',
   // Tighter tracking on the bold display face — a heavy weight at these
   // sizes reads loose at default spacing, so headings pull in to compensate.
   displayTracking: -0.5,

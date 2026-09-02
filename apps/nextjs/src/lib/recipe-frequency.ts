@@ -1,5 +1,5 @@
 // Canonical definitions (including the generation-weighting constants,
-// now also used by the mobile app's local trial-mode meal-plan generator)
+// now also used by the mobile app's local-mode meal-plan generator)
 // live in packages/shared/src/recipe-frequency.ts, shared with
 // apps/mobile/src/constants/recipe-frequency.ts.
 

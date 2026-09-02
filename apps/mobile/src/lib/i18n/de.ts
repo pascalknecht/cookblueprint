@@ -9,6 +9,11 @@ export const de = {
     errorResetPassword: "Link konnte nicht gesendet werden",
     errorInvite: "Einladung konnte nicht gesendet werden",
   },
+  splash: {
+    wordmark: "CookBlueprint",
+    tagline: "EIN PLAN FÜR DIE WOCHE",
+    loading: "Deine Woche wird geladen…",
+  },
   nav: {
     recipes: "Rezepte",
     plan: "Essensplan",
@@ -54,6 +59,8 @@ export const de = {
     emptyTitle: "Liste ist leer",
     emptySubtitle:
       "Füge Zutaten aus einem Rezept oder deinem Essensplan hinzu, oder trage eigene Artikel ein.",
+    allCheckedTitle: "Alles erledigt!",
+    allCheckedSubtitle: "Alles ist abgehakt. Füge jederzeit weitere Artikel hinzu.",
     addItem: "＋ Artikel hinzufügen",
   },
   settings: {
@@ -69,11 +76,11 @@ export const de = {
     statListItems: "Listenartikel",
     members: "Mitglieder",
     invite: "＋ Jemanden einladen",
-    trialBannerTitle: "Du testest CookBlueprint gerade",
-    trialBannerBody:
+    localBannerTitle: "Deine Küche ist auf diesem Gerät",
+    localBannerBody:
       "Deine Rezepte, dein Essensplan und deine Einkaufsliste werden auf diesem Gerät gespeichert. Erstelle ein Konto, um sie zu sichern und mit deinem Haushalt zu teilen.",
-    trialCreateAccount: "Konto erstellen, um Daten zu speichern",
-    trialLogIn: "Schon ein Konto? Anmelden",
+    localCreateAccount: "Konto erstellen, um Daten zu speichern",
+    localLogIn: "Schon ein Konto? Anmelden",
     roleOwner: "Inhaber",
     roleEditor: "Bearbeiter",
     roleMember: "Mitglied",
@@ -137,7 +144,6 @@ export const de = {
     successLabel: "Rezept gefunden — prüfen & speichern",
     previewMeta: "{{time}} Min · für {{servings}} Portionen · {{kcal}} kcal",
     previewSource: "von {{host}}",
-    redo: "Erneut",
     saveToLibrary: "In Sammlung speichern",
     savedToast: "Rezept in deiner Sammlung gespeichert",
     noRecipeFound: "Auf dieser Seite wurde kein Rezept gefunden.",
@@ -243,6 +249,12 @@ export const de = {
     generatingTitle: "Deine Woche wird erstellt…",
     generatingSubtitle: "Mahlzeiten werden über 7 Tage verteilt.",
     keepOneMeal: "Mindestens eine Mahlzeit muss aktiv bleiben",
+    premiumLock: {
+      badge: "Premium",
+      title: "Erweiterte Planung ist eine Premium-Funktion",
+      subtitle: "Kostenlose Konten erhalten eine zufällig ausgewogene Woche. Schalte Kochstil, Aufwand, Regeln und Portionen mit einem Upgrade frei.",
+      cta: "Volle Planung freischalten",
+    },
   },
   recipeDetail: {
     notFound: "Dieses Rezept konnte nicht gefunden werden.",
@@ -257,6 +269,13 @@ export const de = {
     addToList: "＋ Zur Einkaufsliste hinzufügen",
     addedToast: "Zur Einkaufsliste hinzugefügt",
     timeValue: "{{count}} Min",
+    options: "Rezeptoptionen",
+    delete: "Rezept löschen",
+    deleteConfirmTitle: "Dieses Rezept löschen?",
+    deleteConfirmBody: "Es wird auch aus deinem Essensplan entfernt. Das kann nicht rückgängig gemacht werden.",
+    deleteConfirmDelete: "Löschen",
+    deletedToast: "Rezept gelöscht",
+    deleteError: "Rezept konnte nicht gelöscht werden. Bitte versuche es erneut.",
   },
   addToPlan: {
     title: "Zum Essensplan hinzufügen",
@@ -308,11 +327,11 @@ export const de = {
     tryItOut: "Erst mal ausprobieren",
     tryItOutLoading: "Wird eingerichtet…",
     tryItOutError:
-      "Testversion konnte nicht gestartet werden. Bitte erneut versuchen.",
-    trialImported:
-      "Deine Testrezepte, dein Essensplan und deine Einkaufsliste wurden in deinem Konto gespeichert.",
-    trialImportedPartial:
-      "Die meisten deiner Testdaten wurden gespeichert, aber einige Elemente konnten nicht synchronisiert werden — prüfe das am besten kurz nach.",
+      "On-Device-Modus konnte nicht gestartet werden. Bitte erneut versuchen.",
+    localImported:
+      "Deine Rezepte, dein Essensplan und deine Einkaufsliste wurden in deinem Konto gespeichert.",
+    localImportedPartial:
+      "Die meisten deiner lokalen Daten wurden gespeichert, aber einige Elemente konnten nicht synchronisiert werden — prüfe das am besten kurz nach.",
     loginTitle: "Willkommen zurück",
     loginSubtitle: "Melde dich in deiner Küche an.",
     emailLabel: "E-Mail",
@@ -344,6 +363,34 @@ export const de = {
     sendResetLink: "Link senden",
     resetLinkToast:
       "Falls diese E-Mail registriert ist, ist ein Link bereits unterwegs",
+  },
+  paywall: {
+    title: "CookBlueprint Pro beitreten",
+    subtitle: "Intelligentere Essensplanung, abgestimmt auf deine Woche.",
+    subscribeButton: "Kostenlose Testphase starten",
+    ctaTrial: "Kostenlos testen",
+    ctaSubscribe: "Abonnieren",
+    loadError: "Pläne konnten nicht geladen werden.",
+    retryButton: "Erneut versuchen",
+    purchaseError: "Beim Kauf ist etwas schiefgelaufen. Bitte versuche es erneut.",
+    logOut: "Abmelden",
+    close: "Schließen",
+    freeTrialLabel: "{{count}} Tage kostenlos testen",
+    freeTrialGeneric: "Kostenlose Testphase",
+    thenPerPeriod: "danach {{price}}{{period}}",
+    perWeekEquivalent: "{{price}}/Woche",
+    savePercent: "{{percent}}% sparen",
+    periodLabel: { WEEKLY: "Wöchentlich", MONTHLY: "Monatlich", ANNUAL: "Jährlich", LIFETIME: "Einmalig" },
+    periodShort: { WEEKLY: "/Wo.", MONTHLY: "/Mon.", ANNUAL: "/Jahr", LIFETIME: "" },
+    legalLinks: "Nutzungsbedingungen · Datenschutzerklärung",
+    featureCookingStyle: "Kochstil",
+    featureCookingStyleDesc: "Geteilte Zutaten nutzen oder jeden Abend etwas Neues",
+    featureEffort: "Aufwand unter der Woche",
+    featureEffortDesc: "Pläne passend zu deiner tatsächlich verfügbaren Zeit",
+    featureRules: "Intelligente Regeln",
+    featureRulesDesc: "Reste, Vorratskammer zuerst und keine Wiederholungen — wie du willst",
+    featureServings: "Portionskontrolle",
+    featureServingsDesc: "Genaue Portionen für jede Mahlzeit, jedes Mal",
   },
   invite: {
     title: "Zum Haushalt einladen",

@@ -5,12 +5,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Purchases from 'react-native-purchases';
 
 import { BackHeader } from '@/components/mise/back-header';
 import { Button } from '@/components/mise/button';
 import { TextField } from '@/components/mise/text-field';
 import { MiseColors, MiseFonts } from '@/constants/theme';
 import { signUp } from '@/lib/auth-client';
+import { runWithLocalModeNetwork } from '@/lib/local-db/local-mode-state';
 import { useToast } from '@/store/toast';
 
 export default function RegisterScreen() {
@@ -20,15 +22,21 @@ export default function RegisterScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [submitted, setSubmitted] = useState(false);
 
   const registerMutation = useMutation({
     mutationFn: async (input: { name: string; email: string; password: string }) => {
-      const { data, error } = await signUp.email(input);
+      const { data, error } = await runWithLocalModeNetwork(() => signUp.email(input));
       if (error) throw new Error(error.message ?? t('common.errorRegister'));
       return data;
     },
-    onSuccess: () => setSubmitted(true),
+    onSuccess: async (data) => {
+      // Attach purchases to the new account (rather than the device's
+      // anonymous RevenueCat ID) so any later premium purchase — there's no
+      // forced paywall here, the app is free to use — lands on the right
+      // customer instead of an orphaned anonymous one.
+      if (data?.user.id) await Purchases.logIn(data.user.id);
+      router.replace('/check-email');
+    },
     onError: (error) => showToast(error.message),
   });
 
@@ -36,23 +44,6 @@ export default function RegisterScreen() {
     const trimmedName = name.trim();
     if (!trimmedName || !email.trim() || !password) return;
     registerMutation.mutate({ name: trimmedName, email: email.trim(), password });
-  }
-
-  if (submitted) {
-    return (
-      <ScrollView
-        testID="register-check-email-screen"
-        style={styles.screen}
-        contentContainerStyle={[
-          styles.content,
-          styles.confirmContent,
-          { paddingTop: insets.top + 26, paddingBottom: insets.bottom + 24 },
-        ]}>
-        <Text style={[styles.title, styles.centerText]}>{t('auth.checkEmailTitle')}</Text>
-        <Text style={[styles.subtitle, styles.centerText]}>{t('auth.checkEmailBody')}</Text>
-        <Button label={t('auth.backToLogin')} onPress={() => router.replace('/login')} />
-      </ScrollView>
-    );
   }
 
   return (
@@ -110,10 +101,6 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: MiseColors.background },
   content: { flexGrow: 1, paddingHorizontal: 22, paddingTop: 26 },
-  confirmContent: { justifyContent: 'center', alignItems: 'center', gap: 16 },
-  centerText: { textAlign: 'center' },
-  title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 34, lineHeight: 36, color: MiseColors.ink },
-  subtitle: { fontFamily: MiseFonts.body, fontSize: 15, color: MiseColors.muted },
   field: { marginBottom: 16 },
   fieldLast: { marginBottom: 22 },
   legal: {

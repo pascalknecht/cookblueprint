@@ -1,17 +1,17 @@
 import * as Crypto from 'expo-crypto';
 
-import { TRIAL_KEYS } from './keys';
+import { LOCAL_KEYS } from './keys';
 import { listMealPlanEntries } from './meal-plan';
 import { getRecipe } from './recipes';
 import { getJSON, setJSON } from './store';
 import type { RecentShoppingItem, ShoppingItem, ShoppingItemInput } from './types';
 
 function readItems(): Promise<ShoppingItem[]> {
-  return getJSON<ShoppingItem[]>(TRIAL_KEYS.shoppingItems, []);
+  return getJSON<ShoppingItem[]>(LOCAL_KEYS.shoppingItems, []);
 }
 
 function readRecent(): Promise<RecentShoppingItem[]> {
-  return getJSON<RecentShoppingItem[]>(TRIAL_KEYS.recentShoppingItems, []);
+  return getJSON<RecentShoppingItem[]>(LOCAL_KEYS.recentShoppingItems, []);
 }
 
 export function listShoppingItems(): Promise<ShoppingItem[]> {
@@ -40,13 +40,13 @@ async function recordRecentItems(items: ShoppingItemInput[]): Promise<void> {
     );
   }
 
-  await setJSON(TRIAL_KEYS.recentShoppingItems, Array.from(byName.values()));
+  await setJSON(LOCAL_KEYS.recentShoppingItems, Array.from(byName.values()));
 }
 
 export async function createShoppingItem(input: ShoppingItemInput): Promise<ShoppingItem> {
   const items = await readItems();
   const item: ShoppingItem = { id: Crypto.randomUUID(), checked: false, ...input };
-  await setJSON(TRIAL_KEYS.shoppingItems, [...items, item]);
+  await setJSON(LOCAL_KEYS.shoppingItems, [...items, item]);
   await recordRecentItems([input]);
   return item;
 }
@@ -62,7 +62,7 @@ export async function updateShoppingItem(
   const updated = { ...items[index], ...data };
   const next = [...items];
   next[index] = updated;
-  await setJSON(TRIAL_KEYS.shoppingItems, next);
+  await setJSON(LOCAL_KEYS.shoppingItems, next);
   return updated;
 }
 
@@ -83,7 +83,7 @@ async function createDedupedItems(candidates: ShoppingItemInput[]): Promise<Shop
   if (toCreate.length === 0) return [];
 
   const created = toCreate.map((item) => ({ id: Crypto.randomUUID(), checked: false, ...item }));
-  await setJSON(TRIAL_KEYS.shoppingItems, [...items, ...created]);
+  await setJSON(LOCAL_KEYS.shoppingItems, [...items, ...created]);
   await recordRecentItems(toCreate);
   return created;
 }

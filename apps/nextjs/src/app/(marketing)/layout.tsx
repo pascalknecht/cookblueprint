@@ -1,5 +1,5 @@
 import React from "react";
-import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Rethink_Sans } from "next/font/google";
 import "@/styles/devices.min.css";
 import { cn } from "@/lib/utils";
 import { Footer } from "./footer";
@@ -11,9 +11,9 @@ const miseBody = Plus_Jakarta_Sans({
   variable: "--font-mise-body",
 });
 
-const miseDisplay = Instrument_Serif({
+const miseDisplay = Rethink_Sans({
   subsets: ["latin"],
-  weight: "400",
+  weight: ["700"],
   style: ["normal", "italic"],
   variable: "--font-mise-display",
 });
