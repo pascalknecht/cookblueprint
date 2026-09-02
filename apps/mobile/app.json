@@ -12,8 +12,12 @@
       "appleTeamId": "",
       "entitlements": {
         "com.apple.security.application-groups": [
+          "group.com.cookblueprint.app",
           "group.com.cookblueprint.app"
         ]
+      },
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

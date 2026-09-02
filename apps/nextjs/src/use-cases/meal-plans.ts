@@ -1,7 +1,10 @@
+import { env } from "@/env";
+import { hasActiveEntitlement } from "@/lib/entitlement";
 import { prisma } from "@/lib/prisma";
-import { ALL_MEAL_TYPES, type MealType } from "@/lib/meal-types";
+import { ALL_MEAL_TYPES, normalizeEnabledMealTypes, type MealType } from "@/lib/meal-types";
 import { MAX_COOLDOWN_DAYS } from "@/lib/recipe-frequency";
-import { generateMealPlanEntries } from "@repo/shared";
+import { generateMealPlanEntries, type CookingStyle } from "@repo/shared";
+import { generateMealPlanWithAI } from "./ai-meal-plan";
 
 export { ALL_MEAL_TYPES as MEAL_TYPES, type MealType };
 
@@ -45,9 +48,21 @@ function addDays(date: Date, days: number): Date {
   return result;
 }
 
+function toISODate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
+
 export async function generateMealPlan(
   organizationId: string,
-  options: { startDate: Date; endDate: Date; avoidRepeats?: boolean },
+  userId: string,
+  options: {
+    startDate: Date;
+    endDate: Date;
+    avoidRepeats?: boolean;
+    cookingStyle?: CookingStyle;
+    leftovers?: boolean;
+    keepPlanned?: boolean;
+  },
 ) {
   const [recipes, organization, priorEntries] = await Promise.all([
     prisma.recipe.findMany({ where: { organizationId } }),
@@ -62,14 +77,38 @@ export async function generateMealPlan(
   ]);
   if (recipes.length === 0) return [];
 
-  const entries = generateMealPlanEntries({
-    startDate: options.startDate,
-    endDate: options.endDate,
-    avoidRepeats: options.avoidRepeats,
-    recipes,
-    enabledMealTypes: organization?.enabledMealTypes ?? [],
-    priorEntries,
-  });
+  const enabledMealTypes = normalizeEnabledMealTypes(organization?.enabledMealTypes ?? []);
+  const wantsAI = Boolean(options.cookingStyle || options.leftovers);
+  const useAI = wantsAI && (env.MEAL_PLAN_AI_FORCE === "true" || (await hasActiveEntitlement(userId)));
+
+  let entries = useAI
+    ? await generateMealPlanWithAI(organizationId, {
+        startDate: options.startDate,
+        endDate: options.endDate,
+        enabledMealTypes,
+        recipes,
+        priorEntries,
+        cookingStyle: options.cookingStyle,
+        leftovers: options.leftovers,
+        keepPlanned: options.keepPlanned,
+      })
+    : generateMealPlanEntries({
+        startDate: options.startDate,
+        endDate: options.endDate,
+        avoidRepeats: options.avoidRepeats,
+        recipes,
+        enabledMealTypes,
+        priorEntries,
+      });
+
+  if (options.keepPlanned) {
+    const existing = await prisma.mealPlanEntry.findMany({
+      where: { organizationId, date: { gte: options.startDate, lte: options.endDate } },
+      select: { date: true, mealType: true },
+    });
+    const plannedKeys = new Set(existing.map((entry) => `${toISODate(entry.date)}|${entry.mealType}`));
+    entries = entries.filter((entry) => !plannedKeys.has(`${toISODate(entry.date)}|${entry.mealType}`));
+  }
 
   return Promise.all(entries.map((entry) => upsertMealPlanEntry(organizationId, entry)));
 }

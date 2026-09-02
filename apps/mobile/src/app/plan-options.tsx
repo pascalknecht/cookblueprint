@@ -20,25 +20,19 @@ import { useReducedMotionFlag, colorTransition } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
 type CookingStyleKey = 'optimized' | 'balanced' | 'diverse';
-type EffortKey = 'quick' | 'relaxed' | 'noLimit';
-type RuleKey = 'leftovers' | 'keepPlanned' | 'pantry' | 'noRepeat';
+type RuleKey = 'leftovers' | 'keepPlanned' | 'noRepeat';
 
 // Reuse curves and "distinct ingredients" estimates are illustrative — the
-// generate API only accepts avoidRepeats today, so cooking style, effort,
-// and the leftovers/pantry rules only shape this preview, not the actual plan.
+// generate API turns cookingStyle into real guidance for the AI generator
+// (premium orgs only; free orgs keep the plain randomized plan), but doesn't
+// simulate this exact reuse curve.
 const COOKING_STYLES: { key: CookingStyleKey; reuse: number[]; distinct: number }[] = [
   { key: 'optimized', reuse: [1, 0.95, 0.9, 0.85, 0.9, 0.8, 0.75], distinct: 9 },
   { key: 'balanced', reuse: [1, 0.8, 0.55, 0.8, 0.5, 0.7, 0.45], distinct: 14 },
   { key: 'diverse', reuse: [1, 0.45, 0.5, 0.4, 0.5, 0.42, 0.38], distinct: 19 },
 ];
 
-const EFFORT_OPTIONS: { key: EffortKey; labelKey: 'twentyMin' | 'fortyMin' | 'noLimit'; noteKey: 'quick' | 'relaxed' | 'project' }[] = [
-  { key: 'quick', labelKey: 'twentyMin', noteKey: 'quick' },
-  { key: 'relaxed', labelKey: 'fortyMin', noteKey: 'relaxed' },
-  { key: 'noLimit', labelKey: 'noLimit', noteKey: 'project' },
-];
-
-const RULE_KEYS: RuleKey[] = ['leftovers', 'keepPlanned', 'pantry', 'noRepeat'];
+const RULE_KEYS: RuleKey[] = ['leftovers', 'keepPlanned', 'noRepeat'];
 const WEEKDAY_LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
 function hexToRgb(hex: string) {
@@ -67,8 +61,8 @@ export default function PlanOptionsScreen() {
 
   const enabledMealTypes = useEnabledMealTypes();
   const updateEnabledMealTypesMutation = useUpdateEnabledMealTypes();
-  // Free accounts still get a full auto-plan — cooking style, effort, rules
-  // and servings just stay locked at their sensible defaults below, so
+  // Free accounts still get a full auto-plan — cooking style, rules and
+  // servings just stay locked at their sensible defaults below, so
   // generation reads as a randomly balanced week rather than a customized one.
   const { hasActiveEntitlement } = useHasActiveEntitlement();
   const advancedLocked = !hasActiveEntitlement;
@@ -82,17 +76,14 @@ export default function PlanOptionsScreen() {
   const { data: plannedEntries = [] } = useMealPlan({ startDate, endDate });
 
   const [styleIndex, setStyleIndex] = useState(1);
-  const [effortIndex, setEffortIndex] = useState(1);
   const [servings, setServings] = useState(4);
   const [rules, setRules] = useState<Record<RuleKey, boolean>>({
     leftovers: true,
     keepPlanned: true,
-    pantry: false,
     noRepeat: true,
   });
 
   const style = COOKING_STYLES[styleIndex];
-  const effort = EFFORT_OPTIONS[effortIndex];
   const totalSlots = weekDates.length * enabledMealTypes.length;
   const slots = Math.max(0, totalSlots - (rules.keepPlanned ? plannedEntries.length : 0));
 
@@ -113,7 +104,14 @@ export default function PlanOptionsScreen() {
   function handleGenerate() {
     if (slots <= 0) return;
     generateMutation.mutate(
-      { startDate, endDate, avoidRepeats: rules.noRepeat },
+      {
+        startDate,
+        endDate,
+        avoidRepeats: rules.noRepeat,
+        cookingStyle: style.key,
+        leftovers: rules.leftovers,
+        keepPlanned: rules.keepPlanned,
+      },
       {
         onSuccess: () => router.back(),
         onError: (error) => showToast(error.message),
@@ -140,8 +138,7 @@ export default function PlanOptionsScreen() {
           <TrueSheetFooter>
             <View style={styles.summaryRow}>
               <Text style={styles.summaryLeft} numberOfLines={1}>
-                {t('planOptions.subtitleIngredients', { count: style.distinct })} ·{' '}
-                {t(`planOptions.weeknightTime.${effort.noteKey}`)}
+                {t('planOptions.subtitleIngredients', { count: style.distinct })}
               </Text>
               <Text style={styles.summaryRight}>{t('planOptions.summary', { count: servings })}</Text>
             </View>
@@ -246,25 +243,6 @@ export default function PlanOptionsScreen() {
                   </View>
 
                   <Text style={styles.note}>{t(`planOptions.cookingStyle.${style.key}.note`)}</Text>
-                </View>
-
-                <View style={styles.section}>
-                  <View style={styles.sectionHeaderRow}>
-                    <Text style={styles.sectionLabel}>{t('planOptions.weeknightTime.label')}</Text>
-                    <Text style={styles.effortValue}>{t(`planOptions.weeknightTime.${effort.noteKey}`)}</Text>
-                  </View>
-                  <View style={styles.pillRow}>
-                    {EFFORT_OPTIONS.map((e, i) => (
-                      <AnimatedPressable
-                        key={e.key}
-                        onPress={() => setEffortIndex(i)}
-                        style={[styles.pill, i === effortIndex && styles.pillActive, colorTransition(reduced)]}>
-                        <Text style={[styles.pillLabel, i === effortIndex && styles.pillLabelActive]}>
-                          {t(`planOptions.weeknightTime.${e.labelKey}`)}
-                        </Text>
-                      </AnimatedPressable>
-                    ))}
-                  </View>
                 </View>
 
                 <View style={styles.section}>
@@ -387,8 +365,6 @@ const styles = StyleSheet.create({
   togglePillActive: { backgroundColor: MiseColors.brand },
   togglePillLabel: { fontFamily: MiseFonts.bodySemiBold, fontSize: 12.5, color: MiseColors.inkSoft },
   togglePillLabelActive: { color: '#fff' },
-
-  effortValue: { fontFamily: MiseFonts.bodySemiBold, fontSize: 12, color: MiseColors.ink },
 
   ruleRow: {
     flexDirection: 'row',

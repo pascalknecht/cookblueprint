@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { CookingStyle } from '@repo/shared';
 
 import type { MealType } from '@/constants/meal-types';
 import { api } from '@/lib/api-client';
@@ -70,7 +71,14 @@ export function useGenerateMealPlan() {
   const queryClient = useQueryClient();
   const { data: isLocal } = useLocalMode();
   return useMutation({
-    mutationFn: (input: { startDate: Date; endDate: Date; avoidRepeats?: boolean }) =>
+    mutationFn: (input: {
+      startDate: Date;
+      endDate: Date;
+      avoidRepeats?: boolean;
+      cookingStyle?: CookingStyle;
+      leftovers?: boolean;
+      keepPlanned?: boolean;
+    }) =>
       isLocal
         ? localMealPlan.generateMealPlan(input)
         : api
@@ -78,6 +86,9 @@ export function useGenerateMealPlan() {
               startDate: toISODate(input.startDate),
               endDate: toISODate(input.endDate),
               avoidRepeats: input.avoidRepeats,
+              cookingStyle: input.cookingStyle,
+              leftovers: input.leftovers,
+              keepPlanned: input.keepPlanned,
             })
             .then((data) => data.items),
     onSuccess: () => {

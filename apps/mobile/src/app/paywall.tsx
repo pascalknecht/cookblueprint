@@ -31,7 +31,6 @@ const PARALLAX_FACTOR = 0.5;
 
 const FEATURE_LIST = [
   { titleKey: 'featureCookingStyle', descKey: 'featureCookingStyleDesc' },
-  { titleKey: 'featureEffort', descKey: 'featureEffortDesc' },
   { titleKey: 'featureRules', descKey: 'featureRulesDesc' },
   { titleKey: 'featureServings', descKey: 'featureServingsDesc' },
 ] as const;
