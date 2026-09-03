@@ -33,7 +33,9 @@ export default function TabsLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Tabs tabBar={(props) => <MiseTabBar {...props} />} screenOptions={{ headerShown: false }}>
+      <Tabs
+        tabBar={(props) => <MiseTabBar {...props} />}
+        screenOptions={{ headerShown: false, animation: 'fade' }}>
         <Tabs.Screen name="recipes" options={{ title: t('nav.recipes') }} />
         <Tabs.Screen name="plan" options={{ title: t('nav.plan') }} />
         <Tabs.Screen name="list" options={{ title: t('nav.shoppingList') }} />

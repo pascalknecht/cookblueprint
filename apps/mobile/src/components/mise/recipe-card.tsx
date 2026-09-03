@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Transition from 'react-native-screen-transitions';
 
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import type { Recipe } from '@/hooks/use-recipes';
@@ -26,14 +27,16 @@ export function RecipeCard({ recipe, meta, onPress }: RecipeCardProps) {
         onPressIn={() => (pressed.value = true)}
         onPressOut={() => (pressed.value = false)}
         style={styles.pressable}>
-        <PhotoPlaceholder
-          color={recipe.color}
-          style={styles.photo}
-          source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}>
-          <View style={styles.timeBadge}>
-            <Text style={styles.timeBadgeLabel}>{recipe.time}m</Text>
-          </View>
-        </PhotoPlaceholder>
+        <Transition.Boundary id={recipe.id} style={styles.photo}>
+          <PhotoPlaceholder
+            color={recipe.color}
+            style={StyleSheet.absoluteFill}
+            source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}>
+            <View style={styles.timeBadge}>
+              <Text style={styles.timeBadgeLabel}>{recipe.time}m</Text>
+            </View>
+          </PhotoPlaceholder>
+        </Transition.Boundary>
         <View style={styles.body}>
           <Text style={styles.title} numberOfLines={2}>
             {recipe.title}
@@ -63,6 +66,13 @@ const styles = StyleSheet.create({
   photo: {
     height: 112,
     position: 'relative',
+    // The zoom transition reads this boundary's own borderRadius to know
+    // where to start interpolating from — without it, it starts from 0
+    // (the card's rounding otherwise comes only from the parent's
+    // overflow:hidden clip, which the boundary can't see) and the corner
+    // pops straight to rounded instead of animating smoothly.
+    borderRadius: MiseRadius.xl,
+    overflow: 'hidden',
   },
   timeBadge: {
     position: 'absolute',

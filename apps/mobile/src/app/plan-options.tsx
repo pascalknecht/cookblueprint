@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BlurTargetView, BlurView } from 'expo-blur';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
@@ -58,6 +59,9 @@ export default function PlanOptionsScreen() {
   const reduced = useReducedMotionFlag();
   const decrementServingsPress = usePressFeedback();
   const incrementServingsPress = usePressFeedback();
+  // On Android, expo-blur only blurs a BlurTargetView it's explicitly
+  // pointed at via this ref — see the comment by its usage below.
+  const previewBlurTarget = useRef<View>(null);
 
   const enabledMealTypes = useEnabledMealTypes();
   const updateEnabledMealTypesMutation = useUpdateEnabledMealTypes();
@@ -122,7 +126,11 @@ export default function PlanOptionsScreen() {
   return (
     <Sheet
       onDismiss={() => router.back()}
-      detents={[0.86]}
+      // The locked preview adds a disabled cooking-style/servings preview
+      // plus the upsell card on top of the meal-type toggles — genuinely
+      // more content than the unlocked view's fixed budget accounted for,
+      // so it gets more sheet height rather than being crammed to fit.
+      detents={[advancedLocked ? 0.94 : 0.86]}
       enablePanDownToClose={!planGenerating}
       scrollable={!planGenerating}
       header={
@@ -161,7 +169,14 @@ export default function PlanOptionsScreen() {
       ) : (
         <BottomSheetScrollView contentContainerStyle={styles.scrollContent}>
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>{t('planOptions.mealsToPlan')}</Text>
+              <View style={styles.sectionLabelRow}>
+                <Text style={styles.sectionLabel}>{t('planOptions.mealsToPlan')}</Text>
+                {advancedLocked ? (
+                  <View style={styles.freeTag}>
+                    <Text style={styles.freeTagLabel}>{t('planOptions.freeTag')}</Text>
+                  </View>
+                ) : null}
+              </View>
               <View style={styles.pillRowWrap}>
                 {ALL_MEAL_TYPES.map((type) => {
                   const active = enabledMealTypes.includes(type);
@@ -184,26 +199,86 @@ export default function PlanOptionsScreen() {
             </View>
 
             {advancedLocked ? (
-              <Pressable
-                testID="plan-options-premium-lock"
-                style={styles.lockCard}
-                // The sheet is a native modal presented above the whole app —
-                // pushing a screen on top of it doesn't hide it, since
-                // nothing tells the native sheet itself to close. Replacing
-                // this route unmounts it (and with it, the presented sheet)
-                // instead of just changing what's focused underneath.
-                onPress={() => router.replace({ pathname: '/paywall', params: { dismissible: '1' } })}>
-                <View style={styles.lockBadge}>
-                  <Ionicons name="lock-closed" size={12} color="#fff" />
-                  <Text style={styles.lockBadgeLabel}>{t('planOptions.premiumLock.badge')}</Text>
+              <>
+                <View style={styles.divider} />
+
+                {/* One "Advanced planning" section covering everything
+                    locked, not per-feature labels — the blurred preview
+                    hints at real content underneath, and the premium card
+                    overlaps its bottom edge rather than sitting below it
+                    with its own gap. On Android, expo-blur only blurs
+                    content wrapped in a BlurTargetView and referenced by
+                    the BlurView's `blurTarget` ref; without that pairing
+                    it silently falls back to no blur. */}
+                <View style={styles.section}>
+                  <View style={styles.sectionLabelRow}>
+                    <Text style={styles.sectionLabel}>{t('planOptions.advancedPlanning')}</Text>
+                    <View style={styles.premiumTag}>
+                      <Ionicons name="lock-closed" size={9} color={MiseColors.brand} />
+                      <Text style={styles.premiumTagLabel}>{t('planOptions.premiumLock.badge')}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.previewLockedWrap}>
+                    <BlurTargetView ref={previewBlurTarget}>
+                      <View style={styles.previewContent} pointerEvents="none">
+                        <View style={styles.pillRow}>
+                          {COOKING_STYLES.map((s) => (
+                            <View key={s.key} style={styles.pill}>
+                              <Text style={styles.pillLabel}>{t(`planOptions.cookingStyle.${s.key}.label`)}</Text>
+                            </View>
+                          ))}
+                        </View>
+                        <View style={styles.servingsRow}>
+                          <View style={styles.servingsButton}>
+                            <Text style={styles.servingsButtonLabel}>−</Text>
+                          </View>
+                          <Text style={styles.servingsValue}>{servings}</Text>
+                          <View style={styles.servingsButton}>
+                            <Text style={styles.servingsButtonLabel}>+</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </BlurTargetView>
+                    <BlurView
+                      blurTarget={previewBlurTarget}
+                      intensity={4}
+                      tint="light"
+                      blurMethod="dimezisBlurView"
+                      style={StyleSheet.absoluteFill}
+                    />
+                    {/* expo-blur's `tint` is a fixed preset (no custom-color
+                        option), and its default reads as a cool gray patch
+                        against this screen's warm cream background — this
+                        layers the sheet's own background color over the
+                        blur, semi-transparent, so it reads as the same
+                        surface gone hazy rather than a mismatched panel. */}
+                    <View style={styles.previewTint} pointerEvents="none" />
+                  </View>
                 </View>
-                <Text style={styles.lockTitle}>{t('planOptions.premiumLock.title')}</Text>
-                <Text style={styles.lockSubtitle}>{t('planOptions.premiumLock.subtitle')}</Text>
-                <View style={styles.lockCta}>
-                  <Text style={styles.lockCtaLabel}>{t('planOptions.premiumLock.cta')}</Text>
-                  <Ionicons name="arrow-forward" size={14} color={MiseColors.brand} />
+
+                <View testID="plan-options-premium-lock" style={[styles.lockCard, styles.lockCardOverlap]}>
+                  <View style={styles.lockCardHeader}>
+                    <View style={styles.lockIconCircle}>
+                      <Ionicons name="lock-closed" size={13} color={MiseColors.brand} />
+                    </View>
+                    <Text style={styles.lockTitle}>{t('planOptions.premiumLock.title')}</Text>
+                  </View>
+                  <Text style={styles.lockSubtitle}>{t('planOptions.premiumLock.subtitle')}</Text>
+                  <Button
+                    label={t('planOptions.premiumLock.cta')}
+                    variant="gradient"
+                    compact
+                    // The sheet is a native modal presented above the whole
+                    // app — pushing a screen on top of it doesn't hide it,
+                    // since nothing tells the native sheet itself to close.
+                    // Replacing this route unmounts it (and with it, the
+                    // presented sheet) instead of just changing what's
+                    // focused underneath.
+                    onPress={() => router.replace({ pathname: '/paywall', params: { dismissible: '1' } })}
+                  />
                 </View>
-              </Pressable>
+              </>
             ) : (
               <>
                 <View style={styles.section}>
@@ -294,39 +369,68 @@ export default function PlanOptionsScreen() {
 const styles = StyleSheet.create({
   title: { fontFamily: MiseFonts.display, letterSpacing: MiseFonts.displayTracking, fontSize: 25, color: MiseColors.ink },
   subtitle: { fontFamily: MiseFonts.bodyMedium, fontSize: 12, color: MiseColors.muted },
-  scrollContent: { paddingTop: 6, paddingBottom: 24, gap: 22 },
+  scrollContent: { paddingTop: 6, paddingBottom: 32, gap: 20 },
 
   section: { gap: 11 },
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
+  sectionLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   sectionLabel: { fontFamily: MiseFonts.bodyExtraBold, fontSize: 10, letterSpacing: 1, color: MiseColors.mutedLight },
   rulesLabel: { marginBottom: -2 },
 
-  lockCard: {
-    alignItems: 'center',
-    gap: 6,
-    paddingVertical: 28,
-    paddingHorizontal: 24,
-    borderRadius: MiseRadius.lg,
-    borderWidth: 1.4,
-    borderColor: MiseColors.borderFaint,
-    borderStyle: 'dashed',
+  freeTag: {
     backgroundColor: MiseColors.tint,
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  lockBadge: {
+  freeTagLabel: { fontFamily: MiseFonts.bodyExtraBold, fontSize: 9, letterSpacing: 0.5, color: MiseColors.mutedLight },
+  premiumTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    backgroundColor: MiseColors.brand,
+    gap: 3,
+    backgroundColor: MiseColors.tint,
     borderRadius: 999,
-    paddingHorizontal: 11,
-    paddingVertical: 5,
-    marginBottom: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  lockBadgeLabel: { fontFamily: MiseFonts.bodyExtraBold, fontSize: 10.5, letterSpacing: 0.5, color: '#fff' },
-  lockTitle: { fontFamily: MiseFonts.bodyBold, fontSize: 15, color: MiseColors.ink, textAlign: 'center' },
-  lockSubtitle: { fontFamily: MiseFonts.body, fontSize: 12.5, lineHeight: 18, color: MiseColors.muted, textAlign: 'center' },
-  lockCta: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 6 },
-  lockCtaLabel: { fontFamily: MiseFonts.bodyBold, fontSize: 13, color: MiseColors.brand },
+  premiumTagLabel: { fontFamily: MiseFonts.bodyExtraBold, fontSize: 9, letterSpacing: 0.5, color: MiseColors.brand },
+
+  divider: { height: 1, backgroundColor: MiseColors.borderSoft },
+
+  // The real controls render underneath, blurred as one zone (via
+  // BlurTargetView + BlurView, see JSX) rather than each feature blurred
+  // separately — the "Advanced planning" label above already names what's
+  // locked, so the blur itself stays a plain hazy preview.
+  previewLockedWrap: { position: 'relative', borderRadius: MiseRadius.md, overflow: 'hidden' },
+  previewContent: { gap: 20, padding: 14 },
+  previewTint: { position: 'absolute', top: 0, bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(251,246,239,0.55)' },
+
+  // A compact, self-contained card below the (disabled) preview of what's
+  // locked — an icon + title read as a status line, not another button in
+  // the toggle row above, and the CTA is its own real Button rather than
+  // the whole card doubling as one giant tap target.
+  lockCard: {
+    gap: 10,
+    padding: 16,
+    borderRadius: MiseRadius.lg,
+    borderWidth: 1,
+    borderColor: MiseColors.borderSoft,
+    backgroundColor: MiseColors.card,
+  },
+  // Pulls the card up so it overlaps the blurred preview's bottom edge —
+  // floating on top of it rather than sitting below with its own gap.
+  lockCardOverlap: { marginTop: -40, zIndex: 1 },
+  lockCardHeader: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  lockIconCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: MiseColors.tint,
+  },
+  lockTitle: { fontFamily: MiseFonts.bodyBold, fontSize: 15, color: MiseColors.ink },
+  lockSubtitle: { fontFamily: MiseFonts.body, fontSize: 12.5, lineHeight: 18, color: MiseColors.muted },
 
   styleName: { fontFamily: MiseFonts.bodyBold, fontSize: 12, color: MiseColors.brand },
   bars: { flexDirection: 'row', gap: 3, height: 56, alignItems: 'flex-end' },
@@ -361,7 +465,7 @@ const styles = StyleSheet.create({
 
   pillRowWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   togglePill: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 999 },
-  togglePillOff: { borderWidth: 1, borderColor: MiseColors.borderFaint, borderStyle: 'dashed' },
+  togglePillOff: { borderWidth: 1, borderColor: MiseColors.borderFaint },
   togglePillActive: { backgroundColor: MiseColors.brand },
   togglePillLabel: { fontFamily: MiseFonts.bodySemiBold, fontSize: 12.5, color: MiseColors.inkSoft },
   togglePillLabelActive: { color: '#fff' },

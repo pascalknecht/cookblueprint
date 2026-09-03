@@ -52,6 +52,8 @@ export const de = {
     addedWeekToList: "Woche zur Einkaufsliste hinzugefügt",
     noMealsToAdd: "Plane zuerst ein paar Mahlzeiten",
     plannedProgress: "{{planned}} von {{total}} geplant",
+    mealMoved: "Mahlzeit verschoben",
+    mealSwapped: "Mahlzeiten getauscht",
   },
   shoppingScreen: {
     eyebrow: "Gemeinsame Liste",
@@ -222,6 +224,8 @@ export const de = {
       },
     },
     mealsToPlan: "Zu planende Mahlzeiten",
+    freeTag: "Kostenlos",
+    advancedPlanning: "Erweiterte Planung",
     rules: {
       label: "Regeln",
       leftovers: { label: "Reste werden Mittagessen", note: "Übrige Portionen füllen den nächsten Tag" },
@@ -241,8 +245,8 @@ export const de = {
     keepOneMeal: "Mindestens eine Mahlzeit muss aktiv bleiben",
     premiumLock: {
       badge: "Premium",
-      title: "Erweiterte Planung ist eine Premium-Funktion",
-      subtitle: "Kostenlose Konten erhalten eine zufällig ausgewogene Woche. Schalte Kochstil, Aufwand, Regeln und Portionen mit einem Upgrade frei.",
+      title: "Premium-Steuerung",
+      subtitle: "Kostenlose Konten erhalten eine zufällig ausgewogene Woche. Premium gestaltet sie.",
       cta: "Volle Planung freischalten",
     },
   },

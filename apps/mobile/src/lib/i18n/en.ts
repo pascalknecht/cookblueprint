@@ -50,6 +50,8 @@ export const en = {
     addedWeekToList: "Added week to shopping list",
     noMealsToAdd: "Plan some meals first",
     plannedProgress: "{{planned}} of {{total}} planned",
+    mealMoved: "Meal moved",
+    mealSwapped: "Meals swapped",
   },
   shoppingScreen: {
     eyebrow: "Shared list",
@@ -217,6 +219,8 @@ export const en = {
       },
     },
     mealsToPlan: "Meals to plan",
+    freeTag: "Free",
+    advancedPlanning: "Advanced planning",
     rules: {
       label: "Rules",
       leftovers: { label: "Leftovers become lunch", note: "Extra dinner portions fill the next day" },
@@ -236,8 +240,8 @@ export const en = {
     keepOneMeal: "Keep at least one meal enabled",
     premiumLock: {
       badge: "Premium",
-      title: "Advanced planning is a premium feature",
-      subtitle: "Free plans get a randomly balanced week. Upgrade for cooking style, effort, rules and servings control.",
+      title: "Premium controls",
+      subtitle: "Free plans get a randomly balanced week. Premium shapes it.",
       cta: "Unlock full planning",
     },
   },

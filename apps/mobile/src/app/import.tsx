@@ -67,7 +67,7 @@ export default function ImportScreen() {
     createRecipeMutation.mutate(preview, {
       onSuccess: () => {
         showToast(t('importRecipe.savedToast'));
-        router.replace('/(tabs)/recipes');
+        router.replace('/recipes');
       },
       onError: (error) => showToast(error.message),
     });

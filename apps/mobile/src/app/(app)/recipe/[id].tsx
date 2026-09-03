@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Transition from 'react-native-screen-transitions';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/mise/button';
@@ -140,12 +141,14 @@ export default function RecipeDetailScreen() {
           scrollEventThrottle={16}
           contentContainerStyle={{ paddingBottom: insets.bottom + 100 }}>
           <Animated.View onLayout={onHeaderLayout} style={[styles.photo, { height: heroHeight }, parallaxStyle]}>
-            <PhotoPlaceholder
-              color={recipe.color}
-              style={StyleSheet.absoluteFill}
-              iconSize={48}
-              source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}
-            />
+            <Transition.Boundary id={id} style={StyleSheet.absoluteFill}>
+              <PhotoPlaceholder
+                color={recipe.color}
+                style={StyleSheet.absoluteFill}
+                iconSize={48}
+                source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}
+              />
+            </Transition.Boundary>
             <LinearGradient
               colors={['rgba(20,10,30,0.35)', 'rgba(20,10,30,0)', 'rgba(20,10,30,0.55)']}
               locations={[0, 0.3, 1]}

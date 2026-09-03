@@ -30,7 +30,7 @@ export default function WelcomeScreen() {
     isPending: isPending || hasShareIntent,
     isAuthenticated: !!session || !!isLocal,
     redirectWhen: 'authenticated',
-    to: '/(tabs)/recipes',
+    to: '/recipes',
   });
 
   async function handleTryItOut() {

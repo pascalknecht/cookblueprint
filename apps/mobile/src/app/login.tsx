@@ -60,7 +60,7 @@ export default function LoginScreen() {
         return data;
       });
     },
-    onSuccess: () => router.replace('/(tabs)/recipes'),
+    onSuccess: () => router.replace('/recipes'),
     onError: (error) => {
       if (error.message === 'Email not verified') {
         showToast(t('auth.verifyEmailToast'));

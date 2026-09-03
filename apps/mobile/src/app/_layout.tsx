@@ -90,8 +90,12 @@ export default function RootLayout() {
                       />
                       <Stack.Screen name="check-email" />
                       <Stack.Screen name="forgot-password" />
-                      <Stack.Screen name="(tabs)" />
-                      <Stack.Screen name="recipe/[id]" options={{ animation: 'slide_from_right' }} />
+                      {/* (tabs) and recipe/[id] live inside their own BlankStack
+                          (see (app)/_layout.tsx) so the shared-element zoom between
+                          a RecipeCard and the recipe detail screen has one navigator
+                          to measure across — this outer entry must not also animate,
+                          or the two would double up. */}
+                      <Stack.Screen name="(app)" options={{ animation: 'none' }} />
                       <Stack.Screen name="import" options={{ animation: 'slide_from_right' }} />
                       <Stack.Screen name="manual" options={{ animation: 'slide_from_right' }} />
                       <Stack.Screen name="edit-recipe" options={{ animation: 'slide_from_right' }} />

@@ -125,7 +125,7 @@ export default function PaywallScreen() {
         router.back();
         return;
       }
-      router.replace(session ? '/(tabs)/recipes' : '/check-email');
+      router.replace(session ? '/recipes' : '/check-email');
     },
     onError: (error: unknown) => {
       if (isPurchasesError(error) && error.userCancelled) return;

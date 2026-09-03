@@ -58,7 +58,7 @@ export default function ManualScreen() {
       {
         onSuccess: () => {
           showToast(t('manualRecipe.addedToast'));
-          router.replace('/(tabs)/recipes');
+          router.replace('/recipes');
         },
         onError: (error) => showToast(error.message),
       },
