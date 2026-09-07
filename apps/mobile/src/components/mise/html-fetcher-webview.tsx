@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { Modal, StyleSheet } from 'react-native';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
 
 import { useHtmlFetcher } from '@/store/html-fetcher';
@@ -35,10 +35,16 @@ const EXTRACT_JSON_LD_SCRIPT = `
  * recipe import work without a signed-in session, where there's no backend
  * to do the fetch, and it also runs the page's own JS first, so
  * client-rendered recipe sites work too.
+ *
+ * The WebView lives inside a transparent Modal rather than as a plain sibling
+ * of the root <Stack> in _layout.tsx. Mounted directly there, it corrupts the
+ * Stack's Fabric layout on Android — the whole app squishes into a small rect
+ * the moment it starts loading a real URL. A Modal mounts its content into its
+ * own native window (a separate Dialog on Android), decoupled from the
+ * Stack's view tree, so the WebView can't affect its layout.
  */
 export function HtmlFetcherWebView() {
   const { pendingUrl, resolvePending, rejectPending } = useHtmlFetcher();
-  if (!pendingUrl) return null;
 
   function handleMessage(event: WebViewMessageEvent) {
     try {
@@ -54,15 +60,19 @@ export function HtmlFetcherWebView() {
   }
 
   return (
-    <WebView
-      source={{ uri: pendingUrl }}
-      style={styles.hidden}
-      pointerEvents="none"
-      injectedJavaScript={EXTRACT_JSON_LD_SCRIPT}
-      onMessage={handleMessage}
-      onError={() => rejectPending(new Error("Couldn't reach that URL."))}
-      onHttpError={() => rejectPending(new Error("Couldn't reach that URL."))}
-    />
+    <Modal visible={!!pendingUrl} transparent animationType="none" onRequestClose={() => {}}>
+      {pendingUrl ? (
+        <WebView
+          source={{ uri: pendingUrl }}
+          style={styles.hidden}
+          pointerEvents="none"
+          injectedJavaScript={EXTRACT_JSON_LD_SCRIPT}
+          onMessage={handleMessage}
+          onError={() => rejectPending(new Error("Couldn't reach that URL."))}
+          onHttpError={() => rejectPending(new Error("Couldn't reach that URL."))}
+        />
+      ) : null}
+    </Modal>
   );
 }
 
