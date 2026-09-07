@@ -25,7 +25,6 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AnimatedSplash } from '@/components/mise/animated-splash';
 import { HtmlFetcherWebView } from '@/components/mise/html-fetcher-webview';
-import { NeedleWebView } from '@/components/mise/needle-webview';
 import { ShareIntentRedirect } from '@/components/mise/share-intent-redirect';
 import { Toast } from '@/components/mise/toast';
 import { SPLASH_GROUND } from '@/components/mise/splash-artwork';
@@ -33,7 +32,6 @@ import { useSplashVisible } from '@/hooks/use-splash-visible';
 import i18n from '@/lib/i18n';
 import '@/lib/purchases';
 import { HtmlFetcherProvider } from '@/store/html-fetcher';
-import { NeedleProvider, useNeedle } from '@/store/needle';
 import { ToastProvider } from '@/store/toast';
 
 SplashScreen.preventAutoHideAsync();
@@ -76,11 +74,10 @@ export default function RootLayout() {
             <SafeAreaProvider>
               <ToastProvider>
                 <HtmlFetcherProvider>
-                  <NeedleProvider>
-                    <View style={{ flex: 1, backgroundColor: SPLASH_GROUND }}>
-                      <StatusBar style="dark" />
-                      <NavigationBar barStyle="light-content" />
-                      <Stack screenOptions={{ headerShown: false }}>
+                  <View style={{ flex: 1, backgroundColor: SPLASH_GROUND }}>
+                    <StatusBar style="dark" />
+                    <NavigationBar barStyle="light-content" />
+                    <Stack screenOptions={{ headerShown: false }}>
                       <Stack.Screen name="index" />
                       <Stack.Screen name="login" />
                       <Stack.Screen name="register" />
@@ -113,13 +110,11 @@ export default function RootLayout() {
                       <Stack.Screen name="shopping-category-settings" options={modalScreenOptions} />
                       <Stack.Screen name="select-household" options={modalScreenOptions} />
                       <Stack.Screen name="edit-account" options={{ animation: 'slide_from_right' }} />
-                      </Stack>
-                      <Toast />
-                      <HtmlFetcherWebView />
-                      <MaybeNeedleWebView />
-                      <SplashOverlay fontsReady={fontsReady} />
-                    </View>
-                  </NeedleProvider>
+                    </Stack>
+                    <Toast />
+                    <HtmlFetcherWebView />
+                    <SplashOverlay fontsReady={fontsReady} />
+                  </View>
                 </HtmlFetcherProvider>
               </ToastProvider>
             </SafeAreaProvider>
@@ -134,15 +129,4 @@ function SplashOverlay({ fontsReady }: { fontsReady: boolean }) {
   const visible = useSplashVisible(fontsReady);
   if (!visible) return null;
   return <AnimatedSplash fontsReady={fontsReady} />;
-}
-
-// Mounting the hidden Needle WebView unconditionally (even delayed past the
-// splash) corrupts Fabric's layout on Android — the root Stack measures as a
-// square instead of filling the screen. Mirror HtmlFetcherWebView's already-
-// safe pattern instead: stay unmounted until something actually needs it
-// (the first extractIngredients call flips NeedleProvider's `mounted` flag).
-function MaybeNeedleWebView() {
-  const { mounted } = useNeedle();
-  if (!mounted) return null;
-  return <NeedleWebView />;
 }

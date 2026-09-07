@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  mergeNeedleIngredient,
+  mergeIngredientExtract,
   parseIngredientLine,
   preprocessIngredientLines,
 } from "@repo/shared";
@@ -51,20 +51,20 @@ describe("parseIngredientLine", () => {
   });
 });
 
-describe("mergeNeedleIngredient", () => {
+describe("mergeIngredientExtract", () => {
   it("splits on the unit token so leftover words stay on the name", () => {
     expect(
-      mergeNeedleIngredient(
+      mergeIngredientExtract(
         "1 TL Kreuzkümmelpulver",
-        { amount: 1, unit: "TL", name: "Kreuzkümmelpulver" },
+        { unit: "TL" },
         { quantity: "", name: "1 TL Kreuzkümmelpulver" },
       ),
     ).toEqual({ quantity: "1 TL", name: "Kreuzkümmelpulver" });
 
     expect(
-      mergeNeedleIngredient(
+      mergeIngredientExtract(
         "2 EL gehackte Petersilie",
-        { amount: 2, unit: "EL", name: "Petersilie" },
+        { unit: "EL" },
         { quantity: "2 EL", name: "gehackte Petersilie" },
       ),
     ).toEqual({ quantity: "2 EL", name: "gehackte Petersilie" });
@@ -72,28 +72,43 @@ describe("mergeNeedleIngredient", () => {
 
   it("ignores a unit that is not in the original line", () => {
     expect(
-      mergeNeedleIngredient(
+      mergeIngredientExtract(
         "1 Prise Salz",
-        { amount: 1, unit: "TL", name: "Prise Salz" },
+        { unit: "TL" },
         { quantity: "1 Prise", name: "Salz" },
       ),
     ).toEqual({ quantity: "1 Prise", name: "Salz" });
   });
 
-  it("falls back when Needle returns nothing", () => {
+  it("falls back when no unit was extracted", () => {
     expect(
-      mergeNeedleIngredient("3 eggs", null, { quantity: "3", name: "eggs" }),
+      mergeIngredientExtract("3 eggs", null, { quantity: "3", name: "eggs" }),
     ).toEqual({ quantity: "3", name: "eggs" });
+    expect(
+      mergeIngredientExtract("1 litre stock", {}, { quantity: "1 litre", name: "stock" }),
+    ).toEqual({ quantity: "1 litre", name: "stock" });
   });
 });
 
 describe("preprocessIngredientLines", () => {
-  it("uses Needle when present and the parser otherwise", () => {
-    const result = preprocessIngredientLines(
-      ["1 TL Kreuzkümmelpulver", "3 eggs"],
-      [{ amount: 1, unit: "TL", name: "Kreuzkümmelpulver" }, null],
-    );
+  it("splits German and English ingredient lines via parse-ingredient, falling back to the deterministic parser", () => {
+    const result = preprocessIngredientLines(["1 TL Kreuzkümmelpulver", "3 eggs"]);
     expect(result[0]).toMatchObject({ n: "Kreuzkümmelpulver", q: "1 TL" });
     expect(result[1]).toMatchObject({ n: "eggs", q: "3" });
+  });
+
+  it("recognizes German units missing from parse-ingredient's default table", () => {
+    const result = preprocessIngredientLines(["2 Zehen Knoblauch", "1 Prise Salz", "3 EL Olivenöl"]);
+    expect(result[0]).toMatchObject({ n: "Knoblauch", q: "2 Zehen" });
+    expect(result[1]).toMatchObject({ n: "Salz", q: "1 Prise" });
+    expect(result[2]).toMatchObject({ n: "Olivenöl", q: "3 EL" });
+  });
+
+  it("falls back to the deterministic parser for a unit spelling parse-ingredient doesn't recognize", () => {
+    // "litre" isn't in parse-ingredient's default table (only "liter") and isn't in
+    // EXTRA_UOMS either, so extraction finds no unit here and must defer to the fallback
+    // regex parser rather than let parse-ingredient's own quantity/description split win.
+    const result = preprocessIngredientLines(["1 litre stock"]);
+    expect(result[0]).toMatchObject({ n: "stock", q: "1 litre" });
   });
 });

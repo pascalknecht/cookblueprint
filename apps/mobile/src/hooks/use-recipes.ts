@@ -1,4 +1,4 @@
-import { extractIngredientLines, extractRecipeJsonLd, mapSchemaRecipeToInput, preprocessIngredientLines } from '@repo/shared';
+import { extractRecipeJsonLd, mapSchemaRecipeToInput } from '@repo/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -7,7 +7,6 @@ import { api } from '@/lib/api-client';
 import * as localRecipes from '@/lib/local-db/recipes';
 import type { Ingredient, Recipe, RecipeInput } from '@/lib/local-db/types';
 import { useHtmlFetcher } from '@/store/html-fetcher';
-import { useNeedle } from '@/store/needle';
 import { refreshMealPlanWidget } from '@/widgets/refresh-widgets';
 
 import { useLocalMode } from './use-local-mode';
@@ -121,26 +120,20 @@ export function useUploadRecipeImage() {
 /**
  * Extracts a URL's schema.org Recipe markup, if any. Always done on-device via a hidden
  * WebView — that runs the page's own JS before reading it, so client-rendered recipe sites
- * work too, not just static HTML. Ingredient lines are then preprocessed with Needle 2
- * (on-device WASM) to split amount/unit from the name; the deterministic parser is the
- * fallback when Needle is not ready or declines a line. The result is just a preview;
- * saving it (useCreateRecipe) is what actually persists it, locally for local-mode users
- * or to the API for signed-in ones.
+ * work too, not just static HTML. Ingredient lines are then split into amount/unit/name by
+ * mapSchemaRecipeToInput (parse-ingredient, pure JS, synchronous). The result is just a
+ * preview; saving it (useCreateRecipe) is what actually persists it, locally for local-mode
+ * users or to the API for signed-in ones.
  */
 export function useImportRecipe() {
   const { fetchHtml } = useHtmlFetcher();
-  const { extractIngredients } = useNeedle();
   const { t } = useTranslation();
   return useMutation({
     mutationFn: async (url: string): Promise<RecipeInput> => {
       const html = await fetchHtml(url);
       const schemaRecipe = extractRecipeJsonLd(html);
       if (!schemaRecipe) throw new Error(t('importRecipe.noRecipeFound'));
-      const recipe = mapSchemaRecipeToInput(schemaRecipe);
-      const lines = extractIngredientLines(schemaRecipe);
-      if (lines.length === 0) return recipe;
-      const extracts = await extractIngredients(lines);
-      return { ...recipe, ingredients: preprocessIngredientLines(lines, extracts) };
+      return mapSchemaRecipeToInput(schemaRecipe);
     },
   });
 }

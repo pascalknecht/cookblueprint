@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "html-entities": "^2.6.0"
+    "html-entities": "^2.6.0",
+    "parse-ingredient": "^2.2.0"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

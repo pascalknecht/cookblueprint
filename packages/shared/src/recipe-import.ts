@@ -1,4 +1,5 @@
 import { decode as decodeHtmlEntities } from 'html-entities';
+import { parseIngredient, type UnitOfMeasureDefinitions } from 'parse-ingredient';
 
 import { DEFAULT_RECIPE_FREQUENCY, type RecipeFrequency } from './recipe-frequency';
 import { normalizeRecipeMealTypes, type RecipeMealType } from './recipe-meal-types';
@@ -120,32 +121,50 @@ export function parseIngredientLine(rawLine: string): { name: string; quantity: 
   return { quantity: '', name: line };
 }
 
-export type NeedleIngredientExtract = {
-  amount?: number;
-  name?: string;
+export type IngredientExtract = {
   unit?: string;
 };
 
-/** Tool schema for Needle: one ingredient line → amount + unit + name. */
-export const NEEDLE_INGREDIENT_TOOLS = [
-  {
-    name: 'ingredient',
-    description:
-      'Parse one recipe ingredient line into amount, unit, and name. Units may be German (TL, EL, Prise, Zehe, g, ml) or English (tsp, tbsp, cups). Keep adjectives like chopped or gehackte in the name.',
-    parameters: {
-      type: 'object',
-      properties: {
-        amount: { type: 'number', description: 'Numeric amount' },
-        unit: { type: 'string', description: 'Unit only, e.g. TL, EL, g, tsp, cups, Prise, Zehe' },
-        name: {
-          type: 'string',
-          description: 'Ingredient name including adjectives, without amount or unit',
-        },
-      },
-      required: ['name'],
-    },
-  },
-] as const;
+// parse-ingredient ships English units only; these fill in the German ones this app's
+// recipes use, plus a few English ones (dessertspoon, sachet, tin, slice, handful, cl)
+// missing from its default table. Matching is case-insensitive, so one casing suffices.
+const EXTRA_UOMS: UnitOfMeasureDefinitions = {
+  teelöffel: { short: 'TL', plural: 'Teelöffel', alternates: [], type: 'volume' },
+  esslöffel: { short: 'EL', plural: 'Esslöffel', alternates: [], type: 'volume' },
+  messerspitze: { short: 'Msp', plural: 'Messerspitzen', alternates: ['Msp.'], type: 'volume' },
+  prise: { short: 'Prise', plural: 'Prisen', alternates: [], type: 'volume' },
+  zehe: { short: 'Zehe', plural: 'Zehen', alternates: [], type: 'count' },
+  stück: { short: 'Stück', plural: 'Stücke', alternates: ['Stk', 'Stk.'], type: 'count' },
+  bund: { short: 'Bund', plural: 'Bund', alternates: ['Bd', 'Bd.'], type: 'count' },
+  handvoll: { short: 'Handvoll', plural: 'Handvoll', alternates: [], type: 'volume' },
+  tasse: { short: 'Tasse', plural: 'Tassen', alternates: [], type: 'volume' },
+  becher: { short: 'Becher', plural: 'Becher', alternates: [], type: 'volume' },
+  päckchen: { short: 'Päckchen', plural: 'Päckchen', alternates: ['Pck', 'Pck.', 'Packung', 'Packungen'], type: 'count' },
+  dose: { short: 'Dose', plural: 'Dosen', alternates: [], type: 'count' },
+  scheibe: { short: 'Scheibe', plural: 'Scheiben', alternates: [], type: 'count' },
+  zentiliter: { short: 'cl', plural: 'cl', alternates: [], type: 'volume', conversionFactor: 10 },
+  dessertspoon: { short: 'dsp', plural: 'dessertspoons', alternates: ['dsp.'], type: 'volume' },
+  sachet: { short: 'sachet', plural: 'sachets', alternates: [], type: 'count' },
+  tin: { short: 'tin', plural: 'tins', alternates: [], type: 'count' },
+  slice: { short: 'slice', plural: 'slices', alternates: [], type: 'count' },
+  handful: { short: 'handful', plural: 'handfuls', alternates: [], type: 'volume' },
+};
+
+/**
+ * Identifies each ingredient line's unit using parse-ingredient (a plain-JS, regex-based
+ * library — no WASM, no WebView). Only the unit token is read back — its numeric quantity
+ * and cleaned-up description are discarded in favor of slicing the original line in
+ * mergeIngredientExtract, which preserves fractions, ranges, and "ca." prefixes verbatim
+ * and isn't affected by whatever parse-ingredient made of the rest of the line.
+ */
+export function extractIngredientTokens(lines: string[]): (IngredientExtract | null)[] {
+  return lines.map((line) => {
+    if (!line.trim()) return null;
+    const [parsed] = parseIngredient([line], { additionalUOMs: EXTRA_UOMS });
+    if (!parsed?.unitOfMeasure) return null;
+    return { unit: parsed.unitOfMeasure };
+  });
+}
 
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -162,37 +181,22 @@ function findUnitTokenIndex(line: string, unit: string): { start: number; end: n
 }
 
 /**
- * Merge a Needle extract back onto the original line. Quantity is the prefix
+ * Merge an ingredient extract back onto the original line. Quantity is the prefix
  * through the unit (so "gehackte" stays on the name); invented units are ignored.
  */
-export function mergeNeedleIngredient(
+export function mergeIngredientExtract(
   rawLine: string,
-  extracted: NeedleIngredientExtract | null | undefined,
+  extracted: IngredientExtract | null | undefined,
   fallback: { name: string; quantity: string },
 ): { name: string; quantity: string } {
   const line = rawLine.trim();
-  if (!extracted) return fallback;
+  if (!extracted?.unit) return fallback;
 
-  if (extracted.unit) {
-    const span = findUnitTokenIndex(line, extracted.unit);
-    if (!span) return fallback;
-    const quantity = line.slice(0, span.end).trim();
-    const name = line.slice(span.end).trim();
-    if (quantity && name) return { quantity, name };
-    return fallback;
-  }
-
-  const extractedName = extracted.name?.trim();
-  if (extractedName && extractedName.length < line.length) {
-    const lower = line.toLowerCase();
-    const nameLower = extractedName.toLowerCase();
-    if (lower.endsWith(nameLower)) {
-      const quantity = line.slice(0, line.length - extractedName.length).trim();
-      const name = line.slice(line.length - extractedName.length).trim();
-      if (quantity && name) return { quantity, name };
-    }
-  }
-
+  const span = findUnitTokenIndex(line, extracted.unit);
+  if (!span) return fallback;
+  const quantity = line.slice(0, span.end).trim();
+  const name = line.slice(span.end).trim();
+  if (quantity && name) return { quantity, name };
   return fallback;
 }
 
@@ -200,15 +204,13 @@ export function ingredientInputFromParsed(name: string, quantity: string): Recip
   return { n: name, q: quantity, cat: guessIngredientCategory(name) };
 }
 
-/** Applies Needle extracts onto raw lines, falling back to the deterministic parser per line. */
-export function preprocessIngredientLines(
-  rawLines: string[],
-  extracts: Array<NeedleIngredientExtract | null | undefined> | null,
-): RecipeIngredientInput[] {
-  return rawLines.map((rawLine, index) => {
-    const line = decodeHtmlEntities(rawLine);
+/** Applies parse-ingredient's unit/name split onto raw lines, falling back to the deterministic parser per line. */
+export function preprocessIngredientLines(rawLines: string[]): RecipeIngredientInput[] {
+  const lines = rawLines.map((line) => decodeHtmlEntities(line));
+  const extracts = extractIngredientTokens(lines);
+  return lines.map((line, index) => {
     const fallback = parseIngredientLine(line);
-    const parsed = mergeNeedleIngredient(line, extracts?.[index], fallback);
+    const parsed = mergeIngredientExtract(line, extracts[index], fallback);
     return ingredientInputFromParsed(parsed.name, parsed.quantity);
   });
 }
@@ -364,7 +366,7 @@ export function mapSchemaRecipeToInput(schemaRecipe: Record<string, unknown>): R
     parseIsoDurationMinutes(schemaRecipe.prepTime) + parseIsoDurationMinutes(schemaRecipe.cookTime) ||
     30;
 
-  const ingredients = preprocessIngredientLines(extractIngredientLines(schemaRecipe), null);
+  const ingredients = preprocessIngredientLines(extractIngredientLines(schemaRecipe));
 
   const steps = extractInstructionSteps(schemaRecipe.recipeInstructions);
 
