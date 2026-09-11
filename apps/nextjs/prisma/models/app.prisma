@@ -16,7 +16,6 @@ model Organization {
 
   @@unique([slug])
   @@map("organization")
-  @@schema("public")
 }
 
 model Member {
@@ -29,7 +28,6 @@ model Member {
   createdAt      DateTime
 
   @@map("member")
-  @@schema("public")
 }
 
 model Invitation {
@@ -45,5 +43,4 @@ model Invitation {
   user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
 
   @@map("invitation")
-  @@schema("public")
 }

@@ -2,9 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { mobileWebDevOrigins } from "@/lib/mobile-dev-origins";
 
-const PROTECTED_PREFIXES = ["/billing"];
-const LOGIN_PATH = "/login";
-
 function corsHeaders(origin: string | null): Record<string, string> | null {
   if (!origin || !mobileWebDevOrigins.includes(origin)) return null;
   return {
@@ -30,25 +27,9 @@ export async function proxy(request: NextRequest) {
     return response;
   }
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) =>
-    pathname.startsWith(prefix),
-  );
-
-  if (!isProtected) {
-    return NextResponse.next();
-  }
-
-  const sessionCookie = request.cookies.get("better-auth.session_token");
-
-  if (!sessionCookie?.value) {
-    const loginUrl = new URL(LOGIN_PATH, request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
-  }
-
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/billing/:path*", "/api/:path*"],
+  matcher: ["/api/:path*"],
 };

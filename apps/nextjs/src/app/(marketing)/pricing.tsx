@@ -1,7 +1,5 @@
 import React from "react";
 import { Check } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,9 +9,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { getServerTranslator } from "@/lib/i18n/server";
+import { DownloadButtons } from "./download-buttons";
 
 export async function PricingSection() {
   const t = await getServerTranslator();
+
+  const downloadLabels = {
+    googlePlay: t("download.googlePlay"),
+    appStore: t("download.appStore"),
+    comingSoon: t("download.comingSoon"),
+  };
 
   const plans = [
     {
@@ -21,8 +26,6 @@ export async function PricingSection() {
       description: t("pricing.freeDescription"),
       price: "$0",
       period: t("pricing.perMonth"),
-      cta: t("pricing.freeCta"),
-      ctaVariant: "outline" as const,
       highlighted: false,
       features: [
         t("pricing.freeFeature1"),
@@ -36,8 +39,6 @@ export async function PricingSection() {
       description: t("pricing.proDescription"),
       price: "$4",
       period: t("pricing.perMonth"),
-      cta: t("pricing.proCta"),
-      ctaVariant: "default" as const,
       highlighted: true,
       badge: t("pricing.proBadge"),
       features: [
@@ -50,16 +51,16 @@ export async function PricingSection() {
   ];
 
   return (
-    <section className="border-t border-border py-20 md:py-28" id="pricing">
+    <section className="border-border border-t py-20 md:py-28" id="pricing">
       <div className="container mx-auto px-4">
         <div className="mx-auto mb-14 max-w-2xl text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-muted-foreground mb-3 text-xs font-medium tracking-[0.18em] uppercase">
             {t("pricing.eyebrow")}
           </p>
           <h2 className="font-display text-3xl md:text-5xl">
             {t("pricing.title")}
           </h2>
-          <p className="mt-5 text-base text-muted-foreground md:text-lg">
+          <p className="text-muted-foreground mt-5 text-base md:text-lg">
             {t("pricing.subtitle")}
           </p>
         </div>
@@ -68,13 +69,17 @@ export async function PricingSection() {
           {plans.map((plan) => (
             <Card
               key={plan.name}
-              className={plan.highlighted ? "border-primary/40 shadow-md" : ""}
+              className={
+                plan.highlighted
+                  ? "pricing-card border-primary/40 bg-accent shadow-none"
+                  : "pricing-card shadow-none"
+              }
             >
               <CardHeader>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <CardTitle className="text-xl">{plan.name}</CardTitle>
                   {plan.badge ? (
-                    <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium uppercase tracking-[0.12em] text-primary-foreground">
+                    <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-[10px] font-medium tracking-[0.12em] uppercase">
                       {plan.badge}
                     </span>
                   ) : null}
@@ -92,17 +97,23 @@ export async function PricingSection() {
                 </div>
                 <ul className="space-y-2.5">
                   {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm">
+                    <li
+                      key={feature}
+                      className="flex items-start gap-2 text-sm"
+                    >
                       <Check className="text-primary mt-0.5 size-4 shrink-0" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter>
-                <Button variant={plan.ctaVariant} size="lg" className="w-full" asChild>
-                  <Link href="/register">{plan.cta}</Link>
-                </Button>
+              <CardFooter className="mt-auto">
+                <DownloadButtons
+                  labels={downloadLabels}
+                  size="sm"
+                  stack
+                  className="w-full"
+                />
               </CardFooter>
             </Card>
           ))}

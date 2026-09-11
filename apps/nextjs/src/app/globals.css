@@ -3,6 +3,7 @@
 @import "shadcn/tailwind.css";
 
 @plugin "tailwindcss-animate";
+@plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -153,7 +154,7 @@
 
   --radius-3xl: calc(var(--radius) * 2.2);
 
-  --radius-4xl: calc(var(--radius) * 2.6)
+  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 /*
@@ -172,7 +173,7 @@
   --secondary: #f0e8dd;
   --secondary-foreground: #221e1b;
   --muted: #f0e8dd;
-  --muted-foreground: #97887c;
+  --muted-foreground: oklch(0.48 0.025 55);
   --accent: #fbede7;
   --accent-foreground: #9e3f2c;
   --border: #eae1d4;
@@ -186,13 +187,407 @@
   --mise-clay: #c77c3a;
   --mise-near: oklch(0.175 0.014 320);
   --mise-near-foreground: oklch(0.985 0.012 80);
+  --hero-surface: oklch(0.285 0.032 52);
 
   --font-sans: var(--font-mise-body);
   --font-display: var(--font-mise-display);
 }
 
 .marketing-theme .font-display {
+  font-weight: 700;
   letter-spacing: -0.02em;
+}
+
+/* Landing-page composition: recipe paper, clay accents, and real kitchen tools. */
+.landing-container,
+.landing-page > section > .container {
+  width: min(100%, 76rem);
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 3rem);
+}
+
+.landing-page h2,
+.landing-page h3 {
+  text-wrap: balance;
+}
+
+.landing-page p {
+  text-wrap: pretty;
+}
+
+.marketing-theme a:focus-visible,
+.screenshot-gallery:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 5px;
+}
+
+.landing-hero {
+  --foreground: oklch(0.985 0.012 80);
+  --muted-foreground: oklch(0.79 0.032 61);
+  --primary: oklch(0.77 0.1 46);
+  --border: oklch(0.45 0.036 52);
+  margin: 0.5rem clamp(0.75rem, 2.25vw, 2rem) 1.5rem;
+  overflow: clip;
+  border-radius: clamp(1.625rem, 3vw, 2.5rem);
+  background: var(--hero-surface);
+  color: var(--foreground);
+  padding-block: calc(5rem + clamp(2.5rem, 6vw, 5.5rem)) 3.5rem;
+}
+
+.landing-hero .download-actions > a {
+  background: var(--foreground);
+  color: var(--hero-surface);
+}
+
+.hero-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+}
+
+.hero-copy {
+  position: relative;
+  z-index: 2;
+  padding-bottom: 2rem;
+}
+
+.hero-title {
+  font-size: clamp(3rem, 5.2vw, 4.75rem);
+  line-height: 1.06;
+}
+
+.hero-title > span {
+  display: block;
+  margin-top: 0.08em;
+}
+
+.hero-description {
+  max-width: 29rem;
+  margin-top: 1.75rem;
+  color: var(--muted-foreground);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+.hero-actions {
+  margin-top: 2rem;
+}
+
+.hero-actions .download-actions {
+  align-items: flex-start;
+}
+
+.hero-reassurance {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+}
+
+.hero-reassurance svg {
+  flex-shrink: 0;
+}
+
+.hero-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 6px;
+}
+
+.hero-explore:hover {
+  color: var(--primary);
+}
+
+.hero-stage {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  height: 38rem;
+  margin-inline: auto;
+}
+
+.hero-stage-ground {
+  position: absolute;
+  inset: 2.5rem -1rem 2.75rem;
+  background: oklch(0.335 0.036 52);
+  border-radius: 48% 48% 1.5rem 1.5rem;
+}
+
+.hero-recipes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transform: rotate(-5deg);
+}
+
+.hero-plan {
+  position: absolute;
+  top: 5.5rem;
+  right: -0.25rem;
+  transform: rotate(6deg);
+}
+
+.features-section {
+  background: oklch(0.985 0.007 70);
+}
+
+.feature-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 4rem;
+  align-items: start;
+}
+
+.feature-intro > p:first-child {
+  grid-column: 1 / -1;
+}
+
+.feature-intro > p:last-child {
+  margin-top: 0;
+  line-height: 1.75;
+}
+
+.feature-visual {
+  display: flex;
+  align-items: center;
+  min-height: 21rem;
+  padding: 2rem;
+  border-radius: 1.5rem;
+  background: oklch(0.95 0.026 78);
+}
+
+.feature-visual-primary {
+  background: oklch(0.95 0.025 48);
+}
+
+.feature-visual-success {
+  background: oklch(0.945 0.023 130);
+}
+
+.screenshot-section {
+  background: oklch(0.95 0.018 70);
+}
+
+.screenshot-gallery {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 220px;
+  justify-content: space-between;
+  gap: 2rem;
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: 0.75rem 0.25rem 1.5rem;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+.screenshot-figure {
+  scroll-snap-align: center;
+}
+
+.pricing-card {
+  padding-block: 2rem;
+}
+
+.closing-section {
+  margin: 0 clamp(1rem, 3vw, 2.5rem) 2.5rem;
+  border-radius: 2rem;
+  background: oklch(0.925 0.028 66);
+}
+
+@media (max-width: 1023px) {
+  .hero-layout {
+    gap: 1rem;
+  }
+
+  .hero-stage {
+    height: 33rem;
+  }
+
+  .hero-recipes {
+    left: -0.5rem;
+    transform: rotate(-5deg) scale(0.86);
+    transform-origin: top left;
+  }
+
+  .hero-plan {
+    top: 5rem;
+    right: -1.25rem;
+    transform: rotate(6deg) scale(0.86);
+    transform-origin: top right;
+  }
+
+  .screenshot-gallery {
+    justify-content: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .hero-copy {
+    padding-bottom: 0;
+  }
+
+  .hero-title {
+    font-size: clamp(2.625rem, 9vw, 3.75rem);
+  }
+
+  .hero-description {
+    margin-top: 1.25rem;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+
+  .hero-explore {
+    margin-top: 0.75rem;
+  }
+
+  .hero-stage {
+    max-width: 25rem;
+    height: 33rem;
+    margin-top: 1rem;
+  }
+
+  .hero-stage-ground {
+    inset-inline: 0;
+  }
+
+  .hero-recipes {
+    left: 0.5rem;
+  }
+
+  .hero-plan {
+    right: 0.5rem;
+  }
+
+  .feature-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+  }
+
+  .feature-visual {
+    min-height: 18rem;
+    padding: 1.25rem;
+  }
+
+  .marketing-theme .marketing-nav {
+    padding-inline: 0.25rem;
+  }
+
+  html[lang="de"] .hero-title {
+    font-size: clamp(2rem, 8.6vw, 3.5rem);
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-title {
+    font-size: 2.125rem;
+  }
+}
+
+.marketing-header--overlay {
+  height: 0;
+}
+
+.nav-mask-shell {
+  position: relative;
+  height: 4.5rem;
+}
+
+.nav-mask-shell--active {
+  --nav-hero-mask: linear-gradient(white, white);
+  --nav-mask-size: 100% 100%;
+  --nav-mask-position: 0 0;
+  height: 5.5rem;
+}
+
+.nav-layer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Complementary alpha masks split the two palettes along the rounded hero. */
+.nav-mask-shell--active .nav-layer--page {
+  mask-image: linear-gradient(white, white), var(--nav-hero-mask);
+  mask-size:
+    100% 100%,
+    var(--nav-mask-size);
+  mask-position:
+    0 0,
+    var(--nav-mask-position);
+  mask-repeat: no-repeat;
+  mask-composite: exclude;
+}
+
+.nav-layer--hero {
+  /* Base (pre-floating) state: background is still transparent here, so text needs to
+     read against the dark hero showing through — same light tokens the floating page
+     layer uses once IT goes brown, further down. */
+  --foreground: oklch(0.985 0.012 80);
+  --muted-foreground: oklch(0.79 0.032 61);
+  --mise-near: oklch(0.985 0.012 80);
+  --mise-near-foreground: oklch(0.285 0.032 52);
+  --accent: oklch(0.38 0.036 52);
+  --accent-foreground: oklch(0.985 0.012 80);
+  color: var(--foreground);
+  mask-image: var(--nav-hero-mask);
+  mask-size: var(--nav-mask-size);
+  mask-position: var(--nav-mask-position);
+  mask-repeat: no-repeat;
+}
+
+.nav-layer--hero .marketing-nav {
+  pointer-events: none;
+}
+
+/* Once floating, this layer switches to a solid light pill instead — reset the tokens
+   above back to the theme's normal dark-on-light values, since custom properties
+   cascade per-property: a more specific selector still has to restate every one it
+   means to take back, not just the background/border it's changing here. */
+.nav-layer--hero .marketing-nav[data-floating="true"] {
+  --foreground: #221e1b;
+  --muted-foreground: oklch(0.48 0.025 55);
+  --mise-near: oklch(0.175 0.014 320);
+  --mise-near-foreground: oklch(0.985 0.012 80);
+  --accent: #fbede7;
+  --accent-foreground: #9e3f2c;
+  color: var(--foreground);
+  border-color: color-mix(in oklch, var(--border) 70%, transparent);
+  background-color: var(--background);
+  box-shadow: none;
+}
+
+.nav-layer--hero [data-focused="logo"] [data-nav-key="logo"],
+.nav-layer--hero [data-focused="features"] [data-nav-key="features"],
+.nav-layer--hero [data-focused="howItWorks"] [data-nav-key="howItWorks"],
+.nav-layer--hero [data-focused="pricing"] [data-nav-key="pricing"],
+.nav-layer--hero [data-focused="menu"] [data-nav-key="menu"],
+.nav-layer--hero [data-focused="language"] [data-nav-key="language"],
+.nav-layer--hero [data-focused="download"] [data-nav-key="download"] {
+  outline: 2px solid oklch(0.77 0.1 46);
+  outline-offset: 5px;
+  border-radius: 0.5rem;
 }
 
 .marketing-nav {
@@ -204,23 +599,29 @@
   border-radius: 0;
   background-color: transparent;
   box-shadow: 0 0 0 0 oklch(0.2 0.03 50 / 0);
-  backdrop-filter: blur(0);
   transform: translateY(0);
   transition:
     background-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 400ms cubic-bezier(0.16, 1, 0.3, 1),
     border-color 400ms cubic-bezier(0.16, 1, 0.3, 1),
     transform 400ms cubic-bezier(0.16, 1, 0.3, 1),
-    backdrop-filter 400ms cubic-bezier(0.16, 1, 0.3, 1),
     border-radius 400ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Past the hero: a solid brown pill matching the hero card, with the same light
+   text/accent tokens the hero layer used to need when it had the dark background. */
 .marketing-nav[data-floating="true"] {
+  --foreground: oklch(0.985 0.012 80);
+  --muted-foreground: oklch(0.79 0.032 61);
+  --mise-near: oklch(0.985 0.012 80);
+  --mise-near-foreground: oklch(0.285 0.032 52);
+  --accent: oklch(0.38 0.036 52);
+  --accent-foreground: oklch(0.985 0.012 80);
+  color: var(--foreground);
   border-color: color-mix(in oklch, var(--border) 70%, transparent);
   border-radius: 1.75rem;
-  background-color: color-mix(in oklch, var(--background) 78%, transparent);
-  box-shadow: 0 10px 28px oklch(0.2 0.03 50 / 0.14);
-  backdrop-filter: blur(20px);
+  background-color: var(--hero-surface);
+  box-shadow: none;
   transform: translateY(0.5rem);
 }
 

@@ -18,7 +18,6 @@ model Recipe {
 
   @@index([organizationId])
   @@map("recipe")
-  @@schema("public")
 }
 
 model MealPlanEntry {
@@ -33,7 +32,6 @@ model MealPlanEntry {
 
   @@unique([organizationId, date, mealType])
   @@map("meal_plan_entry")
-  @@schema("public")
 }
 
 model ShoppingListItem {
@@ -48,7 +46,6 @@ model ShoppingListItem {
 
   @@index([organizationId])
   @@map("shopping_list_item")
-  @@schema("public")
 }
 
 /// Distinct item names ever added to an org's shopping list, kept around after
@@ -65,5 +62,4 @@ model RecentShoppingItem {
   @@unique([organizationId, name])
   @@index([organizationId])
   @@map("recent_shopping_item")
-  @@schema("public")
 }

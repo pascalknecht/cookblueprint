@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -59,7 +58,7 @@ export function ResetPasswordForm() {
       return;
     }
     toast.success(t("resetPassword.successToast"));
-    router.push("/login");
+    router.push("/");
   }
 
   if (error || !token) {
@@ -72,9 +71,6 @@ export function ResetPasswordForm() {
           <p className="text-muted-foreground">
             {t("resetPassword.linkExpiredBody")}
           </p>
-          <Link href="/forgot-password" className="inline-block underline">
-            {t("resetPassword.requestNewLink")}
-          </Link>
         </div>
       </div>
     );

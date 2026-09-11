@@ -1,9 +1,8 @@
 import type { z } from "zod";
 
 /**
- * Parses and validates a request body against a zod schema, matching the
- * manual try/catch + safeParse convention already used by the Stripe checkout
- * route. Returns either the parsed data or a ready-to-return error Response.
+ * Parses and validates a request body against a zod schema, returning either
+ * the parsed data or a ready-to-return error Response.
  */
 export async function parseJsonBody<Schema extends z.ZodType>(
   request: Request,

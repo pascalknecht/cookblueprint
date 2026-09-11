@@ -1,36 +1,63 @@
-import { ArrowRight, BookOpen, CalendarDays, Link2, ShoppingCart } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  Link2,
+  ShoppingCart,
+  Soup,
+  Salad,
+  Wheat,
+} from "lucide-react";
 import React from "react";
 import { getServerTranslator } from "@/lib/i18n/server";
 
 async function RecipesVisual() {
   const t = await getServerTranslator();
   const recipes = [
-    { name: t("features.recipesVisualLentilSoup"), tag: t("features.tagDinner") },
-    { name: t("features.recipesVisualTacos"), tag: t("features.tagLunch") },
-    { name: t("features.recipesVisualOats"), tag: t("features.tagBreakfast") },
+    {
+      name: t("features.recipesVisualLentilSoup"),
+      tag: t("features.tagDinner"),
+      icon: Soup,
+    },
+    {
+      name: t("features.recipesVisualTacos"),
+      tag: t("features.tagLunch"),
+      icon: Salad,
+    },
+    {
+      name: t("features.recipesVisualOats"),
+      tag: t("features.tagBreakfast"),
+      icon: Wheat,
+    },
   ];
 
   return (
-    <div className="mx-auto w-full max-w-sm space-y-3">
-      <div className="border-border bg-card flex items-center gap-2 rounded-2xl border p-3 shadow-sm">
+    <div className="border-border bg-card mx-auto w-full max-w-sm rounded-[18px] border p-4">
+      <div className="border-border mb-1 flex items-center gap-2 border-b pb-4">
         <div className="bg-gold/15 flex size-9 shrink-0 items-center justify-center rounded-xl">
           <Link2 className="text-gold size-4" />
         </div>
         <div>
-          <p className="text-sm font-medium">{t("features.recipesVisualImportTitle")}</p>
-          <p className="text-muted-foreground text-xs">{t("features.recipesVisualImportSubtitle")}</p>
+          <p className="text-sm font-medium">
+            {t("features.recipesVisualImportTitle")}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {t("features.recipesVisualImportSubtitle")}
+          </p>
         </div>
       </div>
       {recipes.map((recipe) => (
         <div
           key={recipe.name}
-          className="border-border bg-card flex items-center justify-between rounded-2xl border p-3 shadow-sm"
+          className="border-border/60 flex flex-wrap items-center justify-between gap-2 border-b py-3 last:border-0 last:pb-0"
         >
           <div className="flex items-center gap-3">
-            <div className="bg-muted size-9 shrink-0 rounded-xl" />
+            <div className="bg-muted text-muted-foreground flex size-9 shrink-0 items-center justify-center rounded-lg">
+              <recipe.icon className="size-4" aria-hidden="true" />
+            </div>
             <p className="text-sm font-medium">{recipe.name}</p>
           </div>
-          <span className="text-muted-foreground bg-muted rounded-full px-2 py-1 text-[10px] font-medium uppercase tracking-wide">
+          <span className="text-muted-foreground bg-muted rounded-full px-2 py-1 text-[10px] font-medium tracking-wide uppercase">
             {recipe.tag}
           </span>
         </div>
@@ -54,7 +81,7 @@ async function MealPlanVisual() {
       {week.map(({ day, meal }, i) => (
         <div
           key={day}
-          className={`flex items-center justify-between px-3 py-2.5 ${i !== week.length - 1 ? "border-b border-border/60" : ""}`}
+          className={`flex items-center justify-between px-3 py-2.5 ${i !== week.length - 1 ? "border-border/60 border-b" : ""}`}
         >
           <span className="text-muted-foreground text-sm">{day}</span>
           <span className="text-sm font-medium">{meal}</span>
@@ -77,7 +104,9 @@ async function ShoppingListVisual() {
     <div className="border-border bg-card mx-auto w-full max-w-sm rounded-2xl border p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-sm font-semibold">{t("features.listVisualTitle")}</p>
-        <span className="text-muted-foreground text-xs">{t("features.listVisualCount", { count: items.length })}</span>
+        <span className="text-muted-foreground text-xs">
+          {t("features.listVisualCount", { count: items.length })}
+        </span>
       </div>
       <div className="space-y-2.5">
         {items.map(({ item, done }) => (
@@ -86,12 +115,17 @@ async function ShoppingListVisual() {
               className={`flex size-4 shrink-0 items-center justify-center rounded-full border ${done ? "bg-success border-success" : "border-border"}`}
             >
               {done ? (
-                <svg viewBox="0 0 24 24" className="size-2.5 fill-none stroke-white stroke-[3]">
+                <svg
+                  viewBox="0 0 24 24"
+                  className="size-2.5 fill-none stroke-white stroke-[3]"
+                >
                   <path d="M20 6 9 17l-5-5" />
                 </svg>
               ) : null}
             </div>
-            <span className={`text-sm ${done ? "text-muted-foreground line-through" : ""}`}>
+            <span
+              className={`text-sm ${done ? "text-muted-foreground line-through" : ""}`}
+            >
               {item}
             </span>
           </div>
@@ -117,7 +151,11 @@ export async function FeaturesSection() {
       color: "gold",
       title: t("features.recipesTitle"),
       description: t("features.recipesDescription"),
-      bullets: [t("features.recipesBullet1"), t("features.recipesBullet2"), t("features.recipesBullet3")],
+      bullets: [
+        t("features.recipesBullet1"),
+        t("features.recipesBullet2"),
+        t("features.recipesBullet3"),
+      ],
       visual: RecipesVisual,
     },
     {
@@ -126,7 +164,11 @@ export async function FeaturesSection() {
       color: "primary",
       title: t("features.planTitle"),
       description: t("features.planDescription"),
-      bullets: [t("features.planBullet1"), t("features.planBullet2"), t("features.planBullet3")],
+      bullets: [
+        t("features.planBullet1"),
+        t("features.planBullet2"),
+        t("features.planBullet3"),
+      ],
       visual: MealPlanVisual,
     },
     {
@@ -135,27 +177,31 @@ export async function FeaturesSection() {
       color: "success",
       title: t("features.listTitle"),
       description: t("features.listDescription"),
-      bullets: [t("features.listBullet1"), t("features.listBullet2"), t("features.listBullet3")],
+      bullets: [
+        t("features.listBullet1"),
+        t("features.listBullet2"),
+        t("features.listBullet3"),
+      ],
       visual: ShoppingListVisual,
     },
   ] as const;
 
   return (
-    <section className="border-t border-border py-20 md:py-28" id="features">
+    <section className="features-section py-16 md:py-24" id="features">
       <div className="container mx-auto px-4">
-        <div className="mx-auto mb-16 max-w-2xl text-center">
-          <p className="mb-3 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="feature-intro mb-16">
+          <p className="text-muted-foreground mb-3 text-xs font-medium tracking-[0.18em] uppercase">
             {t("features.eyebrow")}
           </p>
           <h2 className="font-display text-3xl md:text-5xl">
             {t("features.title")}
           </h2>
-          <p className="mt-5 text-base text-muted-foreground md:text-lg">
+          <p className="text-muted-foreground mt-5 text-base md:text-lg">
             {t("features.subtitle")}
           </p>
         </div>
 
-        <div className="mx-auto max-w-5xl space-y-20 md:space-y-28">
+        <div className="mx-auto max-w-5xl space-y-16 md:space-y-20">
           {capabilities.map((capability, index) => {
             const colors = colorClasses[capability.color];
             return (
@@ -170,7 +216,7 @@ export async function FeaturesSection() {
                     >
                       <capability.icon className="size-4" />
                     </div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                       {capability.eyebrow}
                     </p>
                   </div>
@@ -182,14 +228,21 @@ export async function FeaturesSection() {
                   </p>
                   <ul className="mt-6 space-y-2.5">
                     {capability.bullets.map((bullet) => (
-                      <li key={bullet} className="flex items-start gap-2 text-sm">
-                        <ArrowRight className={`mt-0.5 size-4 shrink-0 ${colors.bullet}`} />
+                      <li
+                        key={bullet}
+                        className="flex items-start gap-2 text-sm"
+                      >
+                        <ArrowRight
+                          className={`mt-0.5 size-4 shrink-0 ${colors.bullet}`}
+                        />
                         <span>{bullet}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className={index % 2 === 1 ? "md:order-1" : ""}>
+                <div
+                  className={`feature-visual feature-visual-${capability.color} ${index % 2 === 1 ? "md:order-1" : ""}`}
+                >
                   <capability.visual />
                 </div>
               </div>

@@ -2,9 +2,16 @@
 
 A recipe, meal-planning, and shared shopping list app for a household, built with [Expo Router](https://docs.expo.dev/router/introduction/).
 
-- **Recipes** — save your own, or "import" from a link (the import flow uses fixed mock data for now — there's no real scraping yet).
+<p align="center">
+  <img src="../nextjs/public/screenshots/en/recipes.webp" width="200" alt="Recipes list" />
+  <img src="../nextjs/public/screenshots/en/plan.webp" width="200" alt="Weekly meal plan" />
+  <img src="../nextjs/public/screenshots/en/shopping.webp" width="200" alt="Shared shopping list" />
+  <img src="../nextjs/public/screenshots/en/recipe-detail.webp" width="200" alt="Recipe details" />
+</p>
+
+- **Recipes** — save your own, or import from a link: a hidden WebView loads the page (running its JS first, so client-rendered sites work too), reads its schema.org JSON-LD `Recipe` markup, and splits ingredient lines into amount/unit/name with `parse-ingredient`.
 - **Meal plan** — a real Monday–Sunday week (`date-utils.ts`), assign recipes to breakfast/lunch/dinner slots, or auto-generate the week.
-- **Shopping list** — add ingredients from a single recipe or the whole week's plan, with de-duplication by name; check items off, clear checked.
+- **Shopping list** — add ingredients from a single recipe or the whole week's plan, with de-duplication by name; check items off as you shop.
 - **Household** — recipes/plan/list are shared per household via [better-auth](https://www.better-auth.com)'s organization plugin; invite others by email.
 - **Home-screen widgets** — a meal-plan widget and a shopping-list widget for both platforms, see [Home-screen widgets](#home-screen-widgets) below.
 - **Share-to-import** — share a recipe link from Chrome (or any app) straight into CookBlueprint's import flow, see [Share-to-import](#share-to-import) below.
@@ -133,7 +140,7 @@ pnpm e2e:android:server
 ```
 src/
 ├── app/                  # Expo Router routes
-│   ├── (tabs)/            # Recipes, Plan, List, Household
+│   ├── (tabs)/            # Recipes, Plan, List, Settings
 │   ├── recipe/[id].tsx
 │   ├── pick-recipe.tsx, plan-options.tsx, invite.tsx, ...  # modal sheets
 │   └── login.tsx, register.tsx, forgot-password.tsx
@@ -147,7 +154,7 @@ targets/widgets/          # iOS WidgetKit extension (Swift), added via @bacons/a
 index.ts                  # Entry point (wraps expo-router/entry) — registers the Android widget task handler
 ```
 
-Not built yet: push notifications, native deep linking, and the recipe-import flow is mock data rather than a real scraper.
+Not built yet: push notifications, native deep linking.
 
 ## Environments
 

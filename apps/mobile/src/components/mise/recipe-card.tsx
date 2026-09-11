@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import Transition from 'react-native-screen-transitions';
@@ -14,6 +15,7 @@ type RecipeCardProps = {
 };
 
 export function RecipeCard({ recipe, meta, onPress }: RecipeCardProps) {
+  const { t } = useTranslation();
   const pressed = useSharedValue(false);
 
   const cardStyle = useAnimatedStyle(() => ({
@@ -32,6 +34,9 @@ export function RecipeCard({ recipe, meta, onPress }: RecipeCardProps) {
             color={recipe.color}
             style={StyleSheet.absoluteFill}
             source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}>
+            <View style={styles.frequencyBadge}>
+              <Text style={styles.frequencyBadgeLabel}>{t(`recipeFrequency.${recipe.frequency}`)}</Text>
+            </View>
             <View style={styles.timeBadge}>
               <Text style={styles.timeBadgeLabel}>{recipe.time}m</Text>
             </View>
@@ -84,6 +89,20 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   timeBadgeLabel: {
+    color: '#fff',
+    fontSize: 11,
+    fontFamily: MiseFonts.bodySemiBold,
+  },
+  frequencyBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: 'rgba(20,17,24,0.62)',
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  frequencyBadgeLabel: {
     color: '#fff',
     fontSize: 11,
     fontFamily: MiseFonts.bodySemiBold,

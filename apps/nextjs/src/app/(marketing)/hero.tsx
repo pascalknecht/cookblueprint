@@ -1,8 +1,6 @@
-import React from "react";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ArrowDown, Check } from "lucide-react";
 import { getLocale, getServerTranslator } from "@/lib/i18n/server";
+import { DownloadButtons } from "./download-buttons";
 import { HashLink } from "./hash-link";
 import { PhoneMockup } from "./phone-mockup";
 
@@ -10,52 +8,53 @@ export async function HeroSection() {
   const [t, locale] = await Promise.all([getServerTranslator(), getLocale()]);
 
   return (
-    <section className="relative overflow-hidden py-20 md:py-28">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-[-10%] right-[-10%] size-[32rem] rounded-full bg-primary/5 blur-3xl"
-      />
-
-      <div className="relative container mx-auto grid gap-16 px-4 md:grid-cols-2 md:items-center md:gap-8">
-        <div className="mx-auto max-w-xl text-center md:mx-0 md:text-left">
-          <h1 className="font-display text-foreground mb-6 text-4xl tracking-tight md:text-5xl lg:text-6xl">
+    <section className="landing-hero">
+      <div className="landing-container hero-layout">
+        <div className="hero-copy">
+          <h1 className="font-display hero-title">
             {t("hero.titleLine1")}
-            <br />
-            <span className="text-primary italic">{t("hero.titleEmphasis")}</span>
+            <span className="text-primary italic">
+              {t("hero.titleEmphasis")}
+            </span>
           </h1>
-
-          <p className="text-muted-foreground mx-auto mb-10 max-w-md text-base md:mx-0 md:text-lg">
-            {t("hero.subtitle")}
-          </p>
-
-          <div className="flex flex-col items-center justify-center gap-3 sm:flex-row md:justify-start">
-            <Button
+          <p className="hero-description">{t("hero.subtitle")}</p>
+          <div className="hero-actions">
+            <DownloadButtons
               size="lg"
-              className="rounded-full bg-near text-near-foreground hover:bg-near/90"
-              asChild
-            >
-              <Link href="/register">
-                {t("hero.ctaPrimary")}
-                <ArrowRight className="size-4" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <HashLink href="#features">{t("hero.ctaSecondary")}</HashLink>
-            </Button>
+              labels={{
+                googlePlay: t("download.googlePlay"),
+                appStore: t("download.appStore"),
+                comingSoon: t("download.comingSoon"),
+              }}
+            />
+            <p className="hero-reassurance">
+              <Check aria-hidden="true" className="size-4" />
+              {t("hero.disclaimer")}
+            </p>
           </div>
-
-          <p className="text-muted-foreground mt-4 text-xs">
-            {t("hero.disclaimer")}
-          </p>
+          <HashLink href="#how-it-works" className="hero-explore">
+            {t("hero.ctaSecondary")}
+            <ArrowDown aria-hidden="true" className="size-4" />
+          </HashLink>
         </div>
 
-        <div className="relative mx-auto w-[280px]">
-          <PhoneMockup
-            src={`/screenshots/${locale}/recipes.webp`}
-            alt={t("hero.screenshotAlt")}
-            width={280}
-            priority
-          />
+        <div className="hero-stage">
+          <div className="hero-stage-ground" aria-hidden="true" />
+          <figure className="hero-plan">
+            <PhoneMockup
+              src={`/screenshots/${locale}/plan.webp`}
+              alt={t("screenshots.planCaption")}
+              width={212}
+            />
+          </figure>
+          <figure className="hero-recipes">
+            <PhoneMockup
+              src={`/screenshots/${locale}/recipes.webp`}
+              alt={t("hero.screenshotAlt")}
+              width={270}
+              priority
+            />
+          </figure>
         </div>
       </div>
     </section>

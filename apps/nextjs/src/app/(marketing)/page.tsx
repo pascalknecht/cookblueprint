@@ -11,15 +11,15 @@ import { CallToAction } from "./call-to-action";
 
 export default async function Home() {
   return (
-    <div>
+    <div className="landing-page">
       <HeroSection />
       <TrustBar />
       <FeaturesSection />
       <ScreenshotsSection />
       <HouseholdSection />
       <HowItWorksSection />
-      <FaqSection />
       <PricingSection />
+      <FaqSection />
       <CallToAction />
     </div>
   );

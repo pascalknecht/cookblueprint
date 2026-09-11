@@ -3,7 +3,16 @@
 A pnpm/Turborepo monorepo with two apps:
 
 - **`apps/mobile`** — **CookBlueprint**, an Expo (React Native) recipe, meal-planning, and shared shopping list app. This is the actual product — see [`apps/mobile/README.md`](apps/mobile/README.md) for details.
-- **`apps/nextjs`** — the backend CookBlueprint talks to: auth (email/password with verification + reset), a REST API for recipes/meal-plans/shopping-items scoped per household, and a billing shell.
+- **`apps/nextjs`** — the marketing site and backend CookBlueprint talks to: a Better Auth API (email/password with verification + reset) and a REST API for recipes/meal-plans/shopping-items scoped per household. There's no web dashboard or web login — the website is marketing pages plus the API the mobile app calls.
+
+## Screenshots
+
+<p align="center">
+  <img src="apps/nextjs/public/screenshots/en/recipes.webp" width="200" alt="Recipes list" />
+  <img src="apps/nextjs/public/screenshots/en/plan.webp" width="200" alt="Weekly meal plan" />
+  <img src="apps/nextjs/public/screenshots/en/shopping.webp" width="200" alt="Shared shopping list" />
+  <img src="apps/nextjs/public/screenshots/en/recipe-detail.webp" width="200" alt="Recipe details" />
+</p>
 
 ## Tech Stack (`apps/nextjs`)
 
@@ -15,7 +24,7 @@ A pnpm/Turborepo monorepo with two apps:
 | Package Manager | [pnpm](https://pnpm.io/)                                                    |
 | Database ORM    | [Prisma 7](https://www.prisma.io/) with PostgreSQL                          |
 | Authentication  | [Better Auth](https://www.better-auth.com/) (email/password, organizations) |
-| Payments        | [Stripe](https://stripe.com/) (checkout, webhooks)                          |
+| Purchases       | [RevenueCat](https://www.revenuecat.com/) (in-app purchases, entitlements) |
 | UI Components   | [shadcn/ui](https://ui.shadcn.com/) + [Radix](https://www.radix-ui.com/)    |
 | Styling         | [Tailwind CSS v4](https://tailwindcss.com/)                                 |
 | Testing         | [Vitest](https://vitest.dev/) + Testing Library                             |
@@ -40,13 +49,12 @@ A pnpm/Turborepo monorepo with two apps:
 │       ├── prisma/         # Database schema
 │       └── src/
 │           ├── app/       # App Router (pages, layouts, API routes)
-│           │   ├── (marketing)/   # Landing page, login, register, forgot/reset password
-│           │   ├── (main)/        # Authenticated app (dashboard, settings)
+│           │   ├── (marketing)/   # Landing page, password reset landing page
 │           │   ├── (legal)/       # Privacy policy, terms of service
-│           │   └── api/           # Auth, recipes/meal-plans/shopping-items, webhook handlers
+│           │   └── api/           # Auth, recipes/meal-plans/shopping-items
 │           ├── components/        # UI components (shadcn/ui)
 │           ├── hooks/             # Custom React hooks
-│           ├── lib/               # Auth, email, database, Stripe, utilities
+│           ├── lib/               # Auth, email, database, utilities
 │           └── use-cases/         # Business logic layer
 ├── docker/                # Docker configuration files
 │   └── pgadmin/           # pgAdmin server pre-configuration
@@ -99,43 +107,12 @@ Edit `apps/nextjs/.env` with your values. Required for local development:
 
 Optional variables for additional features:
 
-| Variable                 | Description                   |
-| ------------------------ | ----------------------------- |
-| `GOOGLE_CLIENT_ID`       | Google OAuth client ID        |
-| `GOOGLE_CLIENT_SECRET`   | Google OAuth client secret    |
-| `STRIPE_API_KEY`         | Stripe secret key             |
-| `STRIPE_WEBHOOK_SECRET`  | Stripe webhook signing secret |
-| `STRIPE_PRICE_ID`        | Stripe price ID for checkout  |
-| `NEXT_PUBLIC_STRIPE_KEY` | Stripe publishable key        |
-| `EMAIL_FROM`             | Sender for auth emails (defaults to `CookBlueprint <onboarding@resend.dev>` if unset) |
-
-### Stripe webhook setup
-
-Configure a Stripe webhook endpoint that sends events to:
-
-```text
-https://<your-app-domain>/api/webhooks/stripe
-```
-
-For local testing, use:
-
-```bash
-pnpm --filter @repo/nextjs stripe:listen
-```
-
-Use **"Select events"** and include the events supported by `@supabase/stripe-sync-engine` (or choose **"Send all events"**). At minimum for this starter, include:
-
-- `checkout.session.completed`
-- `checkout.session.expired`
-- `checkout.session.async_payment_succeeded`
-- `checkout.session.async_payment_failed`
-- `invoice.payment_succeeded`
-- `invoice.payment_failed`
-- `customer.subscription.created`
-- `customer.subscription.updated`
-- `customer.subscription.deleted`
-
-Copy the webhook signing secret (`whsec_...`) to `STRIPE_WEBHOOK_SECRET` in `apps/nextjs/.env`.
+| Variable                    | Description                   |
+| ---------------------------- | ----------------------------- |
+| `GOOGLE_CLIENT_ID`           | Google OAuth client ID        |
+| `GOOGLE_CLIENT_SECRET`       | Google OAuth client secret    |
+| `REVENUECAT_SECRET_API_KEY`  | RevenueCat secret key for server-side entitlement checks |
+| `EMAIL_FROM`                 | Sender for auth emails (defaults to `CookBlueprint <onboarding@resend.dev>` if unset) |
 
 ### 3. Set up the database
 
@@ -168,38 +145,25 @@ Run these from the monorepo root:
 | `pnpm db:generate`  | Generate Prisma client                 |
 | `pnpm db:push`      | Push Prisma schema to database         |
 
-For Stripe webhook testing:
-
-```bash
-pnpm --filter @repo/nextjs stripe:listen
-```
-
 ## Authentication
 
-This starter uses [Better Auth](https://www.better-auth.com/) with:
+The Better Auth backend (email/password, with **email verification required to sign in** and a password-reset flow) lives entirely behind the API — there's no web login or registration UI. The mobile app talks to it directly via `@better-auth/expo`. Verification and password-reset emails are sent via Resend (`src/lib/email.ts`) — see `RESEND_API_KEY` above.
 
-- **Email/password** authentication, with **email verification required to sign in** and a password-reset flow. Both send real emails via Resend (`src/lib/email.ts`) — see `RESEND_API_KEY` above. Web pages live at `/forgot-password`, `/reset-password`, and `/verify-email`; the mobile app has its own `forgot-password` screen, but the actual "click the link" step always happens in a browser for both platforms.
-- **Organization** plugin for team/workspace support — every new user gets a default organization automatically (`databaseHooks.user.create.after` in `src/lib/auth.ts`), and new sessions default to it (`databaseHooks.session.create.before`). There's no client-side "create organization" step.
-- **Prisma adapter** for database-backed sessions
+Password reset is the one auth flow with a web page: Better Auth emails a reset link that opens `/reset-password` in a browser (`apps/nextjs/src/app/(marketing)/reset-password`), where the user sets a new password before returning to the app. Email verification doesn't need a web landing page — Better Auth's own API endpoint handles the token and the user is verified without leaving the app.
 
-Protected routes (`/dashboard/*`, `/settings/*`) are guarded by a proxy that checks for a valid session cookie and redirects unauthenticated users to `/login`.
+The **Organization** plugin backs household sharing — every new user gets a default organization automatically (`databaseHooks.user.create.after` in `src/lib/auth.ts`), and new sessions default to it (`databaseHooks.session.create.before`). There's no client-side "create organization" step.
 
-## Stripe Integration
+There's no web dashboard and no protected web routes — the authenticated product experience is entirely the mobile app; this Next.js app is the marketing site, the password-reset landing page, and the API backend.
 
-Stripe is pre-configured with:
+## Purchases (RevenueCat)
 
-- A lazy-initialized Stripe client (`src/lib/stripe.ts`)
-- A webhook handler at `/api/webhooks/stripe` backed by `@supabase/stripe-sync-engine`
-- Webhook event processing for supported `@supabase/stripe-sync-engine` event types
-- Prisma models for the `stripe` schema, so synced Stripe data can be queried from your app
-
-Stripe-related environment variables are optional so you can start building without a Stripe account.
+CookBlueprint Pro is an in-app purchase sold through the Apple App Store and Google Play, managed client-side by the RevenueCat SDK in `apps/mobile`. This Next.js app only does a server-side entitlement check (`src/lib/entitlement.ts`) against the RevenueCat REST API using `REVENUECAT_SECRET_API_KEY` — there's no web billing, checkout, or customer portal.
 
 ## Mobile app (CookBlueprint)
 
 `apps/mobile` is an Expo Router app that talks to this Next.js app's REST API (`/api/recipes`, `/api/meal-plans`, `/api/shopping-items`) and shares the same Better Auth backend (via `@better-auth/expo`). Recipes, meal plans, and the shopping list are all scoped to the signed-in user's organization/household. Data fetching goes through React Query, calling a thin `fetch` wrapper (`src/lib/api-client.ts`) that attaches the session cookie manually on native and relies on the browser's cookie jar on web.
 
-Run it from the root with `pnpm --filter @repo/mobile dev` (or `cd apps/mobile && pnpm dev`), then press `w` for web, or scan the QR code with Expo Go. It needs this Next.js app running and reachable — set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env` accordingly. See [`apps/mobile/README.md`](apps/mobile/README.md) for the full rundown.
+Run it from the root with `pnpm --filter @repo/mobile dev` (or `cd apps/mobile && pnpm dev`), then open it on a dev-client build (press `a`/`i` for a running emulator/simulator, or scan the QR code). There's no web target or Expo Go support — native modules (home-screen widgets, share-to-import, `@expo/ui`) require a real dev-client build. It needs this Next.js app running and reachable — set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env` accordingly. See [`apps/mobile/README.md`](apps/mobile/README.md) for the full rundown.
 
 ## Adding Shared Packages
 

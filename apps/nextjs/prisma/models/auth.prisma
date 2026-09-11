@@ -14,7 +14,6 @@ model User {
 
   @@unique([email])
   @@map("user")
-  @@schema("public")
 }
 
 model Session {
@@ -32,7 +31,6 @@ model Session {
 
   @@unique([token])
   @@map("session")
-  @@schema("public")
 }
 
 model Account {
@@ -52,7 +50,6 @@ model Account {
   updatedAt             DateTime
 
   @@map("account")
-  @@schema("public")
 }
 
 model Verification {
@@ -64,5 +61,4 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
-  @@schema("public")
 }

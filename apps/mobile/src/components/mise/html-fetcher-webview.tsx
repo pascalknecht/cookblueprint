@@ -66,6 +66,12 @@ export function HtmlFetcherWebView() {
           source={{ uri: pendingUrl }}
           style={styles.hidden}
           pointerEvents="none"
+          // Hardware-layer WebViews corrupt Fabric's Android root surface —
+          // it gets stuck letterboxed to a width-by-width square the moment
+          // one mounts, and that never recovers once the WebView unmounts.
+          // Software rendering avoids the GPU layer that triggers it; cost is
+          // negligible since this WebView is never actually shown on screen.
+          androidLayerType="software"
           injectedJavaScript={EXTRACT_JSON_LD_SCRIPT}
           onMessage={handleMessage}
           onError={() => rejectPending(new Error("Couldn't reach that URL."))}

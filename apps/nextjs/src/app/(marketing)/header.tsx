@@ -10,9 +10,12 @@ export async function Header() {
         features: t("header.features"),
         howItWorks: t("header.howItWorks"),
         pricing: t("header.pricing"),
-        logIn: t("header.logIn"),
-        getStarted: t("header.getStarted"),
         menu: t("header.menu"),
+      }}
+      downloadLabels={{
+        googlePlay: t("download.googlePlay"),
+        appStore: t("download.appStore"),
+        comingSoon: t("download.comingSoon"),
       }}
     />
   );

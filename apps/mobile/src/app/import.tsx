@@ -7,14 +7,17 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { BackHeader } from '@/components/mise/back-header';
 import { Button } from '@/components/mise/button';
 import { PhotoPlaceholder } from '@/components/mise/photo-placeholder';
 import { MiseSpinner } from '@/components/mise/spinner';
 import { TextField } from '@/components/mise/text-field';
+import { ALL_RECIPE_FREQUENCIES, DEFAULT_RECIPE_FREQUENCY, type RecipeFrequency } from '@/constants/recipe-frequency';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useCreateRecipe, useImportRecipe } from '@/hooks/use-recipes';
 import { useMountEffect } from '@/hooks/use-mount-effect';
+import { useReducedMotionFlag, colorTransition } from '@/lib/motion';
 import { useToast } from '@/store/toast';
 
 type Stage = 'input' | 'parsing' | 'done';
@@ -37,6 +40,8 @@ export default function ImportScreen() {
   const { resetShareIntent } = useShareIntentContext();
   const [url, setUrl] = useState(params.url ?? '');
   const [stage, setStage] = useState<Stage>(params.autostart === '1' ? 'parsing' : 'input');
+  const [frequency, setFrequency] = useState<RecipeFrequency>(DEFAULT_RECIPE_FREQUENCY);
+  const reduced = useReducedMotionFlag();
   const preview = importRecipeMutation.data;
 
   function startParsing(importUrl: string) {
@@ -64,13 +69,16 @@ export default function ImportScreen() {
 
   function handleSave() {
     if (!preview) return;
-    createRecipeMutation.mutate(preview, {
-      onSuccess: () => {
-        showToast(t('importRecipe.savedToast'));
-        router.replace('/recipes');
+    createRecipeMutation.mutate(
+      { ...preview, frequency },
+      {
+        onSuccess: () => {
+          showToast(t('importRecipe.savedToast'));
+          router.replace('/recipes');
+        },
+        onError: (error) => showToast(error.message),
       },
-      onError: (error) => showToast(error.message),
-    });
+    );
   }
 
   return (
@@ -148,6 +156,24 @@ export default function ImportScreen() {
               ))}
             </View>
           </View>
+
+          <Text style={styles.frequencyLabel}>{t('manualRecipe.frequencyQuestion')}</Text>
+          <View style={styles.frequencyChips}>
+            {ALL_RECIPE_FREQUENCIES.map((option) => {
+              const active = option === frequency;
+              return (
+                <AnimatedPressable
+                  key={option}
+                  onPress={() => setFrequency(option)}
+                  style={[styles.frequencyChip, active && styles.frequencyChipActive, colorTransition(reduced)]}>
+                  <Text style={[styles.frequencyChipLabel, active && styles.frequencyChipLabelActive]}>
+                    {t(`recipeFrequency.${option}`)}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
+          </View>
+
           <View style={styles.doneActions}>
             <Button
               label={t('importRecipe.saveToLibrary')}
@@ -230,5 +256,24 @@ const styles = StyleSheet.create({
   previewDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: MiseColors.amber },
   previewIngName: { flex: 1, fontFamily: MiseFonts.body, fontSize: 14, color: MiseColors.ink },
   previewIngQty: { fontFamily: MiseFonts.body, fontSize: 13, color: MiseColors.muted },
+  frequencyLabel: {
+    fontFamily: MiseFonts.bodySemiBold,
+    fontSize: 13,
+    color: MiseColors.inkSoft,
+    marginTop: 18,
+    marginBottom: 8,
+  },
+  frequencyChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  frequencyChip: {
+    backgroundColor: MiseColors.card,
+    borderWidth: 1,
+    borderColor: MiseColors.borderFaint,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  frequencyChipActive: { backgroundColor: MiseColors.near, borderColor: MiseColors.near },
+  frequencyChipLabel: { fontFamily: MiseFonts.bodySemiBold, fontSize: 13, color: MiseColors.inkSoft },
+  frequencyChipLabelActive: { color: '#fff' },
   doneActions: { marginTop: 16 },
 });

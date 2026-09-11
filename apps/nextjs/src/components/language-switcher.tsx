@@ -32,7 +32,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
         <Button
           variant="ghost"
           size={compact ? "icon-sm" : "sm"}
-          className={compact ? undefined : "gap-1.5"}
+          className={compact ? "size-11" : "gap-1.5"}
           aria-label={localeLabel}
         >
           <Globe className="size-4" />
