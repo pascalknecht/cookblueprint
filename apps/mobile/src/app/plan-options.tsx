@@ -1,13 +1,20 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurTargetView, BlurView } from 'expo-blur';
-import { router, useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
-import { BottomSheetScrollView, BottomSheetView, Sheet, TrueSheetFooter, TrueSheetHeader } from '@/components/mise/sheet';
+import {
+  BottomSheetScrollView,
+  BottomSheetView,
+  Sheet,
+  TrueSheetFooter,
+  TrueSheetHeader,
+  type SheetRef,
+} from '@/components/mise/sheet';
 import { MiseSpinner } from '@/components/mise/spinner';
 import { MiseSwitch } from '@/components/mise/switch';
 import { ALL_MEAL_TYPES, type MealType } from '@/constants/meal-types';
@@ -62,6 +69,11 @@ export default function PlanOptionsScreen() {
   // On Android, expo-blur only blurs a BlurTargetView it's explicitly
   // pointed at via this ref — see the comment by its usage below.
   const previewBlurTarget = useRef<View>(null);
+  const sheetRef = useRef<SheetRef>(null);
+  // The sheet closes itself (animated, in its own portal) before we leave
+  // this route, then its onDismiss below does the actual navigation — so
+  // there's never a screen swap racing the close animation.
+  const nextHrefRef = useRef<Href | null>(null);
 
   const enabledMealTypes = useEnabledMealTypes();
   const updateEnabledMealTypesMutation = useUpdateEnabledMealTypes();
@@ -105,6 +117,19 @@ export default function PlanOptionsScreen() {
     setRules((prev) => ({ ...prev, [key]: !prev[key] }));
   }
 
+  function handleDismiss() {
+    router.back();
+    if (nextHrefRef.current) {
+      router.push(nextHrefRef.current);
+      nextHrefRef.current = null;
+    }
+  }
+
+  function goTo(href: Href) {
+    nextHrefRef.current = href;
+    sheetRef.current?.dismiss().catch(() => {});
+  }
+
   function handleGenerate() {
     if (slots <= 0) return;
     generateMutation.mutate(
@@ -117,7 +142,7 @@ export default function PlanOptionsScreen() {
         keepPlanned: rules.keepPlanned,
       },
       {
-        onSuccess: () => router.back(),
+        onSuccess: () => sheetRef.current?.dismiss().catch(() => {}),
         onError: (error) => showToast(error.message),
       },
     );
@@ -125,7 +150,8 @@ export default function PlanOptionsScreen() {
 
   return (
     <Sheet
-      onDismiss={() => router.back()}
+      ref={sheetRef}
+      onDismiss={handleDismiss}
       // The locked preview adds a disabled cooking-style/servings preview
       // plus the upsell card on top of the meal-type toggles — genuinely
       // more content than the unlocked view's fixed budget accounted for,
@@ -269,13 +295,7 @@ export default function PlanOptionsScreen() {
                     label={t('planOptions.premiumLock.cta')}
                     variant="gradient"
                     compact
-                    // The sheet is a native modal presented above the whole
-                    // app — pushing a screen on top of it doesn't hide it,
-                    // since nothing tells the native sheet itself to close.
-                    // Replacing this route unmounts it (and with it, the
-                    // presented sheet) instead of just changing what's
-                    // focused underneath.
-                    onPress={() => router.replace({ pathname: '/paywall', params: { dismissible: '1' } })}
+                    onPress={() => goTo({ pathname: '/paywall', params: { dismissible: '1' } })}
                   />
                 </View>
               </>

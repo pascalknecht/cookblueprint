@@ -24,7 +24,7 @@ export default function RecipeOptionsScreen() {
 
   function goTo(href: Href) {
     nextHrefRef.current = href;
-    sheetRef.current?.dismiss();
+    sheetRef.current?.dismiss().catch(() => {});
   }
 
   function handleDismiss() {
@@ -51,7 +51,7 @@ export default function RecipeOptionsScreen() {
             onSuccess: () => {
               showToast(t('recipeDetail.deletedToast'));
               leaveDetailRef.current = true;
-              sheetRef.current?.dismiss();
+              sheetRef.current?.dismiss().catch(() => {});
             },
             onError: () => showToast(t('recipeDetail.deleteError')),
           });

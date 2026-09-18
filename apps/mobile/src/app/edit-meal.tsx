@@ -33,7 +33,7 @@ export default function EditMealScreen() {
 
   function handleSwitch() {
     switchingRef.current = true;
-    sheetRef.current?.dismiss();
+    sheetRef.current?.dismiss().catch(() => {});
   }
 
   function handleDismiss() {
@@ -48,7 +48,7 @@ export default function EditMealScreen() {
     deleteMutation.mutate(entryId, {
       onSuccess: () => {
         showToast(t('editMeal.removedToast'));
-        router.back();
+        sheetRef.current?.dismiss().catch(() => {});
       },
       onError: (error) => showToast(error.message),
     });

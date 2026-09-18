@@ -1,10 +1,9 @@
 import { TrueSheet } from '@lodev09/react-native-true-sheet';
-import { forwardRef, useImperativeHandle, useRef, type ComponentProps, type ComponentRef } from 'react';
+import { forwardRef, type ComponentProps, type ComponentRef } from 'react';
 import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { MiseColors } from '@/constants/theme';
-import { useMountEffect } from '@/hooks/use-mount-effect';
 
 // TrueSheet's native grabber overlays the top of the sheet rather than
 // reserving space for itself in the content's own layout — paddingTop has
@@ -79,17 +78,11 @@ export const Sheet = forwardRef<SheetRef, SheetProps>(function Sheet(
   { onDismiss, enablePanDownToClose = true, backgroundColor, detents = ['auto'], ...rest },
   forwardedRef,
 ) {
-  const innerRef = useRef<TrueSheet>(null);
-  useImperativeHandle(forwardedRef, () => innerRef.current as TrueSheet, []);
-
-  useMountEffect(() => {
-    innerRef.current?.present();
-  });
-
   return (
     <TrueSheet
-      ref={innerRef}
+      ref={forwardedRef}
       detents={detents}
+      initialDetentIndex={0}
       dismissible={enablePanDownToClose}
       backgroundColor={backgroundColor ?? MiseColors.background}
       onDidDismiss={onDismiss}

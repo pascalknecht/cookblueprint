@@ -17,7 +17,7 @@ export default function AddRecipeSheetScreen() {
 
   function goTo(href: Href) {
     nextHrefRef.current = href;
-    sheetRef.current?.dismiss();
+    sheetRef.current?.dismiss().catch(() => {});
   }
 
   function handleDismiss() {
