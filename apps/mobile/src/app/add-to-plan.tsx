@@ -1,10 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
-import { BottomSheetView, Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet, type SheetRef } from '@/components/mise/sheet';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { useAssignMeal, type MealType } from '@/hooks/use-meal-plan';
 import { useEnabledMealTypes } from '@/hooks/use-organization-settings';
@@ -26,6 +26,7 @@ export default function AddToPlanScreen() {
   const [selectedMeal, setSelectedMeal] = useState<MealType>(enabledMealTypes[0]);
   const reduced = useReducedMotionFlag();
   const confirmPress = usePressFeedback();
+  const sheetRef = useRef<SheetRef>(null);
 
   function handleConfirm() {
     assignMealMutation.mutate(
@@ -33,7 +34,7 @@ export default function AddToPlanScreen() {
       {
         onSuccess: () => {
           showToast(t('addToPlan.addedToast'));
-          router.back();
+          sheetRef.current?.dismiss().catch(() => {});
         },
         onError: (error) => showToast(error.message),
       },
@@ -41,7 +42,7 @@ export default function AddToPlanScreen() {
   }
 
   return (
-    <Sheet onDismiss={() => router.back()}>
+    <Sheet ref={sheetRef} onDismiss={() => router.back()}>
       <BottomSheetView>
         <Text style={styles.title}>{t('addToPlan.title')}</Text>
         {title ? (
@@ -84,6 +85,7 @@ export default function AddToPlanScreen() {
         </View>
 
         <AnimatedPressable
+          testID="add-to-plan-confirm"
           onPress={handleConfirm}
           onPressIn={confirmPress.onPressIn}
           onPressOut={confirmPress.onPressOut}

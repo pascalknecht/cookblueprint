@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
+import { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { BottomSheetView, Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet, type SheetRef } from '@/components/mise/sheet';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
 import { organization, useActiveOrganization, useListOrganizations } from '@/lib/auth-client';
 import { useToast } from '@/store/toast';
@@ -15,6 +16,7 @@ export default function SelectHouseholdScreen() {
   const queryClient = useQueryClient();
   const { data: organizations } = useListOrganizations();
   const { data: activeOrganization } = useActiveOrganization();
+  const sheetRef = useRef<SheetRef>(null);
 
   const setActiveMutation = useMutation({
     mutationFn: async (organizationId: string) => {
@@ -26,13 +28,13 @@ export default function SelectHouseholdScreen() {
       // scoped to the active household server-side, so the whole cache is
       // stale the moment it changes.
       queryClient.invalidateQueries();
-      router.back();
+      sheetRef.current?.dismiss().catch(() => {});
     },
     onError: (error) => showToast(error.message),
   });
 
   return (
-    <Sheet onDismiss={() => router.back()}>
+    <Sheet ref={sheetRef} onDismiss={() => router.back()}>
       <BottomSheetView>
       <Text style={styles.title}>{t('selectHousehold.title')}</Text>
       {(organizations ?? []).map((org) => {

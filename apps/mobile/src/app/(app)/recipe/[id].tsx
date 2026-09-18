@@ -254,6 +254,7 @@ export default function RecipeDetailScreen() {
             style={{ flex: 1 }}
           />
           <IconButton
+            testID="recipe-add-to-plan-button"
             name="calendar"
             variant="tint"
             size={54}

@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/mise/button';
-import { BottomSheetView, Sheet } from '@/components/mise/sheet';
+import { BottomSheetView, Sheet, type SheetRef } from '@/components/mise/sheet';
 import { MiseSwitch } from '@/components/mise/switch';
 import { TextField } from '@/components/mise/text-field';
 import { MiseColors, MiseFonts, MiseRadius } from '@/constants/theme';
@@ -18,6 +18,7 @@ export default function InviteScreen() {
   const { showToast } = useToast();
   const [email, setEmail] = useState('');
   const [canEdit, setCanEdit] = useState(true);
+  const sheetRef = useRef<SheetRef>(null);
 
   const inviteMutation = useMutation({
     mutationFn: async (input: { email: string; role: 'admin' | 'member' }) => {
@@ -27,7 +28,7 @@ export default function InviteScreen() {
     },
     onSuccess: () => {
       showToast(t('invite.sentToast'));
-      router.back();
+      sheetRef.current?.dismiss().catch(() => {});
     },
     onError: (error) => showToast(error.message),
   });
@@ -39,7 +40,7 @@ export default function InviteScreen() {
   }
 
   return (
-    <Sheet onDismiss={() => router.back()}>
+    <Sheet ref={sheetRef} onDismiss={() => router.back()}>
       <BottomSheetView>
       <Text style={styles.title}>{t('invite.title')}</Text>
       <Text style={styles.subtitle}>{t('invite.subtitle')}</Text>
