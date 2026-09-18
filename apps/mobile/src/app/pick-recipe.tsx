@@ -53,7 +53,12 @@ function PickRecipeRow({ recipe, onPress }: { recipe: Recipe; onPress: () => voi
   const { t } = useTranslation();
   const { onPressIn, onPressOut, style: pressStyle } = usePressFeedback();
   return (
-    <AnimatedPressable style={[styles.row, pressStyle]} onPress={onPress} onPressIn={onPressIn} onPressOut={onPressOut}>
+    <AnimatedPressable
+      testID={`pick-recipe-${recipe.id}`}
+      style={[styles.row, pressStyle]}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      onPressOut={onPressOut}>
       <View style={[styles.swatch, { backgroundColor: recipe.color }]} />
       <View style={styles.rowBody}>
         <Text style={styles.rowTitle}>{recipe.title}</Text>

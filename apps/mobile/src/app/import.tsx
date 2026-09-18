@@ -90,6 +90,7 @@ export default function ImportScreen() {
         <View>
           <Text style={styles.subtitle}>{t('importRecipe.subtitle')}</Text>
           <TextField
+            testID="import-url-input"
             value={url}
             onChangeText={setUrl}
             placeholder={t('importRecipe.urlPlaceholder')}
@@ -97,7 +98,7 @@ export default function ImportScreen() {
             icon={<Ionicons name="link" size={16} color={MiseColors.mutedLight} />}
             containerStyle={styles.field}
           />
-          <Button label={t('importRecipe.importButton')} onPress={handleImport} />
+          <Button testID="import-start-button" label={t('importRecipe.importButton')} onPress={handleImport} />
 
           <View style={styles.tip}>
             <Text style={styles.tipTitle}>{t('importRecipe.tipTitle')}</Text>
@@ -139,7 +140,7 @@ export default function ImportScreen() {
               <Text style={styles.previewSource}>{t('importRecipe.previewSource', { host: sourceHost(url) })}</Text>
             </PhotoPlaceholder>
             <View style={styles.previewBody}>
-              <Text style={styles.previewTitle}>{preview.title}</Text>
+              <Text testID="import-preview-title" style={styles.previewTitle}>{preview.title}</Text>
               <Text style={styles.previewMeta}>
                 {t('importRecipe.previewMeta', { time: preview.time, servings: preview.servings, kcal: preview.kcal })}
               </Text>
@@ -176,6 +177,7 @@ export default function ImportScreen() {
 
           <View style={styles.doneActions}>
             <Button
+              testID="import-save-button"
               label={t('importRecipe.saveToLibrary')}
               onPress={handleSave}
               loading={createRecipeMutation.isPending}

@@ -36,6 +36,7 @@ export default function AddRecipeSheetScreen() {
 
       <View style={styles.rows}>
         <SheetRow
+          testID="add-recipe-import-option"
           icon="link"
           iconColor={MiseColors.brand}
           iconBg={MiseColors.tint}
