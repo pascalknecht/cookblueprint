@@ -12,6 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AnimatedPressable } from '@/components/mise/animated-pressable';
 import { Button } from '@/components/mise/button';
+import { PhotoPlaceholder } from '@/components/mise/photo-placeholder';
 import { CompactHeader, PageHeader, useScrollHeader } from '@/components/mise/scroll-header';
 import { getTabBarScrollPadding } from '@/components/mise/tab-bar-metrics';
 import { type MealType } from '@/constants/meal-types';
@@ -335,7 +336,11 @@ export default function PlanScreen() {
 
       {dragPreview ? (
         <Animated.View pointerEvents="none" style={[styles.cellTouchable, styles.dragOverlay, overlayStyle]}>
-          <View style={[styles.cellSwatch, { backgroundColor: dragPreview.recipe.color }]} />
+          <PhotoPlaceholder
+            style={styles.cellSwatch}
+            color={dragPreview.recipe.color}
+            source={dragPreview.recipe.imageUrl ? { uri: dragPreview.recipe.imageUrl } : undefined}
+          />
           <View style={styles.cellBody}>
             <Text style={styles.cellMeal}>{t(`mealTypes.${dragPreview.meal}`)}</Text>
             <Text style={styles.cellTitle} numberOfLines={1}>
@@ -366,7 +371,7 @@ function MealCell({
 }: {
   cellKey: string;
   meal: MealType;
-  recipe: { title: string; color: string; time: number };
+  recipe: { title: string; color: string; time: number; imageUrl?: string | null };
   onPress: () => void;
   onOptionsPress: () => void;
   dragKey: SharedValue<string | null>;
@@ -435,7 +440,11 @@ function MealCell({
   return (
     <GestureDetector gesture={Gesture.Race(pan, tap)}>
       <Animated.View style={[styles.cellTouchable, cellStyle]}>
-        <View style={[styles.cellSwatch, { backgroundColor: recipe.color }]} />
+        <PhotoPlaceholder
+          style={styles.cellSwatch}
+          color={recipe.color}
+          source={recipe.imageUrl ? { uri: recipe.imageUrl } : undefined}
+        />
         <View style={styles.cellBody}>
           <Text style={styles.cellMeal}>{t(`mealTypes.${meal}`)}</Text>
           <Text style={styles.cellTitle} numberOfLines={1}>
@@ -555,7 +564,7 @@ const styles = StyleSheet.create({
     padding: 10,
     paddingHorizontal: 12,
   },
-  cellSwatch: { width: 36, height: 36, borderRadius: 10 },
+  cellSwatch: { width: 36, height: 36, borderRadius: 10, overflow: 'hidden' },
   cellBody: { flex: 1, minWidth: 0 },
   cellMeal: {
     fontFamily: MiseFonts.bodyBold,
